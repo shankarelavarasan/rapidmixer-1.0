@@ -16,7 +16,8 @@ analyzeBtn.addEventListener("click", async () => {
 
   try {
     responseText.textContent = "Thinking...";
-    const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCkWcEwCwGh_7orUR88P8GxZ_J7mCM7Uwg", {
+    const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=REPLACE_WITH_KEY
+", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
