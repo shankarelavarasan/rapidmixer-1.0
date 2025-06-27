@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rapid AI Account Assistant</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>📁 Rapid AI Account Assistant</h1>
+
+    <label for="folderInput">Select Folder:</label>
+    <input type="file" id="folderInput" webkitdirectory directory multiple>
+
+    <label for="prompt">Enter your AI prompt:</label>
+    <textarea id="prompt" placeholder="e.g., Group files by party name and list GST mismatch..." rows="4"></textarea>
+
+    <button id="analyzeBtn">🧠 Run Gemini AI</button>
+
+    <div id="output">
+      <h2>📝 Result</h2>
+      <pre id="responseText">Awaiting input...</pre>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
