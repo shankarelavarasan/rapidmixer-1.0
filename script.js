@@ -1,34 +1,33 @@
-const analyzeBtn = document.getElementById("analyzeBtn");
-const folderInput = document.getElementById("folderInput");
-const promptInput = document.getElementById("prompt");
-const responseText = document.getElementById("responseText");
+document.getElementById('zipInput').addEventListener('change', function (e) {
+  const zipFile = e.target.files[0];
+  const reader = new FileReader();
 
-analyzeBtn.addEventListener("click", async () => {
-  const prompt = promptInput.value.trim();
-  if (!prompt) {
-    responseText.textContent = "Please enter a prompt.";
-    return;
-  }
+  reader.onload = async function (event) {
+    const zip = await JSZip.loadAsync(event.target.result);
+    let allText = '';
 
-  const files = Array.from(folderInput.files);
-  const fileNames = files.map(file => file.name).join("\n");
-  const fullPrompt = `User files:\n${fileNames}\n\nTask: ${prompt}`;
+    for (const filename in zip.files) {
+      const file = zip.files[filename];
+      if (!file.dir && file.name.endsWith('.txt')) {
+        const content = await file.async('text');
+        allText += `\n\n--- ${file.name} ---\n${content}`;
+      }
+    }
 
-  try {
-    responseText.textContent = "Thinking...";
-    const res = await fetchfetch("https://balanced-bolder-rhythm.glitch.me/ask-gemini",
-", {
+    const userPrompt = document.getElementById('promptInput').value;
+    const fullPrompt = userPrompt + '\n\n' + allText;
+
+    document.getElementById("responseArea").textContent = "⌛ Processing...";
+
+    const response = await fetch("https://balanced-bolder-rhythm.glitch.me/ask-gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: fullPrompt }] }]
-      })
+      body: JSON.stringify({ prompt: fullPrompt })
     });
 
-    const data = await res.json();
-    const result = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
-    responseText.textContent = result;
-  } catch (err) {
-    responseText.textContent = "Error: " + err.message;
-  }
+    const result = await response.text();
+    document.getElementById("responseArea").textContent = result;
+  };
+
+  reader.readAsArrayBuffer(zipFile);
 });
