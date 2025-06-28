@@ -1,4 +1,3 @@
-
 document.getElementById('zipInput').addEventListener('change', function (e) {
   const zipFile = e.target.files[0];
   const reader = new FileReader();
@@ -20,7 +19,7 @@ document.getElementById('zipInput').addEventListener('change', function (e) {
 
     document.getElementById("responseArea").textContent = "⌛ Processing...";
 
-    const response = await fetch("https://balanced-bolder-rhythm.glitch.me/ask-gemini", {
+    const response = await fetch("https://gemini-proxy-rapid.vercel.app/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: fullPrompt })
