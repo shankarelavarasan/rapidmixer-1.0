@@ -1,26 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rapid AI Account Assistant</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>📁 Rapid AI Account Assistant</h1>
+    <h1>📂 Rapid AI Account Assistant</h1>
 
-    <label for="folderInput">Select Folder:</label>
-    <input type="file" id="folderInput" webkitdirectory directory multiple>
+    <label for="zipInput">Upload a ZIP file with your accounting files:</label>
+    <input type="file" id="zipInput" accept=".zip" />
 
-    <label for="prompt">Enter your AI prompt:</label>
-    <textarea id="prompt" placeholder="e.g., Group files by party name and list GST mismatch..." rows="4"></textarea>
+    <label for="promptInput">Enter your prompt to Gemini AI:</label>
+    <textarea id="promptInput" placeholder="e.g., Summarize all GST mismatches in the files..." rows="4"></textarea>
 
-    <button id="analyzeBtn">🧠 Run Gemini AI</button>
+    <button id="analyzeBtn">🔍 Analyze with Gemini</button>
 
     <div id="output">
-      <h2>📝 Result</h2>
-      <pre id="responseText">Awaiting input...</pre>
+      <h2>🧠 AI Response</h2>
+      <pre id="responseArea">Awaiting input...</pre>
     </div>
   </div>
 
