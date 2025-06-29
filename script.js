@@ -19,7 +19,7 @@ document.getElementById('zipInput').addEventListener('change', function (e) {
 
     document.getElementById("responseArea").textContent = "⌛ Processing...";
 
-    const response = await fetch("https://developing-fluff-sunday.glitch.me/ask-gemini", {
+    const response = await fetch("https://plaid-occipital-noise.glitch.me/ask-gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: fullPrompt })
