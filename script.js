@@ -1,33 +1,24 @@
-document.getElementById('zipInput').addEventListener('change', function (e) {
-  const zipFile = e.target.files[0];
-  const reader = new FileReader();
-
-  reader.onload = async function (event) {
-    const zip = await JSZip.loadAsync(event.target.result);
-    let allText = '';
-
-    for (const filename in zip.files) {
-      const file = zip.files[filename];
-      if (!file.dir && file.name.endsWith('.txt')) {
-        const content = await file.async('text');
-        allText += `\n\n--- ${file.name} ---\n${content}`;
-      }
+document.getElementById('folderInput').addEventListener('change', async function (e) {
+  const files = e.target.files;
+  let allText = '';
+  for (const file of files) {
+    if (file.name.endsWith('.txt')) {
+      const content = await file.text();
+      allText += `\n\n--- ${file.name} ---\n${content}`;
     }
+  }
 
-    const userPrompt = document.getElementById('promptInput').value;
-    const fullPrompt = userPrompt + '\n\n' + allText;
+  const prompt = document.getElementById('promptInput').value;
+  const fullPrompt = prompt + "\n\n" + allText;
 
-    document.getElementById("responseArea").textContent = "⌛ Processing...";
+  document.getElementById("responseArea").textContent = "⌛ Processing...";
 
-    const response = await fetch("https://plaid-occipital-noise.glitch.me/ask-gemini", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: fullPrompt })
-    });
+  const response = await fetch("https://plaid-occipital-noise.glitch.me/ask-gemini", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt: fullPrompt })
+  });
 
-    const result = await response.text();
-    document.getElementById("responseArea").textContent = result;
-  };
-
-  reader.readAsArrayBuffer(zipFile);
+  const result = await response.text();
+  document.getElementById("responseArea").textContent = result;
 });

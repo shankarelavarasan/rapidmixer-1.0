@@ -1,27 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Rapid AI Assistant</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rapid AI Account Assistant</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Rapid AI Assistant</h1>
+    <h1>📁 Rapid AI Account Assistant</h1>
+    <label for="folderInput">📂 Select Folder:</label>
+    <input type="file" id="folderInput" webkitdirectory directory multiple />
 
-    <label>Select .zip file (containing .txt files):</label><br>
-    <input type="file" id="zipInput" accept=".zip"><br><br>
+    <label for="promptInput">🧠 Enter AI Prompt:</label>
+    <textarea id="promptInput" placeholder="Example: Verify GST entries and group by party..." rows="4"></textarea>
 
-    <label>Enter your Prompt:</label><br>
-    <textarea id="promptInput" placeholder="Enter instructions..." rows="5" cols="50"></textarea><br><br>
+    <button id="analyzeBtn">🚀 Run Gemini</button>
 
-    <button onclick="runAI()">🧠 Run Gemini AI</button>
-
-    <h2>Result:</h2>
-    <pre id="responseArea">Awaiting input...</pre>
+    <div id="output">
+      <h2>📝 AI Result</h2>
+      <pre id="responseArea">Awaiting input...</pre>
+    </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
