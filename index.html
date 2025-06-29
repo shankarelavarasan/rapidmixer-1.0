@@ -1,56 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rapid AI Account Assistant</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f5f7fa;
-    }
-    .container {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      max-width: 700px;
-      margin: auto;
-    }
-    textarea {
-      width: 100%;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      padding: 10px 20px;
-      background: #0066ff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    pre {
-      background: #f0f0f0;
-      padding: 10px;
-      border-radius: 5px;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>Rapid AI Assistant</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h2>📁 Rapid AI Assistant</h2>
-    <p>Select ZIP file with .txt files:</p>
-    <input type="file" id="zipInput" accept=".zip"/>
-    <p>Prompt:</p>
-    <textarea id="promptInput" rows="4" placeholder="e.g. Identify and group bills with GST issues"></textarea><br/><br/>
+    <h1>Rapid AI Assistant</h1>
+
+    <label>Select .zip file (containing .txt files):</label><br>
+    <input type="file" id="zipInput" accept=".zip"><br><br>
+
+    <label>Enter your Prompt:</label><br>
+    <textarea id="promptInput" placeholder="Enter instructions..." rows="5" cols="50"></textarea><br><br>
+
     <button onclick="runAI()">🧠 Run Gemini AI</button>
-    <h3>Response:</h3>
-    <pre id="responseArea">Waiting...</pre>
+
+    <h2>Result:</h2>
+    <pre id="responseArea">Awaiting input...</pre>
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
   <script src="script.js"></script>
 </body>
 </html>
