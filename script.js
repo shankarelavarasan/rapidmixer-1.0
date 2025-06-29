@@ -14,13 +14,12 @@ document.getElementById('zipInput').addEventListener('change', function (e) {
       }
     }
 
-    // ✅ FIXED ID HERE (was 'promptInput', changed to 'prompt')
-    const userPrompt = document.getElementById('prompt').value;
+    const userPrompt = document.getElementById('promptInput').value;
     const fullPrompt = userPrompt + '\n\n' + allText;
 
     document.getElementById("responseArea").textContent = "⌛ Processing...";
 
-    const response = await fetch("https://balanced-bolder-rhythm.glitch.me/ask-gemini", {
+    const response = await fetch("https://developing-fluff-sunday.glitch.me/ask-gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: fullPrompt })
