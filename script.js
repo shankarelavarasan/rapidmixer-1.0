@@ -1,4 +1,3 @@
-
 document.getElementById('zipInput').addEventListener('change', function (e) {
   const zipFile = e.target.files[0];
   const reader = new FileReader();
@@ -15,7 +14,8 @@ document.getElementById('zipInput').addEventListener('change', function (e) {
       }
     }
 
-    const userPrompt = document.getElementById('promptInput').value;
+    // ✅ FIXED ID HERE (was 'promptInput', changed to 'prompt')
+    const userPrompt = document.getElementById('prompt').value;
     const fullPrompt = userPrompt + '\n\n' + allText;
 
     document.getElementById("responseArea").textContent = "⌛ Processing...";
