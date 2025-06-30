@@ -1,32 +1,22 @@
-document.getElementById("ask-button").addEventListener("click", async () => {
-  const prompt = document.getElementById("user-input").value;
-  const resultEl = document.getElementById("result");
+document.getElementById("askBtn").addEventListener("click", async () => {
+  const userInput = document.getElementById("userInput").value;
+  const responseBox = document.getElementById("responseBox");
 
-  if (!prompt.trim()) {
-    resultEl.textContent = "❌ Please enter a question.";
-    return;
-  }
-
-  resultEl.textContent = "⏳ Thinking...";
+  responseBox.innerText = "Thinking...";
 
   try {
-    const response = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
+    const response = await fetch("/ask-gemini", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ prompt })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userInput }),
     });
 
-    if (!response.ok) {
-      resultEl.textContent = "❌ API Failed";
-      return;
-    }
+    if (!response.ok) throw new Error("Gemini API response not ok");
 
     const data = await response.json();
-    resultEl.textContent = data.text || "❌ No result from Gemini";
+    responseBox.innerText = data.text;
   } catch (error) {
-    console.error(error);
-    resultEl.textContent = "❌ Network or server error";
+    console.error("Gemini API call failed:", error);
+    responseBox.innerText = "❌ API failed. Please try again.";
   }
 });
