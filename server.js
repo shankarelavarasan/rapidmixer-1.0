@@ -1,32 +1,42 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const path = require('path');
+require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const port = process.env.PORT || 3000;
+
 app.use(cors());
-app.use(express.json());
-app.use(express.static("public"));
+app.use(bodyParser.json());
 
-if (!process.env.GEMINI_API_KEY) {
-  console.error("❌ No GEMINI_API_KEY in env!");
-}
+// ✅ Serve static files from "public" folder
+app.use(express.static(path.join(__dirname, 'public')));
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-app.post("/ask-gemini", async (req, res) => {
+// ✅ Gemini API endpoint
+app.post('/ask-gemini', async (req, res) => {
   try {
-    const message = req.body.message;
+    const genAI = new GoogleGenerativeAI(process.env.API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(message);
-    const response = await result.response;
+    const prompt = req.body.message;
+
+    const result = await model.generateContent(prompt);
+    const response = result.response;
     const text = response.text();
+    
     res.json({ text });
   } catch (err) {
-    console.error("Gemini Error:", err);
+    console.error("Gemini API error:", err);
     res.status(500).json({ error: "Gemini API failed" });
   }
 });
 
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+// ✅ Fallback to index.html for root path
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(port, () => {
+  console.log(`✅ Server running on port ${port}`);
+});
