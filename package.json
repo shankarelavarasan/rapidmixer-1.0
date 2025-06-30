@@ -1,7 +1,6 @@
 {
-  "name": "gemini-backend",
+  "name": "rapid-ai-backend",
   "version": "1.0.0",
-  "description": "Gemini AI API backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
