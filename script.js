@@ -10,7 +10,7 @@ document.getElementById("askBtn").addEventListener("click", async function () {
   resultArea.textContent = "Thinking...";
 
   try {
-    const response = await fetch("https://your-backend-url.onrender.com/ask-gemini", {
+    const response = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
