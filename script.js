@@ -5,7 +5,7 @@ document.getElementById("askBtn").addEventListener("click", async () => {
   responseBox.innerText = "Thinking...";
 
   try {
-    const response = await fetch("/ask-gemini", {
+    const response = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: userInput }),
