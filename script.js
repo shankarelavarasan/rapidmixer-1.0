@@ -1,6 +1,13 @@
-document.getElementById("askBtn").addEventListener("click", async () => {
-  const prompt = document.getElementById("prompt").value;
-  const resBox = document.getElementById("response");
+document.getElementById("ask-button").addEventListener("click", async () => {
+  const prompt = document.getElementById("user-input").value;
+  const resultEl = document.getElementById("result");
+
+  if (!prompt.trim()) {
+    resultEl.textContent = "❌ Please enter a question.";
+    return;
+  }
+
+  resultEl.textContent = "⏳ Thinking...";
 
   try {
     const response = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
@@ -11,13 +18,15 @@ document.getElementById("askBtn").addEventListener("click", async () => {
       body: JSON.stringify({ prompt })
     });
 
-    const data = await response.json();
-    if (response.ok) {
-      resBox.textContent = data.text;
-    } else {
-      resBox.textContent = "Error: " + data.error;
+    if (!response.ok) {
+      resultEl.textContent = "❌ API Failed";
+      return;
     }
+
+    const data = await response.json();
+    resultEl.textContent = data.text || "❌ No result from Gemini";
   } catch (error) {
-    resBox.textContent = "Gemini API call failed: " + error;
+    console.error(error);
+    resultEl.textContent = "❌ Network or server error";
   }
 });
