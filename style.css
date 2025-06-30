@@ -1,30 +1,27 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #f4f4f4;
-  text-align: center;
-  padding: 50px;
+  font-family: sans-serif;
+  background: #eef2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
 }
-
 .container {
-  max-width: 600px;
-  margin: auto;
-  background: white;
+  background: #fff;
   padding: 30px;
-  border-radius: 10px;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  text-align: center;
 }
-
-input {
-  width: 70%;
+input, button {
+  font-size: 1rem;
   padding: 10px;
+  margin: 5px 0;
 }
-
-button {
-  padding: 10px 20px;
-  margin-left: 10px;
-}
-
 #responseBox {
   margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #ccc;
+  padding: 10px;
+  border: 1px solid #ddd;
+  min-height: 50px;
 }
