@@ -1,35 +1,28 @@
-document.getElementById('folderInput').addEventListener('change', async function (e) {
-  const files = e.target.files;
-  let allText = '';
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-  for (const file of files) {
-    if (file.type === 'text/plain') {
-      const content = await file.text();
-      allText += `\n\n--- ${file.name} ---\n${content}`;
-    }
-  }
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-  const userPrompt = document.getElementById('promptInput').value;
-  const fullPrompt = userPrompt + '\n\n' + allText;
+app.use(cors());
+app.use(bodyParser.json());
 
-  document.getElementById("responseArea").textContent = "⌛ Processing...";
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+app.post('/ask-gemini', async (req, res) => {
   try {
-    const response = await fetch("https://developing-fluff-sunday.glitch.me/ask-gemini", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: fullPrompt })
-    });
-
-    if (!response.ok) {
-      throw new Error("Gemini API response not ok");
-    }
-
-    const result = await response.text();
-    document.getElementById("responseArea").textContent = result;
-
-  } catch (error) {
-    console.error("Gemini API call failed:", error);
-    document.getElementById("responseArea").textContent = "❌ Gemini API call failed. Please try again.";
+    const { prompt } = req.body;
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const content = await model.generateContent(prompt);
+    res.send(content.response.text());
+  } catch (e) {
+    console.error(e);
+    res.status(500).send('Gemini API error');
   }
 });
+
+app.listen(PORT, () => console.log(`✅ Listening on port ${PORT}`));
