@@ -1,33 +1,35 @@
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const dotenv = require("dotenv");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+document.getElementById('folderInput').addEventListener('change', async function (e) {
+  const files = e.target.files;
+  let allText = '';
 
-dotenv.config();
-const app = express();
-const port = 1988;
-
-app.use(cors()); // ✅ Allow all origins (Important!)
-app.use(bodyParser.json());
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-app.post("/ask-gemini", async (req, res) => {
-  try {
-    const prompt = req.body.prompt;
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-
-    res.send(text);
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    res.status(500).send("Gemini API request failed.");
+  for (const file of files) {
+    if (file.type === 'text/plain') {
+      const content = await file.text();
+      allText += `\n\n--- ${file.name} ---\n${content}`;
+    }
   }
-});
 
-app.listen(port, () => {
-  console.log(`✅ Server running on port ${port}`);
+  const userPrompt = document.getElementById('promptInput').value;
+  const fullPrompt = userPrompt + '\n\n' + allText;
+
+  document.getElementById("responseArea").textContent = "⌛ Processing...";
+
+  try {
+    const response = await fetch("https://developing-fluff-sunday.glitch.me/ask-gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: fullPrompt })
+    });
+
+    if (!response.ok) {
+      throw new Error("Gemini API response not ok");
+    }
+
+    const result = await response.text();
+    document.getElementById("responseArea").textContent = result;
+
+  } catch (error) {
+    console.error("Gemini API call failed:", error);
+    document.getElementById("responseArea").textContent = "❌ Gemini API call failed. Please try again.";
+  }
 });
