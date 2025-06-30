@@ -1,28 +1,34 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 
 app.use(cors());
 app.use(bodyParser.json());
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
-app.post('/ask-gemini', async (req, res) => {
+app.post("/ask-gemini", async (req, res) => {
   try {
-    const { prompt } = req.body;
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    const content = await model.generateContent(prompt);
-    res.send(content.response.text());
-  } catch (e) {
-    console.error(e);
-    res.status(500).send('Gemini API error');
+    const prompt = req.body.prompt;
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = await response.text();
+
+    res.json({ text });
+  } catch (err) {
+    console.error("Gemini API Error:", err);
+    res.status(500).json({ error: "Gemini API failed" });
   }
 });
 
-app.listen(PORT, () => console.log(`✅ Listening on port ${PORT}`));
+app.listen(port, () => {
+  console.log(`✅ Listening on port ${port}`);
+});
