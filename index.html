@@ -1,29 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rapid AI Account Assistant</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Rapid AI Assistant</title>
 </head>
 <body>
-  <div class="container">
-    <h1>📁 Rapid AI Account Assistant</h1>
-    <label for="folderInput">📂 Select Folder:</label>
-    <input type="file" id="folderInput" webkitdirectory directory multiple />
+  <h1>Ask Gemini</h1>
+  <input type="text" id="prompt" placeholder="Ask me anything..." />
+  <button id="askBtn">Ask</button>
+  <pre id="response"></pre>
 
-    <label for="promptInput">🧠 Enter AI Prompt:</label>
-    <textarea id="promptInput" placeholder="Example: Verify GST entries and group by party..." rows="4"></textarea>
-
-    <button id="analyzeBtn">🚀 Run Gemini</button>
-
-    <div id="output">
-      <h2>📝 AI Result</h2>
-      <pre id="responseArea">Awaiting input...</pre>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
