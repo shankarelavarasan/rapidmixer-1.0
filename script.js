@@ -1,28 +1,31 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+document.getElementById("askBtn").addEventListener("click", async function () {
+  const prompt = document.getElementById("prompt").value;
+  const resultArea = document.getElementById("result");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+  if (!prompt.trim()) {
+    resultArea.textContent = "Please enter a question!";
+    return;
+  }
 
-app.use(cors());
-app.use(bodyParser.json());
+  resultArea.textContent = "Thinking...";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-app.post('/ask-gemini', async (req, res) => {
   try {
-    const { prompt } = req.body;
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    const content = await model.generateContent(prompt);
-    res.send(content.response.text());
-  } catch (e) {
-    console.error(e);
-    res.status(500).send('Gemini API error');
+    const response = await fetch("https://your-backend-url.onrender.com/ask-gemini", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt: prompt })
+    });
+
+    if (!response.ok) {
+      throw new Error("Gemini API response not ok");
+    }
+
+    const data = await response.json();
+    resultArea.textContent = data.text;
+  } catch (error) {
+    console.error("Gemini API call failed:", error);
+    resultArea.textContent = "Error: Could not get response from Gemini API.";
   }
 });
-
-app.listen(PORT, () => console.log(`✅ Listening on port ${PORT}`));
