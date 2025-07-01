@@ -1,27 +1,18 @@
+// public/script.js
+
 document.getElementById("askBtn").addEventListener("click", async () => {
-  const message = document.getElementById("userInput").value.trim();
-  const resBox = document.getElementById("responseBox");
+  const question = document.getElementById("userInput").value;
+  const responseBox = document.getElementById("responseBox");
+  responseBox.innerHTML = "Thinking...";
 
-  if (!message) {
-    resBox.textContent = "❌ Please enter a message.";
-    return;
-  }
+  const res = await fetch("/ask", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ prompt: question })
+  });
 
-  resBox.textContent = "⏳ Thinking...";
-
-  try {
-    const resp = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
-    });
-
-    if (!resp.ok) throw new Error("API failed");
-
-    const data = await resp.json();
-    resBox.textContent = data.text;
-  } catch (e) {
-    console.error(e);
-    resBox.textContent = "❌ API call failed.";
-  }
+  const data = await res.json();
+  responseBox.innerHTML = data.response || "No response from Gemini";
 });
