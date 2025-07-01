@@ -1,27 +1,39 @@
+/* public/style.css */
 body {
-  font-family: sans-serif;
-  background: #eef2f5;
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   margin: 0;
 }
+
 .container {
-  background: #fff;
+  background: white;
   padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-  text-align: center;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  width: 400px;
 }
-input, button {
-  font-size: 1rem;
+
+#userInput {
+  width: 100%;
   padding: 10px;
-  margin: 5px 0;
+  margin-bottom: 10px;
 }
+
+#askBtn {
+  padding: 10px 20px;
+  background: #007bff;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
 #responseBox {
-  margin-top: 20px;
+  margin-top: 15px;
   padding: 10px;
-  border: 1px solid #ddd;
-  min-height: 50px;
+  background: #eee;
+  border-radius: 5px;
 }
