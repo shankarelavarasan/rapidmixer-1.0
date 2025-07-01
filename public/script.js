@@ -1,7 +1,9 @@
 document.getElementById("askBtn").addEventListener("click", async () => {
   const question = document.getElementById("userInput").value;
   const responseBox = document.getElementById("responseBox");
-  responseBox.innerHTML = "🤖 பதில் தயார் ஆகிறது...";
+
+  // பதில் லோடிங் animation
+  responseBox.innerHTML = "🤖 பதில் தயாராகிறது... தயவு செய்து காத்திருக்கவும்...";
 
   try {
     const res = await fetch("https://rapid-ai-assistant.onrender.com/ask", {
@@ -12,10 +14,13 @@ document.getElementById("askBtn").addEventListener("click", async () => {
       body: JSON.stringify({ prompt: question })
     });
 
+    // பதிலை JSON ஆக மாற்று
     const data = await res.json();
-    responseBox.innerHTML = data.response || "🤖 பதில் இல்லை";
+
+    // Gemini-ன் பதிலை காட்டுங்கள்
+    responseBox.innerHTML = data.response || "🤖 பதில் கிடைக்கவில்லை.";
   } catch (error) {
-    responseBox.innerHTML = "❌ பிழை ஏற்பட்டது!";
-    console.error("Frontend error:", error);
+    responseBox.innerHTML = "❌ பிழை ஏற்பட்டது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.";
+    console.error("❌ Fetch Error:", error);
   }
 });
