@@ -1,10 +1,10 @@
 document.getElementById("askBtn").addEventListener("click", async () => {
   const question = document.getElementById("userInput").value;
   const responseBox = document.getElementById("responseBox");
-  responseBox.innerHTML = "🤖 தயார் ஆகிறது...";
+  responseBox.innerHTML = "🤖 பதில் தயார் ஆகிறது...";
 
   try {
-    const res = await fetch("/ask", {
+    const res = await fetch("https://rapid-ai-assistant.onrender.com/ask", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
