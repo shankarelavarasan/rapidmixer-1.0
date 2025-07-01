@@ -15,7 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 app.use(express.json());
-app.use(express.static("public")); // Serves your index.html, script.js, style.css
+
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
