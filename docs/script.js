@@ -26,13 +26,34 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsText(file);
     });
 
-    folderInput.addEventListener('change', (event) => {
-        const files = event.target.files;
-        console.log('Selected folder contents:', files);
-        // Logic to handle multiple files from a folder needs to be implemented here.
-        // This would likely involve iterating through the 'files' FileList,
-        // reading each one, and sending their content to the backend.
+    folderInput.addEventListener('change', async (event) => {
+        const files = Array.from(event.target.files);
+        if (files.length === 0) return;
+
+        console.log(`Selected ${files.length} files from folder`);
+        appendMessage(`📁 Processing ${files.length} files...`, "user");
+
+        for (const file of files) {
+            try {
+                const content = await readFileContent(file);
+                await sendFileContentToAI(content, file.name);
+                // Add a small delay between files to avoid overwhelming the API
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            } catch (error) {
+                console.error(`Error processing file ${file.name}:`, error);
+                appendMessage(`❌ Error processing file ${file.name}`, "user");
+            }
+        }
     });
+
+    const readFileContent = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(new Error(`Error reading file ${file.name}`));
+            reader.readAsText(file);
+        });
+    };
 
   const askBtn = document.getElementById("askBtn");
   const userInput = document.getElementById("userInput");
@@ -43,14 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const exportDocBtn = document.getElementById("exportDoc");
   const newChatBtn = document.getElementById("newChatBtn");
 
-  const askAI = async () => {
-    const question = userInput.value.trim();
-    if (!question) return;
-
-    appendMessage(question, "user");
-    userInput.value = "";
-
-    appendMessage("🤖 Thinking...", "ai");
+  const callAI = async (body, userMessage, thinkingMessage = "🤖 Thinking...") => {
+    appendMessage(userMessage, "user");
+    appendMessage(thinkingMessage, "ai");
 
     try {
       const res = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
@@ -58,15 +74,27 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: question }),
+        body: JSON.stringify(body),
       });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
+      }
 
       const data = await res.json();
       updateLastAIMessage(data.response || "🤖 Sorry, something went wrong.");
     } catch (error) {
-      updateLastAIMessage("❌ Error fetching response.");
+      updateLastAIMessage(`❌ Error: ${error.message}`);
       console.error("❌ Fetch Error:", error);
     }
+  };
+
+  const askAI = () => {
+    const question = userInput.value.trim();
+    if (!question) return;
+    userInput.value = "";
+    callAI({ prompt: question }, question);
   };
 
   const appendMessage = (text, sender) => {
@@ -136,31 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
     chatContainer.innerHTML = '';
   });
 
-  const sendFileContentToAI = async (content, fileName) => {
-    appendMessage(`📁 Sending file: ${fileName}`, "user");
-    appendMessage("🤖 Processing file...", "ai");
-
-    try {
-        const res = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ fileContent: content, fileName: fileName }),
-        });
-
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
-        }
-
-        const data = await res.json();
-        updateLastAIMessage(data.response || "🤖 Sorry, something went wrong with file processing.");
-
-    } catch (error) { 
-        updateLastAIMessage("❌ Error processing file.");
-        console.error("❌ File Fetch Error:", error);
-    }
+  const sendFileContentToAI = (content, fileName) => {
+    const userMessage = `📁 Analyzing ${fileName}`;
+    const thinkingMessage = `🤖 Processing ${fileName}...`;
+    return callAI({ fileContent: content, fileName: fileName }, userMessage, thinkingMessage);
   };
 
 });
