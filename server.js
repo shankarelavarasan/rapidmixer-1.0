@@ -34,7 +34,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 app.post("/ask-gemini", async (req, res) => {
   try {
     const prompt = req.body.prompt;
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // ** இங்கேதான் ஜெமினி மாடல் பெயர் 'gemini-pro' என்பதற்குப் பதிலாக 'gemini-2.0-flash' என்று மாற்றப்பட்டுள்ளது **
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(prompt);
     const response = result.response.text();
     res.json({ response });
