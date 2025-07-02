@@ -11,10 +11,13 @@ router.post('/ask-gemini', async (req, res) => {
     
     let content;
     if (fileContent && fileName) {
+      console.log(`Received file: ${fileName}, size: ${fileContent.length} characters`);
       content = `Please analyze this file named ${fileName}:\n\n${fileContent}`;
     } else {
       content = prompt;
     }
+
+    console.log(`Total content length sent to Gemini: ${content.length} characters`);
 
     const result = await model.generateContent(content);
     const response = await result.response.text();
