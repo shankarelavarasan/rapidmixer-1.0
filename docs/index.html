@@ -28,6 +28,17 @@
         <li class="file"><i class="fas fa-file-excel"></i><span>data.xlsx</span></li>
       </ul>
       <div class="sidebar-footer">
+        <h3>File Options</h3>
+        <div class="file-options">
+          <input type="file" id="file-input" style="display: none;" />
+          <button class="sidebar-button" onclick="document.getElementById('file-input').click()">
+            <i class="fas fa-file-upload"></i> Choose File
+          </button>
+          <input type="file" id="folder-input" webkitdirectory directory style="display: none;" />
+          <button class="sidebar-button" onclick="document.getElementById('folder-input').click()">
+            <i class="fas fa-folder-open"></i> Choose Folder
+          </button>
+        </div>
         <h3>Export Chat</h3>
         <div class="export-buttons">
           <button id="exportTxt"><i class="fas fa-file-alt"></i> TXT</button>
