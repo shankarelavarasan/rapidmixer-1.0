@@ -1,4 +1,19 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
+    const fileInput = document.getElementById('file-input');
+    const folderInput = document.getElementById('folder-input');
+
+    fileInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        console.log('Selected files:', files);
+        // You can now process the selected files
+    });
+
+    folderInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        console.log('Selected folder contents:', files);
+        // You can now process the selected files
+    });
+
   const askBtn = document.getElementById("askBtn");
   const userInput = document.getElementById("userInput");
   const chatContainer = document.getElementById("chat-container");
