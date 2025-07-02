@@ -18,8 +18,10 @@ router.post('/ask-gemini', async (req, res) => {
     }
 
     console.log(`Total content length sent to Gemini: ${content.length} characters`);
+    console.log('Sending prompt to Gemini:', content);
 
     const result = await model.generateContent(content);
+    console.log('Received result from Gemini:', JSON.stringify(result, null, 2));
     const response = await result.response.text();
     res.json({ response });
   } catch (err) {
