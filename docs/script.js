@@ -6,16 +6,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = event.target.files[0];
         if (!file) return;
 
-        appendMessage(`📁 Uploading ${file.name}...`, "user");
+        const userMessage = appendMessage(`📁 Uploading ${file.name}...`, "user");
         const loadingMessage = appendMessage("⏳ Loading file...", "ai");
 
         try {
             const content = await readFileContent(file);
             await sendFileContentToAI(content, file.name);
-            loadingMessage.remove(); // Remove loading message on success
+            userMessage.innerText = `✅ ${file.name} uploaded successfully.`;
         } catch (error) {
             console.error(`Error processing file ${file.name}:`, error);
             updateLastAIMessage(`❌ Error processing file ${file.name}`);
+        } finally {
+            if (loadingMessage) loadingMessage.remove();
         }
     });
 
@@ -23,20 +25,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const files = Array.from(event.target.files);
         if (files.length === 0) return;
 
-        appendMessage(`📁 Processing ${files.length} files...`, "user");
+        const userMessage = appendMessage(`📁 Processing ${files.length} files...`, "user");
         const loadingMessage = appendMessage("⏳ Loading files...", "ai");
 
-        for (const file of files) {
-            try {
-                const content = await readFileContent(file);
-                await sendFileContentToAI(content, file.name);
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Delay between files
-            } catch (error) {
-                console.error(`Error processing file ${file.name}:`, error);
-                appendMessage(`❌ Error processing file ${file.name}`, "user");
+        try {
+            for (const file of files) {
+                try {
+                    const content = await readFileContent(file);
+                    await sendFileContentToAI(content, file.name);
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Delay between files
+                } catch (error) {
+                    console.error(`Error processing file ${file.name}:`, error);
+                    appendMessage(`❌ Error processing file ${file.name}`, "user");
+                }
             }
+            userMessage.innerText = `✅ Processed ${files.length} files.`;
+        } finally {
+            if (loadingMessage) loadingMessage.remove();
         }
-        loadingMessage.remove(); // Remove loading message after all files are processed
     });
 
     const readFileContent = (file) => {
