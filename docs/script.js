@@ -1,3 +1,5 @@
+// script.js
+
 document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('file-input');
     const folderInput = document.getElementById('folder-input');
@@ -5,13 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.addEventListener('change', (event) => {
         const files = event.target.files;
         console.log('Selected files:', files);
-        // You can now process the selected files
+        // நீங்கள் இப்போது தேர்ந்தெடுக்கப்பட்ட கோப்புகளைச் செயலாக்கலாம்
     });
 
     folderInput.addEventListener('change', (event) => {
         const files = event.target.files;
         console.log('Selected folder contents:', files);
-        // You can now process the selected files
+        // நீங்கள் இப்போது தேர்ந்தெடுக்கப்பட்ட கோப்புகளைச் செயலாக்கலாம்
     });
 
   const askBtn = document.getElementById("askBtn");
@@ -32,12 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
     appendMessage("🤖 Thinking...", "ai");
 
     try {
-      const res = await fetch("/ask-gemini", {
-        method: "POST",
+      // API அழைப்பு முகவரியை Render backend முழு முகவரிக்கு மாற்றியுள்ளோம்
+      const res = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
+        method: "POST", // POST முறை சரியாக உள்ளது
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", // Content-Type சரியாக உள்ளது
         },
-        body: JSON.stringify({ prompt: question }),
+        body: JSON.stringify({ prompt: question }), // JSON body சரியாக உள்ளது
       });
 
       const data = await res.json();
@@ -96,13 +99,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const history = getChatHistory();
-    doc.text(history, 10, 10);
+    // Here you might need to format the text for PDF, handling line breaks etc.
+    // A simple text addition might not handle long text or formatting well.
+    // doc.text(history, 10, 10); // This line is basic and might need improvement
+    
+    // A better way to add text to PDF
+    const textLines = doc.splitTextToSize(history, 180); // Split text into lines that fit the page width
+    doc.text(textLines, 10, 10);
+
     doc.save('chat-history.pdf');
   });
 
   exportDocBtn.addEventListener("click", () => {
+    // DOC export using HTML structure - rudimentary, might need proper library for complex docs
     const history = getChatHistory();
-    const blob = new Blob([`<html><body>${history.replace(/\n/g, '<br>')}</body></html>`], { type: 'application/msword' });
+    // Replacing newlines with <br> for basic HTML structure
+    const htmlContent = `<html><head><meta charset="UTF-8"></head><body>${history.replace(/\n/g, '<br>')}</body></html>`;
+    const blob = new Blob([htmlContent], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
