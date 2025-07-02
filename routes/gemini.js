@@ -6,9 +6,17 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.post('/ask-gemini', async (req, res) => {
   try {
-    const prompt = req.body.prompt;
+    const { prompt, fileContent, fileName } = req.body;
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    const result = await model.generateContent(prompt);
+    
+    let content;
+    if (fileContent && fileName) {
+      content = `Please analyze this file named ${fileName}:\n\n${fileContent}`;
+    } else {
+      content = prompt;
+    }
+
+    const result = await model.generateContent(content);
     const response = result.response.text();
     res.json({ response });
   } catch (err) {
