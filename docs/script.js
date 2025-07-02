@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const exportTxtBtn = document.getElementById("exportTxt");
   const exportPdfBtn = document.getElementById("exportPdf");
   const exportDocBtn = document.getElementById("exportDoc");
+  const newChatBtn = document.getElementById("newChatBtn");
 
   const askAI = async () => {
     const question = userInput.value.trim();
@@ -109,6 +110,10 @@ document.addEventListener('DOMContentLoaded', () => {
     a.download = 'chat-history.doc';
     a.click();
     URL.revokeObjectURL(url);
+  });
+
+  newChatBtn.addEventListener("click", () => {
+    chatContainer.innerHTML = '';
   });
 
 });

@@ -96,6 +96,17 @@ body, html {
     background-color: #444;
 }
 
+#newChatBtn {
+    background-color: #45a29e;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+#newChatBtn:hover {
+    background-color: #66fcf1;
+    color: #1a1a1d;
+}
+
 .export-buttons button {
     background-color: #444;
     color: #fff;
