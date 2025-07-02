@@ -34,8 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
     appendMessage("🤖 Thinking...", "ai");
 
     try {
-      // ** இங்கேதான் API அழைப்பு முகவரி Render backend முழு முகவரிக்கு மாற்றப்பட்டுள்ளது **
-      const res = await fetch("https://rapid-ai-assistant.onrender.com", {
+      // ** இங்கேதான் API அழைப்பு முகவரி Render backend முழு முகவரி மற்றும் பாதையுடன் மாற்றப்பட்டுள்ளது **
+      // '/ask-gemini' என்ற பாதை சேர்க்கப்பட்டுள்ளது
+      const res = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
         method: "POST", // POST முறை சரியாக உள்ளது
         headers: {
           "Content-Type": "application/json", // Content-Type சரியாக உள்ளது
@@ -46,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // பதில் வெற்றிகரமாக வந்ததா என்று status code-ஐ சரிபார்ப்பது நல்லது (optional but recommended)
       if (!res.ok) {
           const errorText = await res.text(); // பிழை பதிலை படிக்கவும்
-          throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
+          throw new new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
       }
 
       const data = await res.json();
