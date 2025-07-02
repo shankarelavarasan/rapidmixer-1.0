@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       // ** இங்கேதான் API அழைப்பு முகவரி Render backend முழு முகவரிக்கு மாற்றப்பட்டுள்ளது **
-      const res = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
+      const res = await fetch("https://rapid-ai-assistant.onrender.com", {
         method: "POST", // POST முறை சரியாக உள்ளது
         headers: {
           "Content-Type": "application/json", // Content-Type சரியாக உள்ளது
