@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     appendMessage("🤖 Thinking...", "ai");
 
     try {
-      const res = await fetch("https://rapid-ai-assistant.onrender.com/ask", {
+      const res = await fetch("/ask-gemini", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

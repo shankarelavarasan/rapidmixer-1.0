@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import cors from "cors";
+import bodyParser from "body-parser";
 
 dotenv.config();
 
@@ -14,12 +16,16 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-app.use(express.json());
+app.use(cors());
+app.use(bodyParser.json());
+
+// Serve frontend files from the 'docs' directory
+app.use(express.static('docs'));
 
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-app.post("/ask", async (req, res) => {
+app.post("/ask-gemini", async (req, res) => {
   try {
     const prompt = req.body.prompt;
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
