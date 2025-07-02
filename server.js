@@ -26,9 +26,6 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 // Serve frontend files from the 'docs' directory
-app.use(express.static('docs'));
-
-
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post("/ask-gemini", async (req, res) => {
@@ -43,6 +40,8 @@ app.post("/ask-gemini", async (req, res) => {
     res.json({ response: "Something went wrong!" });
   }
 });
+
+app.use(express.static('docs'));
 
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
