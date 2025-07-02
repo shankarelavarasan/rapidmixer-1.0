@@ -2,48 +2,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('file-input');
     const folderInput = document.getElementById('folder-input');
 
-    fileInput.addEventListener('change', (event) => {
-        const file = event.target.files[0]; // Get the first selected file
-        if (!file) return; // Exit if no file is selected
+    fileInput.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-        console.log('Selected file:', file.name);
+        appendMessage(`📁 Uploading ${file.name}...`, "user");
+        const loadingMessage = appendMessage("⏳ Loading file...", "ai");
 
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            const fileContent = e.target.result; // Read the file content
-            console.log('File content loaded.');
-            // Now send the file content to the AI
-            sendFileContentToAI(fileContent, file.name); // Call the new function
-        };
-
-        reader.onerror = (e) => {
-            console.error("Error reading file:", e);
-            // You could show an error message to the user here
-        };
-
-        // Tell the FileReader to read the file as text
-        reader.readAsText(file);
+        try {
+            const content = await readFileContent(file);
+            await sendFileContentToAI(content, file.name);
+            loadingMessage.remove(); // Remove loading message on success
+        } catch (error) {
+            console.error(`Error processing file ${file.name}:`, error);
+            updateLastAIMessage(`❌ Error processing file ${file.name}`);
+        }
     });
 
     folderInput.addEventListener('change', async (event) => {
         const files = Array.from(event.target.files);
         if (files.length === 0) return;
 
-        console.log(`Selected ${files.length} files from folder`);
         appendMessage(`📁 Processing ${files.length} files...`, "user");
+        const loadingMessage = appendMessage("⏳ Loading files...", "ai");
 
         for (const file of files) {
             try {
                 const content = await readFileContent(file);
                 await sendFileContentToAI(content, file.name);
-                // Add a small delay between files to avoid overwhelming the API
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Delay between files
             } catch (error) {
                 console.error(`Error processing file ${file.name}:`, error);
                 appendMessage(`❌ Error processing file ${file.name}`, "user");
             }
         }
+        loadingMessage.remove(); // Remove loading message after all files are processed
     });
 
     const readFileContent = (file) => {
