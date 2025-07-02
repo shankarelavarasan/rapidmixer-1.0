@@ -7,17 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!file) return;
 
         const userMessage = appendMessage(`📁 Uploading ${file.name}...`, "user");
-        const loadingMessage = appendMessage("⏳ Loading file...", "ai");
 
         try {
             const content = await readFileContent(file);
             await sendFileContentToAI(content, file.name);
-            userMessage.innerText = `✅ ${file.name} uploaded successfully.`;
+            userMessage.innerText = `✅ ${file.name} uploaded and processed.`;
         } catch (error) {
-            console.error(`Error processing file ${file.name}:`, error);
-            updateLastAIMessage(`❌ Error processing file ${file.name}`);
-        } finally {
-            if (loadingMessage) loadingMessage.remove();
+            console.error(`Error reading file ${file.name}:`, error);
+            appendMessage(`❌ Error reading file ${file.name}.`, "ai");
+            userMessage.innerText = `❌ Error with ${file.name}.`;
         }
     });
 
@@ -25,24 +23,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const files = Array.from(event.target.files);
         if (files.length === 0) return;
 
-        const userMessage = appendMessage(`📁 Processing ${files.length} files...`, "user");
-        const loadingMessage = appendMessage("⏳ Loading files...", "ai");
+        appendMessage(`📁 Processing ${files.length} files from folder...`, "user");
 
-        try {
-            for (const file of files) {
-                try {
-                    const content = await readFileContent(file);
-                    await sendFileContentToAI(content, file.name);
-                    await new Promise(resolve => setTimeout(resolve, 1000)); // Delay between files
-                } catch (error) {
-                    console.error(`Error processing file ${file.name}:`, error);
-                    appendMessage(`❌ Error processing file ${file.name}`, "user");
-                }
+        for (const file of files) {
+            try {
+                const content = await readFileContent(file);
+                await sendFileContentToAI(content, file.name);
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Optional delay
+            } catch (error) {
+                console.error(`Error reading file ${file.name}:`, error);
+                appendMessage(`❌ Error reading file ${file.name}.`, "ai");
             }
-            userMessage.innerText = `✅ Processed ${files.length} files.`;
-        } finally {
-            if (loadingMessage) loadingMessage.remove();
         }
+        appendMessage(`✅ Finished processing folder.`, "ai");
     });
 
     const readFileContent = (file) => {
@@ -102,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     messageDiv.innerText = text;
     chatContainer.appendChild(messageDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
+    return messageDiv;
   };
 
   const updateLastAIMessage = (text) => {
