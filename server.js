@@ -4,7 +4,7 @@ import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import geminiRoutes from './routes/gemini.js';
 import cors from "cors";
 import bodyParser from "body-parser";
 
@@ -25,21 +25,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
-// Serve frontend files from the 'docs' directory
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+app.use('/', geminiRoutes);
 
-app.post("/ask-gemini", async (req, res) => {
-  try {
-    const prompt = req.body.prompt;
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(prompt);
-    const response = result.response.text();
-    res.json({ response });
-  } catch (err) {
-    console.error("Gemini API error:", err.message);
-    res.json({ response: "Something went wrong!" });
-  }
-});
+// Serve frontend files from the 'docs' directory
 
 app.use(express.static('docs'));
 
