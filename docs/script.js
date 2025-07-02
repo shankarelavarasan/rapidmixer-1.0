@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     appendMessage("🤖 Thinking...", "ai");
 
     try {
-      // API அழைப்பு முகவரியை Render backend முழு முகவரிக்கு மாற்றியுள்ளோம்
+      // ** இங்கேதான் API அழைப்பு முகவரி Render backend முழு முகவரிக்கு மாற்றப்பட்டுள்ளது **
       const res = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
         method: "POST", // POST முறை சரியாக உள்ளது
         headers: {
@@ -42,6 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         body: JSON.stringify({ prompt: question }), // JSON body சரியாக உள்ளது
       });
+
+      // பதில் வெற்றிகரமாக வந்ததா என்று status code-ஐ சரிபார்ப்பது நல்லது (optional but recommended)
+      if (!res.ok) {
+          const errorText = await res.text(); // பிழை பதிலை படிக்கவும்
+          throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
+      }
 
       const data = await res.json();
       updateLastAIMessage(data.response || "🤖 Sorry, something went wrong.");
@@ -63,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const aiMessages = chatContainer.querySelectorAll('.ai-message');
     const lastMessage = aiMessages[aiMessages.length - 1];
     if (lastMessage) {
+        // HTML உள்ளீடாகக் கருதுவதைத் தவிர்க்க innerText பயன்படுத்துகிறோம்
         lastMessage.innerText = text;
     }
   }
@@ -78,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let history = "";
     const messages = chatContainer.querySelectorAll('.chat-message');
     messages.forEach(msg => {
+        // innerText பயன்படுத்துவதால் HTML entity-கள் சரியாக வரும்
         const sender = msg.classList.contains('user-message') ? 'You' : 'Rapid AI';
         history += `${sender}: ${msg.innerText}\n\n`;
     });
@@ -99,21 +107,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const history = getChatHistory();
-    // Here you might need to format the text for PDF, handling line breaks etc.
-    // A simple text addition might not handle long text or formatting well.
-    // doc.text(history, 10, 10); // This line is basic and might need improvement
-    
-    // A better way to add text to PDF
-    const textLines = doc.splitTextToSize(history, 180); // Split text into lines that fit the page width
-    doc.text(textLines, 10, 10);
+    // PDF-க்கு உரை சேர்க்க
+    const textLines = doc.splitTextToSize(history, 180); // பக்கத்தின் அகலத்திற்கு ஏற்ப உரையை பிரிக்கும்
+    doc.text(textLines, 10, 10); // PDF-க்கு உரையை சேர்க்கும்
 
     doc.save('chat-history.pdf');
   });
 
   exportDocBtn.addEventListener("click", () => {
-    // DOC export using HTML structure - rudimentary, might need proper library for complex docs
+    // DOC export HTML structure பயன்படுத்தி - இது ஒரு அடிப்படை முறை
     const history = getChatHistory();
-    // Replacing newlines with <br> for basic HTML structure
+    // Line breaks-ஐ <br> ஆக மாற்றுகிறோம் HTML-க்காக
     const htmlContent = `<html><head><meta charset="UTF-8"></head><body>${history.replace(/\n/g, '<br>')}</body></html>`;
     const blob = new Blob([htmlContent], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
