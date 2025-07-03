@@ -31,23 +31,9 @@ router.post('/ask-gemini', async (req, res) => {
 
     const result = await model.generateContent(content);
 
-    // Check the structure of the result from Gemini
-    if (result && result.response && typeof result.response.text === 'function') {
-        const responseText = await result.response.text();
-        console.log('Gemini response text (first 200 chars):', responseText.substring(0, 200));
-        res.json({ response: responseText });
-    } else {
-         console.error('Gemini API did not return expected response structure.', JSON.stringify(result, null, 2));
-         let errorMessage = 'Gemini API returned an unexpected response.';
-         if (result && result.promptFeedback && result.promptFeedback.blockReason) {
-             errorMessage = `Gemini blocked prompt: ${result.promptFeedback.blockReason}`;
-             console.error('Prompt feedback:', result.promptFeedback);
-         } else if (result && result.response && result.response.candidates && result.response.candidates.length > 0 && result.response.candidates[0].finishReason) {
-              errorMessage = `Gemini finished with reason: ${result.response.candidates[0].finishReason}`;
-              console.error('Candidate finish reason:', result.response.candidates[0].finishReason);
-         }
-         res.status(500).json({ response: `Error from AI: ${errorMessage}` });
-    }
+    const response = await result.response;
+    const text = response.text();
+    res.json({ response: text });
   } catch (err) {
     console.error("Gemini API fetch error:", err);
     let userErrorMessage = "Something went wrong while processing your request.";
