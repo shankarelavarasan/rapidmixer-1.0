@@ -31,31 +31,7 @@ router.post('/ask-gemini', async (req, res) => {
 
     const result = await model.generateContent(content);
 
-    console.log("Raw result from Gemini:", JSON.stringify(result, null, 2));
-
-    if (!result || !result.response) {
-        console.error("Gemini API error: Invalid response structure.", result);
-        if (result && result.promptFeedback) {
-            return res.status(400).json({ response: `Request was blocked. Reason: ${result.promptFeedback.blockReason}` });
-        }
-        return res.status(500).json({ response: "Failed to get a valid response from the AI. The response structure was unexpected." });
-    }
-
-    const response = result.response;
-
-    if (response.promptFeedback && response.promptFeedback.blockReason) {
-        console.error(`Gemini API request blocked. Reason: ${response.promptFeedback.blockReason}`);
-        return res.status(400).json({ response: `Your request was blocked by the safety filter. Reason: ${response.promptFeedback.blockReason}` });
-    }
-
-    if (!response.candidates || response.candidates.length === 0 || !response.candidates[0].content) {
-        console.error("Gemini API error: No content in response candidates.", response);
-        if (response.candidates && response.candidates.length > 0 && response.candidates[0].finishReason) {
-             return res.status(500).json({ response: `The request finished with reason: ${response.candidates[0].finishReason}. No content was generated.` });
-        }
-        return res.status(500).json({ response: "The AI response did not contain any content." });
-    }
-
+    const response = await result.response;
     const text = response.text();
     res.json({ response: text });
   } catch (err) {
