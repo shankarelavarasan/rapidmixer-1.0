@@ -66,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-
   const askBtn = document.getElementById("askBtn");
   const userInput = document.getElementById("userInput");
   const chatContainer = document.getElementById("chat-container");
