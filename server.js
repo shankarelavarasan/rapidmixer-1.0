@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import geminiRoutes from './routes/gemini.js';
 import cors from "cors";
-import bodyParser from "body-parser";
+
 
 dotenv.config();
 
@@ -16,6 +16,11 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// Middleware for parsing JSON and urlencoded data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
 const corsOptions = {
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -24,7 +29,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(bodyParser.json());
 
 app.use('/', geminiRoutes);
 
