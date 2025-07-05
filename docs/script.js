@@ -210,29 +210,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2000);
   });
 
-  voiceToTextBtn.addEventListener("click", () => {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'en-US';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
 
-    appendMessage("🎤 Listening...", "ai");
-
+  voiceToTextBtn.addEventListener('click', () => {
     recognition.start();
+    voiceToTextBtn.style.color = '#ff4d4d'; // Indicate recording
+  });
 
-    recognition.onresult = (event) => {
-        const speechResult = event.results[0][0].transcript;
-        userInput.value = speechResult;
-        appendMessage(`✅ Speech recognized. Text has been added to the input box.`, "ai");
-    };
+  recognition.addEventListener('result', e => {
+    const transcript = Array.from(e.results)
+      .map(result => result[0])
+      .map(result => result.transcript)
+      .join('');
 
-    recognition.onspeechend = () => {
-        recognition.stop();
-    };
+    userInput.value = transcript;
+  });
 
-    recognition.onerror = (event) => {
-        appendMessage(`❌ Error during speech recognition: ${event.error}`, "ai");
-    };
+  recognition.addEventListener('end', () => {
+    voiceToTextBtn.style.color = '#66fcf1'; // Reset color
   });
 
   loadTemplateBtn.addEventListener("click", () => {
@@ -243,21 +240,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const file = event.target.files[0];
     if (!file) return;
 
-    appendMessage(`📄 Loading template: ${file.name}...`, "user");
+    appendMessage(`📄 Using ${file.name} as a template.`, 'user');
+    // Store template file for backend processing
     const reader = new FileReader();
-
     reader.onload = (e) => {
-        const fileContent = e.target.result;
-        userInput.value = fileContent;
-        appendMessage(`✅ Template loaded into the input box.`, "ai");
+        // We can store the template content if needed on the frontend
+        // For now, we just acknowledge it's loaded.
+        appendMessage(`✅ Template ${file.name} is ready. Now, provide instructions in the chat.`, 'ai');
     };
-
-    reader.onerror = (e) => {
-        console.error(`Error reading template file ${file.name}:`, e);
-        appendMessage(`❌ Error reading template file ${file.name}.`, "ai");
-    };
-
-    reader.readAsText(file);
+    reader.readAsText(file); // or readAsDataURL for binary files
   });
 
 });
