@@ -13,10 +13,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-const allowedOrigins = [
-    'https://shankarelavarasan.github.io',
-    'https://rapid-ai-assistant.onrender.com'
-];
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',');
 
 const corsOptions = {
     origin: function (origin, callback) {
