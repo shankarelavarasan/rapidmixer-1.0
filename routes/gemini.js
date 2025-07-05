@@ -1,8 +1,50 @@
 import express from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { spawn } from 'child_process';
 
 const router = express.Router();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+const template = {
+  "Bill Number": null,
+  "Date": null,
+  "GST Rate": null,
+  "Quantity": null,
+  "Amount": null,
+  "Item": null,
+  "Total": null,
+  "File Name": null,
+  "Errors": []
+};
+
+router.post('/process-entry', (req, res) => {
+  const { userInput, folderPath } = req.body;
+
+  const pythonProcess = spawn('python', ['entry_engine.py']);
+
+  let pythonOutput = '';
+  pythonProcess.stdout.on('data', (data) => {
+    pythonOutput += data.toString();
+  });
+
+  let pythonError = '';
+  pythonProcess.stderr.on('data', (data) => {
+    pythonError += data.toString();
+  });
+
+  pythonProcess.on('close', (code) => {
+    if (code !== 0) {
+      console.error(`Python script exited with code ${code}`);
+      console.error(pythonError);
+      return res.status(500).json({ error: 'Failed to process entry.', details: pythonError });
+    }
+    res.json({ message: 'Entry processed successfully.', data: pythonOutput });
+  });
+
+  const data = { template, userInput, folderPath };
+  pythonProcess.stdin.write(JSON.stringify(data));
+  pythonProcess.stdin.end();
+});
 
 router.post('/ask-gemini', async (req, res) => {
   try {

@@ -82,6 +82,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+  const processEntry = async () => {
+      const userInputText = userInput.value.trim();
+      if (!userInputText) {
+          appendMessage("Please provide instructions for the entry.", "ai");
+          return;
+      }
+
+      // For now, we'll use a hardcoded folder path.
+      // In a real application, you'd get this from a folder picker.
+      const folderPath = 'C:/Users/admin/rapid-ai-assistant/entries';
+
+      appendMessage(`📝 Processing entry with your instructions...`, "user");
+      userInput.value = "";
+
+      try {
+          const res = await fetch("/process-entry", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ 
+                  userInput: userInputText,
+                  folderPath: folderPath
+              }),
+          });
+
+          if (!res.ok) {
+              const errorText = await res.text();
+              throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
+          }
+
+          const data = await res.json();
+          appendMessage(`✅ Entry created at: ${data.data.file_path}`, "ai");
+      } catch (error) {
+          appendMessage(`❌ Error: ${error.message}`, "ai");
+          console.error("❌ Fetch Error:", error);
+      }
+  };
+
   const askAI = async () => {
       const question = userInput.value.trim();
       if (!question && loadedFolderFiles.length === 0) {
@@ -138,7 +177,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  askBtn.addEventListener("click", askAI);
+  askBtn.addEventListener("click", () => {
+    // This is a simple way to decide which function to call.
+    // You could have a more sophisticated way to determine the user's intent.
+    if (loadedFolderFiles.length > 0 || userInput.value.toLowerCase().startsWith('ask:')) {
+        askAI();
+    } else {
+        processEntry();
+    }
+  });
   userInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
       askAI();
