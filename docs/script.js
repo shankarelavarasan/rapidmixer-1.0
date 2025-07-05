@@ -74,6 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const exportPdfBtn = document.getElementById("exportPdf");
   const exportDocBtn = document.getElementById("exportDoc");
   const newChatBtn = document.getElementById("newChatBtn");
+  const imageToTextBtn = document.getElementById("image-to-text-btn");
+  const voiceToTextBtn = document.getElementById("voice-to-text-btn");
+  const imageInput = document.getElementById("image-input");
 
 
 
@@ -183,6 +186,51 @@ document.addEventListener('DOMContentLoaded', () => {
   newChatBtn.addEventListener("click", () => {
     chatContainer.innerHTML = '';
     loadedFolderFiles = []; // Clear stored files on new chat
+  });
+
+  imageToTextBtn.addEventListener("click", () => {
+    imageInput.click();
+  });
+
+  imageInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    appendMessage(`🖼️ Processing image: ${file.name}...`, "user");
+
+    // Here you would typically send the image to the server
+    // to be processed by an OCR library or service.
+    // For this example, we'll just simulate it.
+    setTimeout(() => {
+        const extractedText = `This is simulated text extracted from ${file.name}.`;
+        userInput.value = extractedText;
+        appendMessage(`✅ Image processed. Extracted text has been added to the input box.`, "ai");
+    }, 2000);
+  });
+
+  voiceToTextBtn.addEventListener("click", () => {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    appendMessage("🎤 Listening...", "ai");
+
+    recognition.start();
+
+    recognition.onresult = (event) => {
+        const speechResult = event.results[0][0].transcript;
+        userInput.value = speechResult;
+        appendMessage(`✅ Speech recognized. Text has been added to the input box.`, "ai");
+    };
+
+    recognition.onspeechend = () => {
+        recognition.stop();
+    };
+
+    recognition.onerror = (event) => {
+        appendMessage(`❌ Error during speech recognition: ${event.error}`, "ai");
+    };
   });
 
 });
