@@ -77,6 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const imageToTextBtn = document.getElementById("image-to-text-btn");
   const voiceToTextBtn = document.getElementById("voice-to-text-btn");
   const imageInput = document.getElementById("image-input");
+  const loadTemplateBtn = document.getElementById("load-template-btn");
+  const templateInput = document.getElementById("template-input");
 
 
 
@@ -231,6 +233,31 @@ document.addEventListener('DOMContentLoaded', () => {
     recognition.onerror = (event) => {
         appendMessage(`❌ Error during speech recognition: ${event.error}`, "ai");
     };
+  });
+
+  loadTemplateBtn.addEventListener("click", () => {
+    templateInput.click();
+  });
+
+  templateInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    appendMessage(`📄 Loading template: ${file.name}...`, "user");
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+        const fileContent = e.target.result;
+        userInput.value = fileContent;
+        appendMessage(`✅ Template loaded into the input box.`, "ai");
+    };
+
+    reader.onerror = (e) => {
+        console.error(`Error reading template file ${file.name}:`, e);
+        appendMessage(`❌ Error reading template file ${file.name}.`, "ai");
+    };
+
+    reader.readAsText(file);
   });
 
 });
