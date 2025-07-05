@@ -13,11 +13,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',');
+const allowedOrigins = [
+    'https://shankarelavarasan.github.io',
+    ...(process.env.ALLOWED_ORIGINS || '').split(',')
+];
 
 const corsOptions = {
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
