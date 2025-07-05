@@ -1,12 +1,9 @@
-// server.js
-
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import geminiRoutes from './routes/gemini.js';
 import cors from "cors";
-import bodyParser from "body-parser";
 
 dotenv.config();
 
@@ -24,12 +21,12 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/', geminiRoutes);
 
 // Serve frontend files from the 'docs' directory
-
 app.use(express.static('docs'));
 
 app.listen(PORT, () => {

@@ -2,50 +2,69 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('file-input');
     const folderInput = document.getElementById('folder-input');
 
-    fileInput.addEventListener('change', async (event) => {
+    let loadedFolderFiles = []; // { name: 'filename.txt', content: 'file content' }
+
+    fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
-        const userMessage = appendMessage(`📁 Uploading ${file.name}...`, "user");
+        appendMessage(`📁 Reading ${file.name}...`, "user");
+        const reader = new FileReader();
 
-        try {
-            const content = await readFileContent(file);
-            await sendFileContentToAI(content, file.name);
-            userMessage.innerText = `✅ ${file.name} uploaded and processed.`;
-        } catch (error) {
-            console.error(`Error reading file ${file.name}:`, error);
+        reader.onload = (e) => {
+            const fileContent = e.target.result;
+            loadedFolderFiles = [{ name: file.name, content: fileContent }];
+            appendMessage(`✅ Finished reading ${file.name}. Now ask AI a question.`, "ai");
+        };
+
+        reader.onerror = (e) => {
+            console.error(`Error reading file ${file.name}:`, e);
             appendMessage(`❌ Error reading file ${file.name}.`, "ai");
-            userMessage.innerText = `❌ Error with ${file.name}.`;
-        }
+        };
+
+        reader.readAsText(file);
     });
 
-    folderInput.addEventListener('change', async (event) => {
-        const files = Array.from(event.target.files);
-        if (files.length === 0) return;
+    folderInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        loadedFolderFiles = []; // Clear previous files
 
-        appendMessage(`📁 Processing ${files.length} files from folder...`, "user");
-
-        for (const file of files) {
-            try {
-                const content = await readFileContent(file);
-                await sendFileContentToAI(content, file.name);
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Optional delay
-            } catch (error) {
-                console.error(`Error reading file ${file.name}:`, error);
-                appendMessage(`❌ Error reading file ${file.name}.`, "ai");
-            }
+        if (files.length === 0) {
+            appendMessage("No files selected from folder.", "ai");
+            return;
         }
-        appendMessage(`✅ Finished processing folder.`, "ai");
-    });
 
-    const readFileContent = (file) => {
-        return new Promise((resolve, reject) => {
+        appendMessage(`📁 Reading ${files.length} files from folder...`, "user");
+
+        let filesReadCount = 0;
+        const totalFiles = files.length;
+
+        for (let i = 0; i < totalFiles; i++) {
+            const file = files[i];
             const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = (e) => reject(new Error(`Error reading file ${file.name}`));
+
+            reader.onload = (e) => {
+                const fileContent = e.target.result;
+                loadedFolderFiles.push({ name: file.name, content: fileContent });
+
+                filesReadCount++;
+                if (filesReadCount === totalFiles) {
+                    appendMessage(`✅ Finished reading ${totalFiles} files. Now ask AI a question.`, "ai");
+                }
+            };
+
+            reader.onerror = (e) => {
+                console.error("Error reading file:", file.name, e);
+                filesReadCount++;
+                if (filesReadCount === totalFiles) {
+                    appendMessage(`❌ Finished reading folder with errors.`, "ai");
+                }
+            };
+
             reader.readAsText(file);
-        });
-    };
+        }
+    });
+
 
   const askBtn = document.getElementById("askBtn");
   const userInput = document.getElementById("userInput");
@@ -56,37 +75,45 @@ document.addEventListener('DOMContentLoaded', () => {
   const exportDocBtn = document.getElementById("exportDoc");
   const newChatBtn = document.getElementById("newChatBtn");
 
-  const callAI = async (body, userMessage, thinkingMessage = "🤖 Thinking...") => {
-    appendMessage(userMessage, "user");
-    appendMessage(thinkingMessage, "ai");
 
-    try {
-      const res = await fetch("/ask-gemini", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
+  const askAI = async () => {
+      const question = userInput.value.trim();
+      if (!question && loadedFolderFiles.length === 0) {
+          appendMessage("Please enter a question or select a folder/file.", "ai");
+          return;
       }
 
-      const data = await res.json();
-      updateLastAIMessage(data.response || "🤖 Sorry, something went wrong.");
-    } catch (error) {
-      updateLastAIMessage(`❌ Error: ${error.message}`);
-      console.error("❌ Fetch Error:", error);
-    }
-  };
+      appendMessage(question || "Processing files...", "user");
+      userInput.value = "";
 
-  const askAI = () => {
-    const question = userInput.value.trim();
-    if (!question) return;
-    userInput.value = "";
-    callAI({ prompt: question }, question);
+      appendMessage("🤖 Thinking...", "ai");
+
+      const filesToSend = loadedFolderFiles;
+
+      try {
+          const res = await fetch("/ask-gemini", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ 
+                  prompt: question,
+                  filesData: filesToSend
+              }),
+          });
+
+          if (!res.ok) {
+              const errorText = await res.text();
+              throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
+          }
+
+          const data = await res.json();
+          updateLastAIMessage(data.response || "🤖 Sorry, something went wrong.");
+      } catch (error) {
+          updateLastAIMessage(`❌ Error: ${error.message}`);
+          console.error("❌ Fetch Error:", error);
+      }
   };
 
   const appendMessage = (text, sender) => {
@@ -155,12 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   newChatBtn.addEventListener("click", () => {
     chatContainer.innerHTML = '';
+    loadedFolderFiles = []; // Clear stored files on new chat
   });
-
-  const sendFileContentToAI = (content, fileName) => {
-    const userMessage = `📁 Analyzing ${fileName}`;
-    const thinkingMessage = `🤖 Processing ${fileName}...`;
-    return callAI({ fileContent: content, fileName: fileName }, userMessage, thinkingMessage);
-  };
 
 });
