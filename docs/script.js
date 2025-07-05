@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const filesToSend = loadedFolderFiles;
 
       try {
-          const res = await fetch("/ask-gemini", {
+          const res = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
               method: "POST",
               headers: {
                   "Content-Type": "application/json",
