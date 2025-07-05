@@ -13,8 +13,19 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+const allowedOrigins = [
+    'https://shankarelavarasan.github.io',
+    'https://rapid-ai-assistant.onrender.com'
+];
+
 const corsOptions = {
-    origin: '*',
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     optionsSuccessStatus: 204
