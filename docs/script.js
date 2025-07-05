@@ -73,12 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const exportTxtBtn = document.getElementById("exportTxt");
   const exportPdfBtn = document.getElementById("exportPdf");
   const exportDocBtn = document.getElementById("exportDoc");
+  const exportXlsxBtn = document.getElementById("exportXlsx");
   const newChatBtn = document.getElementById("newChatBtn");
   const imageToTextBtn = document.getElementById("image-to-text-btn");
   const voiceToTextBtn = document.getElementById("voice-to-text-btn");
   const imageInput = document.getElementById("image-input");
   const loadTemplateBtn = document.getElementById("load-template-btn");
   const templateInput = document.getElementById("template-input");
+
+  imageToTextBtn.addEventListener('click', () => imageInput.click());
+
+  imageInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    processImage(file);
+  });
 
 
 
@@ -119,6 +128,35 @@ document.addEventListener('DOMContentLoaded', () => {
           appendMessage(`❌ Error: ${error.message}`, "ai");
           console.error("❌ Fetch Error:", error);
       }
+  };
+
+  const processImage = async (file) => {
+    appendMessage(`🖼️ Processing image: ${file.name}...`, "user");
+    const formData = new FormData();
+    formData.append('image', file);
+
+    // Get additional instructions from the user if needed
+    const instructions = prompt("Enter any additional instructions (e.g., 'extract GST and Amount'):");
+    formData.append('userInput', instructions || '');
+    formData.append('folderPath', 'C:/Users/admin/rapid-ai-assistant/entries');
+
+    try {
+        const res = await fetch("/process-entry", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
+        }
+
+        const data = await res.json();
+        appendMessage(`✅ Entry created from image at: ${data.data.file_path}`, "ai");
+    } catch (error) {
+        appendMessage(`❌ Error processing image: ${error.message}`, "ai");
+        console.error("❌ Image Processing Error:", error);
+    }
   };
 
   const askAI = async () => {
@@ -191,6 +229,24 @@ document.addEventListener('DOMContentLoaded', () => {
       askAI();
     }
   });
+
+  exportXlsxBtn.addEventListener("click", () => {
+    const chatHistory = getChatHistoryForExport();
+    const worksheet = XLSX.utils.json_to_sheet(chatHistory);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Chat History");
+    XLSX.writeFile(workbook, "chat_history.xlsx");
+  });
+
+  const getChatHistoryForExport = () => {
+    const history = [];
+    const messages = chatContainer.querySelectorAll('.chat-message');
+    messages.forEach(msg => {
+        const sender = msg.classList.contains('user-message') ? 'You' : 'Rapid AI';
+        history.push({ Sender: sender, Message: msg.innerText });
+    });
+    return history;
+  }
 
   const getChatHistory = () => {
     let history = "";
@@ -288,14 +344,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!file) return;
 
     appendMessage(`📄 Using ${file.name} as a template.`, 'user');
-    // Store template file for backend processing
+    
     const reader = new FileReader();
     reader.onload = (e) => {
-        // We can store the template content if needed on the frontend
-        // For now, we just acknowledge it's loaded.
         appendMessage(`✅ Template ${file.name} is ready. Now, provide instructions in the chat.`, 'ai');
+        
+        // Ask for output format
+        setTimeout(() => {
+            const format = prompt("In which format should the final document be saved? (e.g., PDF, DOCX, XLSX)");
+            if (format) {
+                appendMessage(`📝 Understood. The output will be a ${format} file.`, 'ai');
+                // You can store this preference and use it when calling the backend.
+            }
+        }, 500);
     };
-    reader.readAsText(file); // or readAsDataURL for binary files
+    reader.readAsText(file);
   });
 
 });

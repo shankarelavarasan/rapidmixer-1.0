@@ -4,20 +4,28 @@ from datetime import datetime
 import sys
 import json
 
+from PIL import Image
+import pytesseract
+
+def extract_text_from_image(image_path):
+    try:
+        return pytesseract.image_to_string(Image.open(image_path))
+    except Exception as e:
+        return f"Error processing image: {e}"
+
 def update_template_from_input(template, user_input):
-    # Sample rules for extraction
-    if "GST" in user_input:
-        gst_match = re.search(r'GST[\s:=]*([0-9]+)%?', user_input)
-        if gst_match:
-            template["GST Rate"] = float(gst_match.group(1))
-    if "amount" in user_input.lower():
-        amt_match = re.search(r'amount[\s:=]*₹?([0-9]+)', user_input, re.I)
-        if amt_match:
-            template["Amount"] = float(amt_match.group(1))
-    if "date" in user_input.lower():
-        date_match = re.search(r'(\d{1,2}-\d{1,2}-\d{4})', user_input)
-        if date_match:
-            template["Date"] = date_match.group(1)
+    gst_match = re.search(r'GST[\s:=]*([0-9]+)%?', user_input, re.I)
+    if gst_match:
+        template["GST Rate"] = float(gst_match.group(1))
+
+    amt_match = re.search(r'amount[\s:=₹]*([0-9,]+)', user_input, re.I)
+    if amt_match:
+        template["Amount"] = float(amt_match.group(1).replace(',', ''))
+
+    date_match = re.search(r'(\d{1,2}-\d{1,2}-\d{4})', user_input)
+    if date_match:
+        template["Date"] = date_match.group(1)
+
     return template
 
 def save_template_to_file(template, folder_path):
@@ -27,7 +35,7 @@ def save_template_to_file(template, folder_path):
         for key, value in template.items():
             if key != "Errors":
                 f.write(f"{key}: {value}\n")
-        if template["Errors"]:
+        if "Errors" in template and template["Errors"]:
             f.write(f"Errors: {', '.join(template['Errors'])}\n")
     return file_path
 
