@@ -32,7 +32,7 @@ router.post('/ask-gemini', async (req, res) => {
     console.log('Prompt sent to Gemini (first 200 chars):', content.substring(0, 200));
     console.log('Prompt length:', content.length);
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const result = await model.generateContent(content);
 
