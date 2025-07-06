@@ -1,41 +1,41 @@
-<!DOCTYPE html> 
- <html lang="en"> 
- <head> 
-   <meta charset="UTF-8" /> 
-   <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
-   <title>Invoice Entry</title> 
-   <link rel="stylesheet" href="style.css" /> 
- </head> 
- <body> 
-   <div class="container"> 
-     <div class="sidebar"> 
-       <h2>Actions</h2> 
-       <ul> 
-         <li><label for="folder-upload" class="custom-file-upload">📁 Select Folder</label><input id="folder-upload" type="file" webkitdirectory directory multiple/></li> 
-         <li><label for="template-upload" class="custom-file-upload">📄 Select File</label><input id="template-upload" type="file"/></li> 
-         <li><button id="voice-to-text-btn" class="custom-file-upload"><i class="icon">🎤</i> Voice to Text</button></li>
-         <li><button id="voice-to-task-btn" class="custom-file-upload"><i class="icon">🗣️</i> Voice to Task</button></li> 
-       </ul> 
-       <div class="chat-history"> 
-         <h3>History</h3> 
-         <ul> 
-           <li>Chat 1</li> 
-           <li>Chat 2</li> 
-         </ul> 
-       </div> 
-     </div> 
-     <div class="main"> 
-       <div id="result-area"></div>
-       <textarea id="outputText" placeholder="Speech result will appear here..."></textarea> 
-       <div class="prompt-area"> 
-         <textarea id="prompt-input" placeholder="Ask me anything..."></textarea> 
-         <button id="send-prompt">Send</button> 
-       </div> 
-       <div class="button-group"> 
-         <button class="primary-btn">Process Documents</button> 
-         <button class="secondary-btn" id="export-btn">Export</button> 
-       </div> 
-     </div> 
-   </div> 
- </body> 
- </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapid AI Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo-container">
+                <h1 class="logo-title">Rapid AI</h1>
+            </div>
+            <button id="newChatBtn" class="new-chat-btn">+ New Chat</button>
+            <div class="actions-container">
+                <label for="file-input" class="action-btn">📤 Select File</label>
+                <input type="file" id="file-input" hidden>
+                
+                <label for="folder-input" class="action-btn">📁 Select Folder</label>
+                <input type="file" id="folder-input" webkitdirectory hidden>
+            </div>
+            <div class="export-container">
+                <h3 class="export-title">Export Chat</h3>
+                <button id="exportTxt" class="export-btn">.txt</button>
+                <button id="exportPdf" class="export-btn">.pdf</button>
+                <button id="exportDoc" class="export-btn">.doc</button>
+            </div>
+        </aside>
+        <main class="chat-area">
+            <div id="chat-container" class="chat-container"></div>
+            <div class="input-area">
+                <textarea id="userInput" placeholder="Ask Rapid AI anything..." rows="1"></textarea>
+                <button id="askBtn">Send</button>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rapid AI Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+  <div class="app-container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>Workspace</h2>
+      </div>
+      <ul class="file-explorer">
+        <li class="folder"><i class="fas fa-folder"></i><span>Projects</span>
+          <ul>
+            <li class="file"><i class="fas fa-file-alt"></i><span>project_alpha.txt</span></li>
+            <li class="file"><i class="fas fa-file-alt"></i><span>project_beta.txt</span></li>
+          </ul>
+        </li>
+        <li class="folder"><i class="fas fa-folder"></i><span>Documents</span>
+          <ul>
+            <li class="file"><i class="fas fa-file-word"></i><span>report.docx</span></li>
+            <li class="file"><i class="fas fa-file-pdf"></i><span>presentation.pdf</span></li>
+          </ul>
+        </li>
+        <li class="file"><i class="fas fa-file-excel"></i><span>data.xlsx</span></li>
+      </ul>
+      <div class="sidebar-footer">
+        <button class="sidebar-button" id="newChatBtn"><i class="fas fa-plus"></i> New Chat</button>
+        <h3>File Options</h3>
+        <div class="file-options">
+          <input type="file" id="file-input" style="display: none;" />
+          <button class="sidebar-button" onclick="document.getElementById('file-input').click()">
+            <i class="fas fa-file-upload"></i> Choose File
+          </button>
+          <input type="file" id="folder-input" webkitdirectory directory style="display: none;" />
+          <button class="sidebar-button" onclick="document.getElementById('folder-input').click()">
+            <i class="fas fa-folder-open"></i> Choose Folder
+          </button>
+        </div>
+        <h3>Export Chat</h3>
+        <div class="export-buttons">
+          <button id="exportTxt"><i class="fas fa-file-alt"></i> TXT</button>
+          <button id="exportPdf"><i class="fas fa-file-pdf"></i> PDF</button>
+          <button id="exportDoc"><i class="fas fa-file-word"></i> DOC</button>
+        </div>
+      </div>
+    </div>
+    <div class="main-content">
+      <header class="app-header">
+        <h1>Rapid AI</h1>
+      </header>
+      <div class="chat-container" id="chat-container">
+        <!-- Chat messages will be appended here -->
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="userInput" placeholder="Ask Rapid AI..." />
+        <button id="askBtn"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
