@@ -1,202 +1,67 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.getElementById('file-input');
-    const folderInput = document.getElementById('folder-input');
+    const templateForm = document.getElementById('template-form');
+    const readFolderBtn = document.getElementById('read-folder-btn');
+    const exportBtn = document.getElementById('export-btn');
+    const templateDisplay = document.getElementById('template-display');
 
-    let loadedFolderFiles = []; // { name: 'filename.txt', content: 'file content' }
+    // This will be populated by the template upload
+    let templateFields = [];
 
-    fileInput.addEventListener('change', (event) => {
+    // Mock function to simulate template upload and field extraction
+    const handleTemplateUpload = (file) => {
+        // In a real scenario, you would send the file to the backend
+        // The backend would parse it and return the fields.
+        console.log("Simulating template upload for:", file.name);
+
+        // For this example, we'll hardcode the fields based on the UI
+        templateFields = ['Name', 'Date', 'Invoice No.', 'GST'];
+
+        // Show the form
+        templateDisplay.style.display = 'block';
+
+        // You can also dynamically generate the form fields here if needed
+        // For now, we assume the form is static in the HTML.
+        alert('Template processed. You can now select a folder to fill the data.');
+    };
+
+    // We need a file input for the template, let's add it dynamically for now
+    const templateFileInput = document.createElement('input');
+    templateFileInput.type = 'file';
+    templateFileInput.accept = '.txt,.pdf,.xlsx,.csv,.json,.jpg,.png';
+    templateFileInput.style.display = 'none';
+    document.body.appendChild(templateFileInput);
+
+    // Trigger template file selection when the 'File Upload' link is clicked
+    const fileUploadLink = document.querySelector('a[href="#"]'); // First link
+    fileUploadLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        templateFileInput.click();
+    });
+
+    templateFileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
-        if (!file) return;
-
-        appendMessage(`📁 Reading ${file.name}...`, "user");
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            const fileContent = e.target.result;
-            loadedFolderFiles = [{ name: file.name, content: fileContent }];
-            appendMessage(`✅ Finished reading ${file.name}. Now ask AI a question.`, "ai");
-        };
-
-        reader.onerror = (e) => {
-            console.error(`Error reading file ${file.name}:`, e);
-            appendMessage(`❌ Error reading file ${file.name}.`, "ai");
-        };
-
-        reader.readAsText(file);
-    });
-
-    folderInput.addEventListener('change', (event) => {
-        const files = event.target.files;
-        loadedFolderFiles = []; // Clear previous files
-
-        if (files.length === 0) {
-            appendMessage("No files selected from folder.", "ai");
-            return;
-        }
-
-        appendMessage(`📁 Reading ${files.length} files from folder...`, "user");
-
-        let filesReadCount = 0;
-        const totalFiles = files.length;
-
-        for (let i = 0; i < totalFiles; i++) {
-            const file = files[i];
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-                const fileContent = e.target.result;
-                loadedFolderFiles.push({ name: file.name, content: fileContent });
-
-                filesReadCount++;
-                if (filesReadCount === totalFiles) {
-                    appendMessage(`✅ Finished reading ${totalFiles} files. Now ask AI a question.`, "ai");
-                }
-            };
-
-            reader.onerror = (e) => {
-                console.error("Error reading file:", file.name, e);
-                filesReadCount++;
-                if (filesReadCount === totalFiles) {
-                    appendMessage(`❌ Finished reading folder with errors.`, "ai");
-                }
-            };
-
-            reader.readAsText(file);
+        if (file) {
+            handleTemplateUpload(file);
         }
     });
 
 
-  const askBtn = document.getElementById("askBtn");
-  const userInput = document.getElementById("userInput");
-  const chatContainer = document.getElementById("chat-container");
+    readFolderBtn.addEventListener('click', () => {
+        // This would open a folder selector
+        // For now, we'll just log to the console
+        console.log('"Read Selected Folder & Fill Template" clicked');
+        alert('Folder selection would happen here, and then AI would process the files.');
+        // Here you would implement the logic to read files from a folder
+        // and then call the AI to fill the template fields.
+    });
 
-  const exportTxtBtn = document.getElementById("exportTxt");
-  const exportPdfBtn = document.getElementById("exportPdf");
-  const exportDocBtn = document.getElementById("exportDoc");
-  const exportXlsxBtn = document.getElementById("exportXlsx");
-  const newChatBtn = document.getElementById("newChatBtn");
-  const imageToTextBtn = document.getElementById("image-to-text-btn");
-  const voiceToTextBtn = document.getElementById("voice-to-text-btn");
-  const imageInput = document.getElementById("image-input");
-  const loadTemplateBtn = document.getElementById("load-template-btn");
-  const templateInput = document.getElementById("template-input");
-
-  imageToTextBtn.addEventListener('click', () => imageInput.click());
-
-  imageInput.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    processImage(file);
-  });
-
-
-
-  const processEntry = async () => {
-      const userInputText = userInput.value.trim();
-      if (!userInputText) {
-          appendMessage("Please provide instructions for the entry.", "ai");
-          return;
-      }
-
-      // For now, we'll use a hardcoded folder path.
-      // In a real application, you'd get this from a folder picker.
-      const folderPath = 'C:/Users/admin/rapid-ai-assistant/entries';
-
-      appendMessage(`📝 Processing entry with your instructions...`, "user");
-      userInput.value = "";
-
-      try {
-          const res = await fetch("/process-entry", {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ 
-                  userInput: userInputText,
-                  folderPath: folderPath
-              }),
-          });
-
-          if (!res.ok) {
-              const errorText = await res.text();
-              throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
-          }
-
-          const data = await res.json();
-          appendMessage(`✅ Entry created at: ${data.data.file_path}`, "ai");
-      } catch (error) {
-          appendMessage(`❌ Error: ${error.message}`, "ai");
-          console.error("❌ Fetch Error:", error);
-      }
-  };
-
-  const processImage = async (file) => {
-    appendMessage(`🖼️ Processing image: ${file.name}...`, "user");
-    const formData = new FormData();
-    formData.append('image', file);
-
-    // Get additional instructions from the user if needed
-    const instructions = prompt("Enter any additional instructions (e.g., 'extract GST and Amount'):");
-    formData.append('userInput', instructions || '');
-    formData.append('folderPath', 'C:/Users/admin/rapid-ai-assistant/entries');
-
-    try {
-        const res = await fetch("/process-entry", {
-            method: "POST",
-            body: formData,
-        });
-
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
-        }
-
-        const data = await res.json();
-        appendMessage(`✅ Entry created from image at: ${data.data.file_path}`, "ai");
-    } catch (error) {
-        appendMessage(`❌ Error processing image: ${error.message}`, "ai");
-        console.error("❌ Image Processing Error:", error);
-    }
-  };
-
-  const askAI = async () => {
-      const question = userInput.value.trim();
-      if (!question && loadedFolderFiles.length === 0) {
-          appendMessage("Please enter a question or select a folder/file.", "ai");
-          return;
-      }
-
-      appendMessage(question || "Processing files...", "user");
-      userInput.value = "";
-
-      appendMessage("🤖 Thinking...", "ai");
-
-      const filesToSend = loadedFolderFiles;
-
-      try {
-          const res = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ 
-                  prompt: question,
-                  filesData: filesToSend
-              }),
-          });
-
-          if (!res.ok) {
-              const errorText = await res.text();
-              throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
-          }
-
-          const data = await res.json();
-          updateLastAIMessage(data.response || "🤖 Sorry, something went wrong.");
-      } catch (error) {
-          updateLastAIMessage(`❌ Error: ${error.message}`);
-          console.error("❌ Fetch Error:", error);
-      }
-  };
+    exportBtn.addEventListener('click', () => {
+        console.log('"Export" clicked');
+        alert('Export functionality would be implemented here.');
+        // Here you would implement the logic to export the filled data
+        // to Excel, CSV, etc.
+    });
+});
 
   const appendMessage = (text, sender) => {
     const messageDiv = document.createElement("div");
@@ -338,6 +203,41 @@ document.addEventListener('DOMContentLoaded', () => {
   loadTemplateBtn.addEventListener("click", () => {
     templateInput.click();
   });
+
+  templateForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const fileInput = event.target.querySelector('input[type="file"]');
+    const file = fileInput.files[0];
+    if (!file) {
+        appendMessage("Please select a template file to upload.", "ai");
+        return;
+    }
+    uploadTemplate(file);
+  });
+
+  const uploadTemplate = async (file) => {
+    appendMessage(`📄 Uploading template: ${file.name}...`, "user");
+    const formData = new FormData();
+    formData.append('template', file);
+
+    try {
+        const res = await fetch("/upload-template", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`HTTP error! status: ${res.status}, response: ${errorText}`);
+        }
+
+        const data = await res.json();
+        appendMessage(`✅ Template uploaded successfully. The following fields were found: ${data.fields.join(', ')}`, "ai");
+    } catch (error) {
+        appendMessage(`❌ Error uploading template: ${error.message}`, "ai");
+        console.error("❌ Template Upload Error:", error);
+    }
+  };
 
   templateInput.addEventListener('change', (event) => {
     const file = event.target.files[0];

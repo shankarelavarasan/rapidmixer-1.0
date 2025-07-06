@@ -1,36 +1,4 @@
-.chat-message {
-  max-width: 70%;
-  padding: 10px 15px;
-  border-radius: 15px;
-  margin-bottom: 15px;
-  line-height: 1.5;
-}
-
-.user-message {
-  background-color: #2563eb;
-  color: #fff;
-  align-self: flex-end;
-  border-bottom-right-radius: 3px;
-}
-
-.ai-message {
-  background-color: #e5e7eb;
-  color: #1f2937;
-  align-self: flex-start;
-  border-bottom-left-radius: 3px;
-}
-
-/* Custom Scrollbar */
-.chat-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.chat-container::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-.chat-container::-webkit-scrollbar-thumb {
-  background-color: #94a3b8;
-  border-radius: 10px;
-  border: 2px solid #f1f5f9;
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

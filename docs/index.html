@@ -7,77 +7,70 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-50 font-sans">
   <div class="flex h-screen">
-    <div class="sidebar bg-gray-800 text-white w-64 p-4 flex-shrink-0">
-      <div class="sidebar-header mb-4">
-        <h2 class="text-2xl font-bold">Workspace</h2>
+    <div class="sidebar bg-blue-800 text-white w-72 p-6 flex-shrink-0">
+      <div class="sidebar-header mb-8">
+        <h2 class="text-3xl font-bold">Invoice Entry</h2>
       </div>
-      <ul class="file-explorer space-y-2">
-        <li class="folder"><i class="fas fa-folder"></i><span>Projects</span>
-          <ul>
-            <li class="file"><i class="fas fa-file-alt"></i><span>project_alpha.txt</span></li>
-            <li class="file"><i class="fas fa-file-alt"></i><span>project_beta.txt</span></li>
-          </ul>
+      <ul class="space-y-4">
+        <li>
+          <a href="#" class="flex items-center px-4 py-3 bg-blue-700 rounded-lg text-lg">
+            <i class="fas fa-file-upload mr-3"></i> File Upload
+          </a>
         </li>
-        <li class="folder"><i class="fas fa-folder"></i><span>Documents</span>
-          <ul>
-            <li class="file"><i class="fas fa-file-word"></i><span>report.docx</span></li>
-            <li class="file"><i class="fas fa-file-pdf"></i><span>presentation.pdf</span></li>
-          </ul>
+        <li>
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg text-lg">
+            <i class="fas fa-microphone mr-3"></i> Voice Input
+          </a>
         </li>
-        <li class="file"><i class="fas fa-file-excel"></i><span>data.xlsx</span></li>
+        <li>
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg text-lg">
+            <i class="fas fa-image mr-3"></i> Image Upload
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg text-lg">
+            <i class="fas fa-cog mr-3"></i> Settings
+          </a>
+        </li>
       </ul>
-      <div class="sidebar-footer mt-auto">
-        <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mb-4" id="newChatBtn"><i class="fas fa-plus"></i> New Chat</button>
-        <h3 class="text-lg font-semibold mb-2">File Options</h3>
-        <div class="space-y-2">
-          <input type="file" id="file-input" style="display: none;" />
-          <button class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded" onclick="document.getElementById('file-input').click()">
-            <i class="fas fa-file-upload"></i> Choose File
-          </button>
-          <input type="file" id="folder-input" webkitdirectory directory style="display: none;" />
-          <button class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded" onclick="document.getElementById('folder-input').click()">
-            <i class="fas fa-folder-open"></i> Choose Folder
-          </button>
-          <input type="file" id="image-input" accept="image/*" style="display: none;" />
-          <button class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded" id="image-to-text-btn">
-            <i class="fas fa-file-image"></i> Image to Text
-          </button>
-
-          <input type="file" id="template-input" style="display: none;" />
-          <button class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded" id="load-template-btn">
-            <i class="fas fa-file-invoice"></i> Load Template
-          </button>
-        </div>
-        <h3 class="text-lg font-semibold mb-2">Export Chat</h3>
-        <div class="space-y-2">
-          <button id="exportTxt" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
-            <i class="fas fa-file-alt"></i> Export as TXT
-          </button>
-          <button id="exportPdf" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
-            <i class="fas fa-file-pdf"></i> Export as PDF
-          </button>
-          <button id="exportDoc" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
-            <i class="fas fa-file-word"></i> Export as DOC
-          </button>
-          <button id="exportXlsx" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
-            <i class="fas fa-file-excel"></i> Export as XLSX
-          </button>
-        </div>
-      </div>
     </div>
-    <div class="main-content flex-1 flex flex-col">
-      <header class="bg-white shadow-md p-4">
-        <h1 class="text-3xl font-bold text-gray-800">Rapid AI</h1>
+    <div class="main-content flex-1 flex flex-col p-8">
+      <header class="flex justify-between items-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800">Invoice Entry</h1>
+        <div class="flex space-x-2">
+          <button class="bg-gray-200 hover:bg-gray-300 text-gray-600 p-3 rounded-lg"><i class="fas fa-edit"></i></button>
+          <button class="bg-gray-200 hover:bg-gray-300 text-gray-600 p-3 rounded-lg"><i class="fas fa-microphone"></i></button>
+          <button class="bg-gray-200 hover:bg-gray-300 text-gray-600 p-3 rounded-lg"><i class="fas fa-volume-up"></i></button>
+        </div>
       </header>
-      <div class="flex-1 p-4 overflow-y-auto" id="chat-container">
-        <!-- Chat messages will be appended here -->
-      </div>
-      <div class="bg-white p-4 flex items-center">
-        <input type="text" id="userInput" placeholder="Ask Rapid AI..." class="flex-1 border rounded-full py-2 px-4 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <button id="voice-to-text-btn" class="text-gray-500 hover:text-blue-500 p-2 rounded-full focus:outline-none"><i class="fas fa-microphone text-xl"></i></button>
-        <button id="askBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none"><i class="fas fa-paper-plane"></i></button>
+      <div id="template-display" class="bg-white p-8 rounded-2xl shadow-lg">
+        <div class="bg-green-100 text-green-800 p-4 rounded-lg mb-6 flex items-center">
+          <i class="fas fa-check-circle mr-3"></i> Template uploaded successfully
+        </div>
+        <form id="template-form" class="space-y-6">
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label for="name" class="block text-gray-600 mb-2">Name</label>
+              <input type="text" id="name" class="w-full p-3 border rounded-lg">
+            </div>
+            <div>
+              <label for="date" class="block text-gray-600 mb-2">Date</o_label>
+              <input type="date" id="date" value="2024-06-05" class="w-full p-3 border rounded-lg">
+            </div>
+            <div>
+              <label for="invoice-no" class="block text-gray-600 mb-2">Invoice No.</label>
+              <input type="text" id="invoice-no" class="w-full p-3 border rounded-lg">
+            </div>
+            <div>
+              <label for="gst" class="block text-gray-600 mb-2">GST</label>
+              <input type="text" id="gst" placeholder="%" class="w-full p-3 border rounded-lg">
+            </div>
+          </div>
+          <button type="button" id="read-folder-btn" class="w-full bg-blue-600 text-white p-4 rounded-lg font-bold text-lg hover:bg-blue-700">Read Selected Folder & Fill Template</button>
+          <button type="button" id="export-btn" class="w-full bg-white border border-gray-300 text-gray-700 p-4 rounded-lg font-bold text-lg hover:bg-gray-50">Export</button>
+        </form>
       </div>
     </div>
   </div>
