@@ -9,25 +9,29 @@
  <body> 
    <div class="container"> 
      <div class="sidebar"> 
-       <h2>File Upload</h2> 
+       <h2>Actions</h2> 
        <ul> 
-         <li><i class="icon">🎤</i> Voic Input</li> 
-         <li><i class="icon">🖼️</i> Image Upload</li> 
-         <li><i class="icon">⚙️</i> Settings</li> 
+         <li><label for="template-upload" class="custom-file-upload">📄 Select Template</label><input id="template-upload" type="file"/></li> 
+         <li><label for="folder-upload" class="custom-file-upload">📁 Select Folder</label><input id="folder-upload" type="file" webkitdirectory directory multiple/></li> 
        </ul> 
+       <div class="chat-history"> 
+         <h3>History</h3> 
+         <ul> 
+           <li>Chat 1</li> 
+           <li>Chat 2</li> 
+         </ul> 
+       </div> 
      </div> 
      <div class="main"> 
-       <div class="top-icons"> 
-         <button>🎤</button> 
-         <button>👤</button> 
-         <button>🔊</button> 
+       <div id="result-area"></div> 
+       <div class="prompt-area"> 
+         <textarea id="prompt-input" placeholder="Ask me anything..."></textarea> 
+         <button id="send-prompt">Send</button> 
        </div> 
-       <h1>Invoice Entry</h1> 
-       <div class="alert-success"> 
-         ✅ Template uploaded successfully 
+       <div class="button-group"> 
+         <button class="primary-btn">Process Documents</button> 
+         <button class="secondary-btn" id="export-btn">Export</button> 
        </div> 
-       <button class="primary-btn">Read Selected Folder & Fill Template</button> 
-       <button class="secondary-btn">Export</button> 
      </div> 
    </div> 
  </body> 

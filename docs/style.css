@@ -30,6 +30,12 @@
    font-size: 22px; 
    color: white; 
  } 
+
+ .sidebar h3 { 
+   font-size: 18px; 
+   color: white; 
+   margin-top: 20px; 
+ } 
  
  .sidebar ul { 
    list-style: none; 
@@ -44,6 +50,21 @@
    display: flex; 
    align-items: center; 
    gap: 10px; 
+   cursor: pointer; 
+ } 
+
+ input[type="file"] { 
+   display: none; 
+ } 
+
+ .custom-file-upload { 
+   border: 1px solid #ccc; 
+   display: inline-block; 
+   padding: 6px 12px; 
+   cursor: pointer; 
+   background-color: #f0f0f0; 
+   color: #333; 
+   border-radius: 4px; 
  } 
  
  .icon { 
@@ -59,7 +80,43 @@
    border-bottom-right-radius: 15px; 
    display: flex; 
    flex-direction: column; 
-   gap: 20px; 
+   justify-content: space-between; 
+ } 
+
+ #result-area { 
+   flex-grow: 1; 
+   overflow-y: auto; 
+   border: 1px solid #ccc; 
+   padding: 10px; 
+   border-radius: 5px; 
+   margin-bottom: 20px; 
+ } 
+
+ .prompt-area { 
+   display: flex; 
+   gap: 10px; 
+ } 
+
+ #prompt-input { 
+   flex-grow: 1; 
+   padding: 10px; 
+   border-radius: 5px; 
+   border: 1px solid #ccc; 
+ } 
+
+ #send-prompt { 
+   padding: 10px 15px; 
+   border-radius: 5px; 
+   border: none; 
+   background-color: #1056f0; 
+   color: white; 
+   cursor: pointer; 
+ } 
+
+ .button-group { 
+   display: flex; 
+   gap: 10px; 
+   margin-top: 20px; 
  } 
  
  .top-icons { 
