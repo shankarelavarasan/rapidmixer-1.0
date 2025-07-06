@@ -11,8 +11,10 @@
      <div class="sidebar"> 
        <h2>Actions</h2> 
        <ul> 
-         <li><label for="template-upload" class="custom-file-upload">📄 Select Template</label><input id="template-upload" type="file"/></li> 
          <li><label for="folder-upload" class="custom-file-upload">📁 Select Folder</label><input id="folder-upload" type="file" webkitdirectory directory multiple/></li> 
+         <li><label for="template-upload" class="custom-file-upload">📄 Select File</label><input id="template-upload" type="file"/></li> 
+         <li><button id="voice-to-text-btn" class="custom-file-upload"><i class="icon">🎤</i> Voice to Text</button></li>
+         <li><button id="voice-to-task-btn" class="custom-file-upload"><i class="icon">🗣️</i> Voice to Task</button></li> 
        </ul> 
        <div class="chat-history"> 
          <h3>History</h3> 
@@ -23,7 +25,8 @@
        </div> 
      </div> 
      <div class="main"> 
-       <div id="result-area"></div> 
+       <div id="result-area"></div>
+       <textarea id="outputText" placeholder="Speech result will appear here..."></textarea> 
        <div class="prompt-area"> 
          <textarea id="prompt-input" placeholder="Ask me anything..."></textarea> 
          <button id="send-prompt">Send</button> 

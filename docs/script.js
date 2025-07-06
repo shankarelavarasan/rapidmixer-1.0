@@ -5,7 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
    const promptInput = document.getElementById('prompt-input'); 
    const sendPromptBtn = document.getElementById('send-prompt'); 
    const processBtn = document.querySelector('.primary-btn'); 
-   const exportBtn = document.getElementById('export-btn'); 
+   const exportBtn = document.getElementById('export-btn');
+   const voiceToTextBtn = document.getElementById('voice-to-text-btn');
+   const outputText = document.getElementById('outputText'); 
 
    let templateFile = null; 
    let documentFiles = []; 
@@ -79,5 +81,39 @@ document.addEventListener('DOMContentLoaded', () => {
    exportBtn.addEventListener('click', () => { 
      // Add logic to export results as PDF, Excel, or Word 
      alert('Exporting results...'); 
-   }); 
+   });
+
+   function startListening() {
+     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+     recognition.lang = 'en-US';
+     recognition.interimResults = false;
+
+     recognition.onresult = function(event) {
+       const speechToText = event.results[0][0].transcript.toLowerCase();
+       outputText.value = speechToText;
+       handleVoiceCommand(speechToText);
+     };
+
+     recognition.start();
+   }
+
+   voiceToTextBtn.addEventListener('click', startListening);
+
+   function handleVoiceCommand(text) {
+     if (text.includes("select folder")) {
+       folderUpload.click();
+     } else if (text.includes("select file")) {
+       templateUpload.click();
+     } else if (text.includes("process documents")) {
+       processBtn.click();
+     } else if (text.includes("export")) {
+       exportBtn.click();
+     } else if (text.includes("clear")) {
+       outputText.value = "";
+     } else {
+       // AI Chat prompt
+       promptInput.value = text;
+       sendPromptBtn.click();
+     }
+   } 
  });
