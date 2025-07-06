@@ -29,53 +29,41 @@ document.addEventListener('DOMContentLoaded', () => {
      } 
    }); 
 
-   sendPromptBtn.addEventListener('click', async () => { 
-     const promptText = promptInput.value.trim(); 
-     if (promptText) { 
-       resultArea.innerHTML += `<p><strong>You:</strong> ${promptText}</p>`; 
-       promptInput.value = ''; 
-       try { 
-         const response = await fetch('/api/chat', { 
-           method: 'POST', 
-           headers: { 
-             'Content-Type': 'application/json', 
-           }, 
-           body: JSON.stringify({ prompt: promptText }), 
-         }); 
-         const data = await response.json(); 
-         resultArea.innerHTML += `<p><strong>AI:</strong> ${data.response}</p>`; 
-       } catch (error) { 
-         console.error('Error sending prompt:', error); 
-         resultArea.innerHTML += `<p><strong>Error:</strong> Could not get a response.</p>`; 
-       } 
-     } 
+   sendPromptBtn.addEventListener('click', async () => {
+     const promptText = promptInput.value.trim();
+     if (promptText || templateFile || documentFiles.length > 0) {
+       resultArea.innerHTML += `<p><strong>You:</strong> ${promptText}</p>`;
+       promptInput.value = '';
+
+       const filesData = [];
+       if (templateFile) {
+         const templateContent = await readFileAsText(templateFile);
+         filesData.push({ name: templateFile.name, content: templateContent });
+       }
+       for (const file of documentFiles) {
+         const fileContent = await readFileAsText(file);
+         filesData.push({ name: file.name, content: fileContent });
+       }
+
+       try {
+         const response = await fetch('/ask-gemini', {
+           method: 'POST',
+           headers: {
+             'Content-Type': 'application/json',
+           },
+           body: JSON.stringify({ prompt: promptText, filesData }),
+         });
+         const data = await response.json();
+         resultArea.innerHTML += `<p><strong>AI:</strong> ${data.response}</p>`;
+       } catch (error) {
+         console.error('Error sending prompt:', error);
+         resultArea.innerHTML += `<p><strong>Error:</strong> Could not get a response.</p>`;
+       }
+     }
    }); 
 
-   processBtn.addEventListener('click', async () => { 
-     if (!templateFile || documentFiles.length === 0) { 
-       alert('Please select a template and a folder of documents.'); 
-       return; 
-     } 
-
-     const formData = new FormData(); 
-     formData.append('template', templateFile); 
-     documentFiles.forEach(file => { 
-       formData.append('documents', file); 
-     }); 
-
-     try { 
-       resultArea.innerHTML += `<p>Processing documents...</p>`; 
-       const response = await fetch('/api/process', { 
-         method: 'POST', 
-         body: formData, 
-       }); 
-       const data = await response.json(); 
-       resultArea.innerHTML += `<p><strong>Server:</strong> ${data.message}</p>`; 
-       // Add logic to display processing results 
-     } catch (error) { 
-       console.error('Error processing documents:', error); 
-       resultArea.innerHTML += `<p><strong>Error:</strong> Could not process documents.</p>`; 
-     } 
+   processBtn.addEventListener('click', async () => {
+     sendPromptBtn.click();
    }); 
 
    exportBtn.addEventListener('click', () => { 
@@ -111,9 +99,17 @@ document.addEventListener('DOMContentLoaded', () => {
      } else if (text.includes("clear")) {
        outputText.value = "";
      } else {
-       // AI Chat prompt
        promptInput.value = text;
        sendPromptBtn.click();
      }
+   }
+
+   function readFileAsText(file) {
+     return new Promise((resolve, reject) => {
+       const reader = new FileReader();
+       reader.onload = () => resolve(reader.result);
+       reader.onerror = reject;
+       reader.readAsText(file);
+     });
    } 
  });
