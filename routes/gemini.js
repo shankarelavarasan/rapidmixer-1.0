@@ -32,7 +32,7 @@ import express from 'express';
      console.log('Prompt sent to Gemini (first 200 chars):', content.substring(0, 200)); 
      console.log('Prompt length:', content.length); 
  
-     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" }); 
+     const model = genAI.getGenerativeModel({ model: "gemini-pro" }); 
  
      const result = await model.generateContent(content); 
  
