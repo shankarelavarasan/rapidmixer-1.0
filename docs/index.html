@@ -15,17 +15,24 @@
             </div>
             <button id="newChatBtn" class="new-chat-btn">+ New Chat</button>
             <div class="actions-container">
-                <label for="file-input" class="action-btn">📤 Select File</label>
-                <input type="file" id="file-input" hidden>
-                
                 <label for="folder-input" class="action-btn">📁 Select Folder</label>
                 <input type="file" id="folder-input" webkitdirectory hidden>
+
+                <label for="templateInput" class="action-btn">📄 Add Template</label>
+                <input type="file" id="templateInput" accept=".pdf,.docx,.xlsx,.txt,.csv" style="display: none;">
             </div>
+
             <div class="export-container">
-                <h3 class="export-title">Export Chat</h3>
-                <button id="exportTxt" class="export-btn">.txt</button>
-                <button id="exportPdf" class="export-btn">.pdf</button>
-                <button id="exportDoc" class="export-btn">.doc</button>
+                <h3 class="export-title">Export & Share</h3>
+                <select id="exportFormat">
+                    <option value="pdf">.pdf</option>
+                    <option value="docx">.docx</option>
+                    <option value="xlsx">.xlsx</option>
+                    <option value="txt">.txt</option>
+                </select>
+                <button id="exportBtn" class="export-btn">Export</button>
+                <button id="shareEmail" class="share-btn">📧 Email</button>
+                <button id="shareWhatsapp" class="share-btn">📱 WhatsApp</button>
             </div>
         </aside>
         <main class="chat-area">
@@ -33,6 +40,8 @@
             <div class="input-area">
                 <textarea id="userInput" placeholder="Ask Rapid AI anything..." rows="1"></textarea>
                 <button id="askBtn">Send</button>
+                <button id="voiceTextBtn">🎤</button>
+                <button id="voiceTaskBtn">🎯</button>
             </div>
         </main>
     </div>

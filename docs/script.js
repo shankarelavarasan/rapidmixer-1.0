@@ -1,29 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.getElementById('file-input');
+    const templateInput = document.getElementById('templateInput');
+    let templateFile = null;
+
+    templateInput.addEventListener('change', (event) => {
+        templateFile = event.target.files[0];
+        if (templateFile) {
+            appendMessage(`📄 Template added: ${templateFile.name}`, 'ai');
+        }
+    });
+    
     const folderInput = document.getElementById('folder-input');
 
     let loadedFolderFiles = []; // { name: 'filename.txt', content: 'file content' }
 
-    fileInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
 
-        appendMessage(`📁 Reading ${file.name}...`, "user");
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            const fileContent = e.target.result;
-            loadedFolderFiles = [{ name: file.name, content: fileContent }];
-            appendMessage(`✅ Finished reading ${file.name}. Now ask AI a question.`, "ai");
-        };
-
-        reader.onerror = (e) => {
-            console.error(`Error reading file ${file.name}:`, e);
-            appendMessage(`❌ Error reading file ${file.name}.`, "ai");
-        };
-
-        reader.readAsText(file);
-    });
 
     folderInput.addEventListener('change', (event) => {
         const files = event.target.files;
@@ -70,9 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const userInput = document.getElementById("userInput");
   const chatContainer = document.getElementById("chat-container");
 
-  const exportTxtBtn = document.getElementById("exportTxt");
-  const exportPdfBtn = document.getElementById("exportPdf");
-  const exportDocBtn = document.getElementById("exportDoc");
+  const exportBtn = document.getElementById("exportBtn");
+  const exportFormat = document.getElementById("exportFormat");
+  const shareEmailBtn = document.getElementById("shareEmail");
+  const shareWhatsappBtn = document.getElementById("shareWhatsapp");
+  const voiceTextBtn = document.getElementById("voiceTextBtn");
+  const voiceTaskBtn = document.getElementById("voiceTaskBtn");
   const newChatBtn = document.getElementById("newChatBtn");
 
 
@@ -90,6 +83,18 @@ document.addEventListener('DOMContentLoaded', () => {
       appendMessage("🤖 Thinking...", "ai");
 
       const filesToSend = loadedFolderFiles;
+      const promptData = {
+        prompt: question,
+        filesData: filesToSend
+      };
+
+      if (templateFile) {
+        promptData.templateFile = {
+            name: templateFile.name,
+            type: templateFile.type,
+            size: templateFile.size
+        };
+      }
 
       try {
           const res = await fetch("https://rapid-ai-assistant.onrender.com/ask-gemini", {
@@ -97,10 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
               headers: {
                   "Content-Type": "application/json",
               },
-              body: JSON.stringify({ 
-                  prompt: question,
-                  filesData: filesToSend
-              }),
+              body: JSON.stringify(promptData),
           });
 
           if (!res.ok) {
@@ -150,7 +152,92 @@ document.addEventListener('DOMContentLoaded', () => {
     return history;
   }
 
-  exportTxtBtn.addEventListener("click", () => {
+  const exportAsFile = (content, filename, type) => {
+    const blob = new Blob([content], { type });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  exportBtn.addEventListener("click", () => {
+    const history = getChatHistory();
+    const format = exportFormat.value;
+    let mimeType = '';
+    switch(format) {
+        case 'txt':
+            mimeType = 'text/plain';
+            break;
+        case 'pdf':
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(history, 10, 10);
+            doc.save(`chat-history.pdf`);
+            return;
+        case 'docx':
+             const blob = new Blob([`<html><body>${history.replace(/\n/g, '<br>')}</body></html>`], { type: 'application/msword' });
+             const url = URL.createObjectURL(blob);
+             const a = document.createElement('a');
+             a.href = url;
+             a.download = 'chat-history.doc';
+             a.click();
+             URL.revokeObjectURL(url);
+            return;
+    }
+    exportAsFile(history, `chat-history.${format}`, mimeType);
+  });
+
+  shareEmailBtn.addEventListener('click', () => {
+    const history = getChatHistory();
+    const subject = 'Chat History from Rapid AI Assistant';
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(history)}`;
+  });
+
+  shareWhatsappBtn.addEventListener('click', () => {
+    const history = getChatHistory();
+    const url = `https://wa.me/?text=${encodeURIComponent(history)}`;
+    window.open(url, '_blank');
+  });
+
+  const startVoiceRecognition = (callback) => {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.onresult = (event) => {
+          const result = event.results[0][0].transcript;
+          callback(result);
+      };
+      recognition.start();
+  }
+
+  voiceTextBtn.addEventListener('click', () => {
+      startVoiceRecognition(result => {
+          userInput.value = result;
+      });
+  });
+
+  voiceTaskBtn.addEventListener('click', () => {
+      startVoiceRecognition(command => {
+          command = command.toLowerCase();
+          if (command.includes("select folder")) {
+              folderInput.click();
+          } else if (command.includes("add template")) {
+              templateInput.click();
+          } else if (command.includes("export")) {
+              exportBtn.click();
+          } else {
+              alert("Command not recognized");
+          }
+      });
+  });
+
+  newChatBtn.addEventListener("click", () => {
+    chatContainer.innerHTML = '';
+    loadedFolderFiles = []; // Clear stored files on new chat
+    templateFile = null;
+  });
+
+});
     const history = getChatHistory();
     const blob = new Blob([history], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);

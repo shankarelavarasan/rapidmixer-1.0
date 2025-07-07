@@ -73,7 +73,7 @@ body {
     margin-bottom: 10px;
 }
 
-.export-btn {
+.export-btn, .share-btn {
     background-color: #333;
     color: #E0E0E0;
     border: 1px solid #444;
@@ -84,7 +84,7 @@ body {
     transition: background-color 0.3s;
 }
 
-.export-btn:hover {
+.export-btn:hover, .share-btn:hover {
     background-color: #444;
 }
 
@@ -127,6 +127,15 @@ body {
     background-color: #1E1E1E;
 }
 
+#exportFormat {
+    background-color: #252525;
+    color: #E0E0E0;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
 #userInput {
     flex: 1;
     padding: 10px;
@@ -137,7 +146,7 @@ body {
     resize: none;
 }
 
-#askBtn {
+#askBtn, #voiceTextBtn, #voiceTaskBtn {
     background-color: #BB86FC;
     color: #121212;
     border: none;
@@ -148,7 +157,7 @@ body {
     transition: background-color 0.3s;
 }
 
-#askBtn:hover {
+#askBtn:hover, #voiceTextBtn:hover, #voiceTaskBtn:hover {
     background-color: #9e66d4;
 }
 
