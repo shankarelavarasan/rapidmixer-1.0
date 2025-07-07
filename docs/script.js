@@ -182,17 +182,25 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const extractData = (text) => {
-      const data = {};
-      const lines = text.split('\n');
-      lines.forEach(line => {
-          const parts = line.split(':');
-          if (parts.length === 2) {
-              const key = parts[0].trim();
-              const value = parts[1].trim();
-              data[key] = value;
-          }
-      });
-      return data;
+    const data = {};
+    const patterns = {
+        'Bill No': /Bill No[:\s]+(\w+)/i,
+        'Date': /Date[:\s]+([\d-]+)/i,
+        'GST': /GST[:\s]+([\d%]+)/i,
+        'Qty': /Qty[:\s]+(\d+)/i,
+        'Amount': /Amount[:\s]+([\d,]+)/i,
+        'Invoice Date': /Invoice Date[:\s]+([\d-]+)/i,
+        'Item': /Item[:\s]+(\w+)/i,
+        'Total': /Total[:\s]+([\d,]+)/i
+    };
+
+    for (const key in patterns) {
+        const match = text.match(patterns[key]);
+        if (match) {
+            data[key] = match[1].trim();
+        }
+    }
+    return data;
   };
 
   const updateLastAIMessage = (text) => {
