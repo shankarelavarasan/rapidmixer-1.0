@@ -25,6 +25,5 @@ export async function ask(question) {
 export function render(container, project) {
     // The main chat interface is handled by script.js now.
     // This space can be used for Gemini-specific settings for the project.
-    console.log(`Gemini module loaded for project: ${project.name}`);
-    // container.innerHTML = `<h3>Gemini Settings for ${project.name}</h3>`;
+    container.innerHTML = `<h3>Gemini Settings</h3><p>This area can be used for API key settings, model selection, etc. for the <strong>${project.name}</strong> project.</p>`;
 }

@@ -56,31 +56,43 @@ body {
 #tabContainer {
     display: flex;
     background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    padding: 0 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 0 20px;
+    border-bottom: 1px solid #ddd;
 }
 
 .tab-button {
-    padding: 15px 20px;
+    padding: 15px 25px;
     cursor: pointer;
     border: none;
     background-color: transparent;
     font-size: 16px;
+    font-weight: 500;
+    color: #555;
     border-bottom: 3px solid transparent;
     transition: all 0.3s ease;
+    margin-bottom: -1px; /* Aligns with the container's bottom border */
 }
 
-.tab-button.active, .tab-button:hover {
+.tab-button:hover {
+    color: #007bff;
+}
+
+.tab-button.active {
     border-bottom: 3px solid #007bff;
     color: #007bff;
+    font-weight: 600;
 }
 
 .tab-content {
     display: none;
+    padding: 20px;
+    height: 100%;
 }
 
 .tab-content.active {
     display: block;
+    height: 100%;
 }
 
 #projectHeader {
@@ -111,5 +123,44 @@ body {
 .chat-area {
     display: flex;
     flex-direction: column;
-    height: calc(100% - 100px); /* Adjust based on header height */
+    height: 100%;
+    justify-content: space-between;
+}
+
+#chat-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background-color: #fff;
+}
+
+.input-area {
+    display: flex;
+    gap: 10px;
+}
+
+#userInput {
+    flex-grow: 1;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    font-size: 16px;
+    resize: none;
+}
+
+#askBtn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#askBtn:hover {
+    background-color: #0056b3;
 }

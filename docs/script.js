@@ -1,4 +1,4 @@
-import { createProject, getProjects, getProject, updateProject } from './modules/projectManager.js';
+import { createProject, getProjects, getProject } from './modules/projectManager.js';
 import { ask as askGemini } from './modules/gemini.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -36,9 +36,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button data-module="docGenerator">Doc Generator</button>
             </div>
         `;
-        // By default, the chat tab is active and its content is already in the HTML.
-        // We just need to make sure the correct module is loaded if a different tab is selected.
-        loadModule('chat');
+        loadModule('chat'); // Load chat by default
+    };
+
+    const loadModule = async (moduleName) => {
+        // Deactivate all tabs
+        document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+        // Activate the selected tab
+        const tabButton = document.querySelector(`.tab-button[data-tab='${moduleName}']`);
+        const tabContent = document.getElementById(moduleName.split('/').pop().replace('.js',''));
+        if (tabButton && tabContent) {
+            tabButton.classList.add('active');
+            tabContent.classList.add('active');
+
+            if (moduleName !== 'chat') {
+                try {
+                    const module = await import(`./modules/${moduleName}.js`);
+                    if (module.render) {
+                        tabContent.innerHTML = ''; // Clear previous content
+                        module.render(tabContent, activeProject);
+                    }
+                } catch (err) {
+                    console.error(`Failed to load module: ${moduleName}`, err);
+                    tabContent.innerHTML = `<p>Error loading module.</p>`;
+                }
+            }
+        }
     };
 
     const loadModule = (moduleName) => {
@@ -87,25 +112,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const askBtn = document.getElementById("askBtn");
     const userInput = document.getElementById("userInput");
-    const chatContainer = document.getElementById("chat"); // The chat container is now the 'chat' tab
+    const chatContainer = document.getElementById("chat-container");
+    const askBtn = document.getElementById('askBtn');
+    const userInput = document.getElementById('userInput');
 
-    askBtn.addEventListener("click", () => {
+    const handleAsk = () => {
         const question = userInput.value.trim();
         if (question && activeProject) {
-            // Placeholder for sending message within a project context
-            console.log(`Sending message in project ${activeProject.name}: ${question}`);
-            addMessageToChat("user", question);
-            userInput.value = "";
+            addMessageToChat('user', question);
+            userInput.value = '';
             askGemini(question).then(response => {
-                addMessageToChat("bot", response);
+                addMessageToChat('bot', response);
             });
+        }
+    };
+
+    askBtn.addEventListener('click', handleAsk);
+    userInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleAsk();
         }
     });
 
     function addMessageToChat(sender, message) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('chat-message', `${sender}-message`);
-        messageElement.innerHTML = message; // Use innerHTML to render formatted code
+        // Sanitize message to prevent XSS, but allow basic formatting. For a real app, use a library like DOMPurify.
+        // For now, we'll just set textContent for safety, and handle code blocks separately.
+        if (message.startsWith('```')) {
+            const codeBlock = document.createElement('pre');
+            const code = document.createElement('code');
+            // Extract language and code
+            const lang = message.match(/```(\w*)/)[1] || '';
+            code.className = `language-${lang}`;
+            code.textContent = message.replace(/```\w*\n/, '').replace(/\n```/, '');
+            codeBlock.appendChild(code);
+            messageElement.appendChild(codeBlock);
+            // If you have a syntax highlighter like Prism.js, you would call it here:
+            // Prism.highlightElement(code);
+        } else {
+            messageElement.textContent = message;
+        }
+
         chatContainer.appendChild(messageElement);
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }

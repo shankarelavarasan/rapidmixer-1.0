@@ -1,36 +1,50 @@
-// This module will handle Optical Character Recognition (OCR) using Tesseract.js
+// This module will handle OCR (Image to Text) functionality
 import Tesseract from 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
 
 export function render(container, project) {
     container.innerHTML = `
-        <h2>OCR Module</h2>
-        <p>Upload an image to extract text.</p>
-        <input type="file" id="ocr-file-input" accept="image/*">
-        <button id="ocr-process-btn">Extract Text</button>
-        <div id="ocr-output"></div>
+        <h3>OCR - Image to Text</h3>
+        <p>Upload an image to extract text from it. This uses Tesseract.js.</p>
+        <input type="file" id="ocrInput" accept="image/*">
+        <button id="processOcrBtn">Process Image</button>
+        <div id="ocrProgress"><small></small></div>
+        <h4>Extracted Text:</h4>
+        <pre id="ocrOutput"></pre>
     `;
 
-    const fileInput = document.getElementById('ocr-file-input');
-    const processBtn = document.getElementById('ocr-process-btn');
-    const outputDiv = document.getElementById('ocr-output');
+    const processOcrBtn = document.getElementById('processOcrBtn');
+    const ocrInput = document.getElementById('ocrInput');
+    const ocrOutput = document.getElementById('ocrOutput');
+    const ocrProgress = document.getElementById('ocrProgress').querySelector('small');
 
-    processBtn.addEventListener('click', async () => {
-        const file = fileInput.files[0];
+    processOcrBtn.addEventListener('click', async () => {
+        const file = ocrInput.files[0];
         if (!file) {
-            outputDiv.textContent = 'Please select an image file.';
+            ocrOutput.textContent = 'Please select an image file first.';
             return;
         }
 
-        outputDiv.textContent = 'Processing...';
+        ocrOutput.textContent = '';
+        ocrProgress.textContent = 'Initializing Tesseract...';
 
         try {
-            const { data: { text } } = await Tesseract.recognize(file, 'eng', {
-                logger: m => console.log(m) // Add logger for progress
+            const { createWorker } = Tesseract;
+            const worker = await createWorker({
+                logger: m => {
+                    console.log(m);
+                    ocrProgress.textContent = `${m.status} (${(m.progress * 100).toFixed(2)}%)`;
+                }
             });
-            outputDiv.innerHTML = `<h3>Extracted Text:</h3><pre>${text}</pre>`;
+
+            await worker.loadLanguage('eng');
+            await worker.initialize('eng');
+            const { data: { text } } = await worker.recognize(file);
+            ocrOutput.textContent = text;
+            await worker.terminate();
         } catch (error) {
             console.error('OCR Error:', error);
-            outputDiv.innerHTML = '<p>An error occurred during OCR processing.</p>';
+            ocrOutput.textContent = 'An error occurred during OCR processing.';
+            ocrProgress.textContent = 'Error.';
         }
     });
 }
