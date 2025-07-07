@@ -16,8 +16,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     const folderInput = document.getElementById('folder-input');
+    const fileInput = document.getElementById('file-input');
 
     let loadedFolderFiles = []; // { name: 'filename.txt', content: 'file content' }
+    let loadedFile = null; // { name: 'filename.txt', content: 'file content' }
+
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                loadedFile = { name: file.name, content: e.target.result };
+                appendMessage(`📄 File selected: ${file.name}`, 'ai');
+            };
+            reader.readAsText(file);
+        }
+    });
 
 
 
@@ -74,6 +88,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const newChatBtn = document.getElementById("newChatBtn");
   const fillTemplateBtn = document.getElementById("fillTemplateBtn");
 
+  newChatBtn.addEventListener('click', () => {
+    chatContainer.innerHTML = '';
+    loadedFolderFiles = [];
+    loadedFile = null;
+    templateFile = null;
+    templateContent = null;
+    generatedFiles = [];
+    lastAIResponse = '';
+    appendMessage('New chat started.', 'ai');
+  });
+
 
 
   const askAI = async () => {
@@ -89,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       appendMessage("🤖 Thinking...", "ai");
 
-      const filesToSend = loadedFolderFiles;
+      const filesToSend = loadedFile ? [loadedFile] : loadedFolderFiles;
       const promptData = {
         prompt: question,
         filesData: filesToSend
