@@ -72,17 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const voiceTextBtn = document.getElementById("voiceTextBtn");
   const voiceTaskBtn = document.getElementById("voiceTaskBtn");
   const newChatBtn = document.getElementById("newChatBtn");
+  const fillTemplateBtn = document.getElementById("fillTemplateBtn");
 
 
 
   const askAI = async () => {
       const question = userInput.value.trim().toLowerCase();
-
-      if (question.includes('fill template')) {
-          processAndFillTemplates();
-          userInput.value = "";
-          return;
-      }
 
       if (!question && loadedFolderFiles.length === 0) {
           appendMessage("Please enter a question or select a folder/file.", "ai");
@@ -218,6 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
       askAI();
     }
   });
+
+  fillTemplateBtn.addEventListener("click", processAndFillTemplates);
 
   const getChatHistory = () => {
     let history = "";
