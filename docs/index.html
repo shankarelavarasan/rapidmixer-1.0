@@ -8,46 +8,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <aside class="sidebar">
-            <div class="logo-container">
-                <h1 class="logo-title">Rapid AI</h1>
-            </div>
-            <button id="newChatBtn" class="new-chat-btn">+ New Chat</button>
-            <div class="actions-container">
-                <label for="folder-input" class="action-btn">📁 Select Folder</label>
-                <input type="file" id="folder-input" webkitdirectory hidden>
+    <div id="sidebar">
+        <h2>Projects</h2>
+        <ul id="projectList"></ul>
+        <button id="newProjectBtn">➕ புதிய Project</button>
+    </div>
 
-                <label for="templateInput" class="action-btn">📄 Add Template</label>
-                <input type="file" id="templateInput" accept=".pdf,.docx,.xlsx,.txt,.csv" style="display: none;">
-
-                <label for="file-input" class="action-btn">📄 Select File</label>
-                <input type="file" id="file-input" hidden>
-
-                <button id="fillTemplateBtn" class="action-btn">📝 Fill Template</button>
-            </div>
-
-            <div class="export-container">
-                <h3 class="export-title">Export</h3>
-                <select id="exportFormat">
-                    <option value="pdf">PDF</option>
-                    <option value="docx">DOCX</option>
-                    <option value="txt">TXT</option>
-                </select>
-                <button id="exportBtn" class="export-btn">Download Output</button>
-            </div>
-        </aside>
-        <main class="chat-area">
+    <div id="mainContent">
+        <div id="projectHeader"></div>
+        <div id="moduleView">
+            <!-- Module content இங்கு dynamic ஆக காட்டப்படும் -->
+        </div>
+        <div class="chat-area">
             <div id="chat-container" class="chat-container"></div>
             <div class="input-area">
                 <textarea id="userInput" placeholder="Ask Rapid AI anything..." rows="1"></textarea>
                 <button id="askBtn">Send</button>
-                <button id="voiceTextBtn">🎤</button>
-                <button id="voiceTaskBtn">🎯</button>
             </div>
-        </main>
+        </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.umd.min.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
