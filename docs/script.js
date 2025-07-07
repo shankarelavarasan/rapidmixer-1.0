@@ -1,11 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     const templateInput = document.getElementById('templateInput');
     let templateFile = null;
+    let templateContent = null; // To store template content
 
     templateInput.addEventListener('change', (event) => {
         templateFile = event.target.files[0];
         if (templateFile) {
-            appendMessage(`📄 Template added: ${templateFile.name}`, 'ai');
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                templateContent = e.target.result;
+                appendMessage(`📄 Template added: ${templateFile.name}`, 'ai');
+            };
+            reader.readAsText(templateFile);
         }
     });
     
@@ -70,7 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   const askAI = async () => {
-      const question = userInput.value.trim();
+      const question = userInput.value.trim().toLowerCase();
+
+      if (question.includes('fill template')) {
+          processAndFillTemplates();
+          userInput.value = "";
+          return;
+      }
+
       if (!question && loadedFolderFiles.length === 0) {
           appendMessage("Please enter a question or select a folder/file.", "ai");
           return;
@@ -117,6 +130,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   };
 
+  const processAndFillTemplates = () => {
+    if (!templateContent) {
+        appendMessage("Please add a template file first.", "ai");
+        return;
+    }
+    if (loadedFolderFiles.length === 0) {
+        appendMessage("Please select a folder with data files first.", "ai");
+        return;
+    }
+
+    appendMessage("🤖 Processing files and filling templates...", "ai");
+    generatedFiles = []; // Clear previous generated files
+
+    loadedFolderFiles.forEach((file) => {
+        const data = extractData(file.content);
+        const filledContent = fillTemplate(templateContent, data);
+        const originalExtension = templateFile.name.split('.').pop();
+        generatedFiles.push({
+            filename: `filled_${file.name.replace(/\.[^/.]+$/, "")}.${originalExtension}`,
+            content: filledContent
+        });
+    });
+
+    if (generatedFiles.length > 0) {
+        updateLastAIMessage(`✅ Successfully generated ${generatedFiles.length} files. Select an export format and click 'Download Output'.`);
+    } else {
+        updateLastAIMessage("❌ Could not generate any files. Check your template and data files.");
+    }
+  };
+
   const appendMessage = (text, sender) => {
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("chat-message", `${sender}-message`);
@@ -127,6 +170,30 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   let lastAIResponse = "";
+  let generatedFiles = []; // To store { filename: '...', content: '...' }
+
+  const fillTemplate = (template, data) => {
+    let filledTemplate = template;
+    for (const key in data) {
+        const regex = new RegExp(`{{${key}}}`, 'g');
+        filledTemplate = filledTemplate.replace(regex, data[key]);
+    }
+    return filledTemplate;
+  };
+
+  const extractData = (text) => {
+      const data = {};
+      const lines = text.split('\n');
+      lines.forEach(line => {
+          const parts = line.split(':');
+          if (parts.length === 2) {
+              const key = parts[0].trim();
+              const value = parts[1].trim();
+              data[key] = value;
+          }
+      });
+      return data;
+  };
 
   const updateLastAIMessage = (text) => {
     const aiMessages = chatContainer.querySelectorAll('.ai-message');
@@ -155,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const exportAsFile = (content, filename, type) => {
-    const blob = new Blob([content], { type });
+    const blob = (content instanceof Blob) ? content : new Blob([content], { type });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = filename;
@@ -165,11 +232,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
   exportBtn.addEventListener("click", () => {
     const format = exportFormat.value;
-    if (!lastAIResponse) {
-        alert("There is no AI response to export.");
+
+    if (generatedFiles.length > 0) {
+        generatedFiles.forEach(file => {
+            const content = file.content;
+            const filename = file.filename.replace(/\.[^/.]+$/, "");
+
+            switch(format) {
+                case 'txt':
+                    exportAsFile(content, `${filename}.txt`, 'text/plain');
+                    break;
+                case 'pdf':
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    doc.text(content, 10, 10);
+                    doc.save(`${filename}.pdf`);
+                    break;
+                case 'docx':
+                    const docxContent = new docx.Document({
+                        sections: [{
+                            children: [new docx.Paragraph({ children: [new docx.TextRun(content)] })],
+                        }],
+                    });
+                    docx.Packer.toBlob(docxContent).then(blob => {
+                        exportAsFile(blob, `${filename}.docx`, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+                    });
+                    break;
+            }
+        });
         return;
     }
 
+    if (!lastAIResponse) {
+        alert("There is no AI response or generated files to export.");
+        return;
+    }
+
+    // Fallback to exporting the last AI response if no files were generated
     switch(format) {
         case 'txt':
             exportAsFile(lastAIResponse, `ai_output.txt`, 'text/plain');
@@ -183,24 +282,11 @@ document.addEventListener('DOMContentLoaded', () => {
         case 'docx':
             const docxContent = new docx.Document({
                 sections: [{
-                    properties: {},
-                    children: [
-                        new docx.Paragraph({
-                            children: [
-                                new docx.TextRun(lastAIResponse)
-                            ],
-                        }),
-                    ],
-                }, ],
+                    children: [new docx.Paragraph({ children: [new docx.TextRun(lastAIResponse)] })],
+                }],
             });
-
             docx.Packer.toBlob(docxContent).then(blob => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'ai_output.docx';
-                a.click();
-                URL.revokeObjectURL(url);
+                exportAsFile(blob, 'ai_output.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
             });
             break;
     }
@@ -241,8 +327,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   newChatBtn.addEventListener("click", () => {
     chatContainer.innerHTML = '';
-    loadedFolderFiles = []; // Clear stored files on new chat
+    loadedFolderFiles = [];
     templateFile = null;
+    templateContent = null;
+    generatedFiles = [];
+    lastAIResponse = "";
   });
 
 });
