@@ -1,38 +1,30 @@
 // This module will handle interactions with the Gemini API
 
-export function render(project) {
-    const moduleView = document.getElementById('moduleView');
-    moduleView.innerHTML = `
-        <h2>Gemini AI for ${project.name}</h2>
-        <div id="gemini-chat-container"></div>
-        <div class="input-area">
-            <textarea id="gemini-user-input" placeholder="Ask Gemini..."></textarea>
-            <button id="gemini-ask-btn">Send</button>
-        </div>
-    `;
-
-    const chatContainer = document.getElementById('gemini-chat-container');
-    const userInput = document.getElementById('gemini-user-input');
-    const askBtn = document.getElementById('gemini-ask-btn');
-
-    askBtn.addEventListener('click', async () => {
-        const question = userInput.value.trim();
-        if (!question) return;
-
-        addMessage('user', question);
-        userInput.value = '';
-
-        // Simulate a response from Gemini
+/**
+ * Simulates a call to the Gemini API.
+ * @param {string} question The user's question.
+ * @returns {Promise<string>} A promise that resolves with the AI's answer.
+ */
+export async function ask(question) {
+    console.log(`Asking Gemini: ${question}`);
+    // In a real app, this would make a fetch call to your backend.
+    // The backend would then securely call the Gemini API.
+    return new Promise(resolve => {
         setTimeout(() => {
-            addMessage('bot', 'This is a simulated response from Gemini.');
+            resolve(`This is a simulated response to: "${question}"`);
         }, 1000);
     });
+}
 
-    function addMessage(sender, text) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('chat-message', `${sender}-message`);
-        messageElement.textContent = text;
-        chatContainer.appendChild(messageElement);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
+/**
+ * Renders the view for the Gemini module.
+ * Since the chat UI is now global, this can be used for settings in the future.
+ * @param {HTMLElement} container The element to render content into.
+ * @param {object} project The active project.
+ */
+export function render(container, project) {
+    // The main chat interface is handled by script.js now.
+    // This space can be used for Gemini-specific settings for the project.
+    console.log(`Gemini module loaded for project: ${project.name}`);
+    // container.innerHTML = `<h3>Gemini Settings for ${project.name}</h3>`;
 }

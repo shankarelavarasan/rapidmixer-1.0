@@ -16,8 +16,20 @@
 
     <div id="mainContent">
         <div id="projectHeader"></div>
+        <div id="tabContainer">
+            <button class="tab-button active" data-tab="chat">Chat</button>
+            <button class="tab-button" data-tab="ocr">OCR</button>
+            <button class="tab-button" data-tab="voice">Voice-to-Text</button>
+            <button class="tab-button" data-tab="tasks">Task Manager</button>
+            <button class="tab-button" data-tab="docgen">Doc Generator</button>
+        </div>
         <div id="moduleView">
             <!-- Module content இங்கு dynamic ஆக காட்டப்படும் -->
+            <div id="chat" class="tab-content active"></div>
+            <div id="ocr" class="tab-content"></div>
+            <div id="voice" class="tab-content"></div>
+            <div id="tasks" class="tab-content"></div>
+            <div id="docgen" class="tab-content"></div>
         </div>
         <div class="chat-area">
             <div id="chat-container" class="chat-container"></div>

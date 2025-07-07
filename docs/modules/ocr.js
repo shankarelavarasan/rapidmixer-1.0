@@ -1,8 +1,8 @@
 // This module will handle Optical Character Recognition (OCR) using Tesseract.js
+import Tesseract from 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
 
-export function render() {
-    const moduleView = document.getElementById('moduleView');
-    moduleView.innerHTML = `
+export function render(container, project) {
+    container.innerHTML = `
         <h2>OCR Module</h2>
         <p>Upload an image to extract text.</p>
         <input type="file" id="ocr-file-input" accept="image/*">
@@ -23,10 +23,14 @@ export function render() {
 
         outputDiv.textContent = 'Processing...';
 
-        // In a real implementation, you would use an OCR library like Tesseract.js
-        // For now, we'll simulate the OCR process.
-        setTimeout(() => {
-            outputDiv.textContent = `Text extracted from ${file.name}:\n\nThis is simulated OCR text.`;
-        }, 2000);
+        try {
+            const { data: { text } } = await Tesseract.recognize(file, 'eng', {
+                logger: m => console.log(m) // Add logger for progress
+            });
+            outputDiv.innerHTML = `<h3>Extracted Text:</h3><pre>${text}</pre>`;
+        } catch (error) {
+            console.error('OCR Error:', error);
+            outputDiv.innerHTML = '<p>An error occurred during OCR processing.</p>';
+        }
     });
 }
