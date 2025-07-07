@@ -62,8 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const exportBtn = document.getElementById("exportBtn");
   const exportFormat = document.getElementById("exportFormat");
-  const shareEmailBtn = document.getElementById("shareEmail");
-  const shareWhatsappBtn = document.getElementById("shareWhatsapp");
+
   const voiceTextBtn = document.getElementById("voiceTextBtn");
   const voiceTaskBtn = document.getElementById("voiceTaskBtn");
   const newChatBtn = document.getElementById("newChatBtn");
@@ -127,11 +126,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return messageDiv;
   };
 
+  let lastAIResponse = "";
+
   const updateLastAIMessage = (text) => {
     const aiMessages = chatContainer.querySelectorAll('.ai-message');
     const lastMessage = aiMessages[aiMessages.length - 1];
     if (lastMessage) {
         lastMessage.innerText = text;
+        lastAIResponse = text; // Store the response
     }
   }
 
@@ -162,43 +164,49 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   exportBtn.addEventListener("click", () => {
-    const history = getChatHistory();
     const format = exportFormat.value;
-    let mimeType = '';
+    if (!lastAIResponse) {
+        alert("There is no AI response to export.");
+        return;
+    }
+
     switch(format) {
         case 'txt':
-            mimeType = 'text/plain';
+            exportAsFile(lastAIResponse, `ai_output.txt`, 'text/plain');
             break;
         case 'pdf':
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.text(history, 10, 10);
-            doc.save(`chat-history.pdf`);
-            return;
+            doc.text(lastAIResponse, 10, 10);
+            doc.save('ai_output.pdf');
+            break;
         case 'docx':
-             const blob = new Blob([`<html><body>${history.replace(/\n/g, '<br>')}</body></html>`], { type: 'application/msword' });
-             const url = URL.createObjectURL(blob);
-             const a = document.createElement('a');
-             a.href = url;
-             a.download = 'chat-history.doc';
-             a.click();
-             URL.revokeObjectURL(url);
-            return;
+            const docxContent = new docx.Document({
+                sections: [{
+                    properties: {},
+                    children: [
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun(lastAIResponse)
+                            ],
+                        }),
+                    ],
+                }, ],
+            });
+
+            docx.Packer.toBlob(docxContent).then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ai_output.docx';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+            break;
     }
-    exportAsFile(history, `chat-history.${format}`, mimeType);
   });
 
-  shareEmailBtn.addEventListener('click', () => {
-    const history = getChatHistory();
-    const subject = 'Chat History from Rapid AI Assistant';
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(history)}`;
-  });
 
-  shareWhatsappBtn.addEventListener('click', () => {
-    const history = getChatHistory();
-    const url = `https://wa.me/?text=${encodeURIComponent(history)}`;
-    window.open(url, '_blank');
-  });
 
   const startVoiceRecognition = (callback) => {
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();

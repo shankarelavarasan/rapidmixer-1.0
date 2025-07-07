@@ -23,16 +23,13 @@
             </div>
 
             <div class="export-container">
-                <h3 class="export-title">Export & Share</h3>
+                <h3 class="export-title">Export</h3>
                 <select id="exportFormat">
-                    <option value="pdf">.pdf</option>
-                    <option value="docx">.docx</option>
-                    <option value="xlsx">.xlsx</option>
-                    <option value="txt">.txt</option>
+                    <option value="pdf">PDF</option>
+                    <option value="docx">DOCX</option>
+                    <option value="txt">TXT</option>
                 </select>
-                <button id="exportBtn" class="export-btn">Export</button>
-                <button id="shareEmail" class="share-btn">📧 Email</button>
-                <button id="shareWhatsapp" class="share-btn">📱 WhatsApp</button>
+                <button id="exportBtn" class="export-btn">Download Output</button>
             </div>
         </aside>
         <main class="chat-area">
@@ -45,6 +42,7 @@
             </div>
         </main>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.umd.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
