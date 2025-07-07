@@ -238,38 +238,3 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 });
-    const history = getChatHistory();
-    const blob = new Blob([history], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'chat-history.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  exportPdfBtn.addEventListener("click", () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const history = getChatHistory();
-    doc.text(history, 10, 10);
-    doc.save('chat-history.pdf');
-  });
-
-  exportDocBtn.addEventListener("click", () => {
-    const history = getChatHistory();
-    const blob = new Blob([`<html><body>${history.replace(/\n/g, '<br>')}</body></html>`], { type: 'application/msword' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'chat-history.doc';
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  newChatBtn.addEventListener("click", () => {
-    chatContainer.innerHTML = '';
-    loadedFolderFiles = []; // Clear stored files on new chat
-  });
-
-});
