@@ -13,26 +13,11 @@ import express from "express";
  const app = express(); 
  const PORT = process.env.PORT || 10000; 
   
- const allowedOrigins = [ 
-     'https://shankarelavarasan.github.io', 
-     ...(process.env.ALLOWED_ORIGINS || '').split(',') 
- ]; 
-  
- const corsOptions = { 
-     origin: function (origin, callback) { 
-         if (!origin || allowedOrigins.includes(origin)) { 
-             callback(null, true); 
-         } else { 
-             callback(new Error('Not allowed by CORS')); 
-         } 
-     }, 
-      
-     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', 
-     credentials: true, 
-     optionsSuccessStatus: 204 
- }; 
-  
- app.use(cors(corsOptions)); 
+ const corsOptions = {
+  origin: 'https://shankarelavarasan.github.io',
+  optionsSuccessStatus: 200 // For legacy browser support
+};
+app.use(cors(corsOptions)); 
  app.use(express.json()); 
  app.use(express.urlencoded({ extended: true })); 
   
