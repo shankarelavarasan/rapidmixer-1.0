@@ -38,7 +38,11 @@ const handleAsk = () => {
     if (question && activeProject) {
         addMessageToChat('user', question);
         userInput.value = '';
-        askGemini(question).then(response => {
+
+        // Assuming activeProject.files is an array of file objects with name and content
+        const filesData = activeProject.files || [];
+
+        askGemini(question, filesData).then(response => {
             addMessageToChat('bot', response);
         }).catch(error => {
             console.error('Error asking Gemini:', error);

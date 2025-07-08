@@ -1,33 +1,31 @@
 // This module will handle OCR (Image to Text) functionality
 
+import { createWorker } from 'tesseract.js';
+
 export function render(container, project) {
     container.innerHTML = `
         <h3>OCR - Image to Text</h3>
-        <p>Upload an image to extract text from it. This uses Tesseract.js.</p>
-        <input type="file" id="ocrInput" accept="image/*">
-        <button id="processOcrBtn">Process Image</button>
+        <p>Run OCR on all image files in the current project.</p>
+        <button id="runOcrBtn">Run OCR on Project Files</button>
         <div id="ocrProgress"><small></small></div>
         <h4>Extracted Text:</h4>
-        <pre id="ocrOutput"></pre>
+        <div id="ocrResults"></div>
     `;
 
-    const processOcrBtn = document.getElementById('processOcrBtn');
-    const ocrInput = document.getElementById('ocrInput');
-    const ocrOutput = document.getElementById('ocrOutput');
+    const runOcrBtn = document.getElementById('runOcrBtn');
+    const ocrResults = document.getElementById('ocrResults');
     const ocrProgress = document.getElementById('ocrProgress').querySelector('small');
 
-    processOcrBtn.addEventListener('click', async () => {
-        const file = ocrInput.files[0];
-        if (!file) {
-            ocrOutput.textContent = 'Please select an image file first.';
+    runOcrBtn.addEventListener('click', async () => {
+        if (!project || !project.files || project.files.length === 0) {
+            ocrResults.innerHTML = '<p>No files in the project to process.</p>';
             return;
         }
 
-        ocrOutput.textContent = '';
+        ocrResults.innerHTML = '';
         ocrProgress.textContent = 'Initializing Tesseract...';
 
         try {
-            const { createWorker } = Tesseract;
             const worker = await createWorker({
                 logger: m => {
                     console.log(m);
@@ -37,12 +35,21 @@ export function render(container, project) {
 
             await worker.loadLanguage('eng');
             await worker.initialize('eng');
-            const { data: { text } } = await worker.recognize(file);
-            ocrOutput.textContent = text;
+
+            for (const file of project.files) {
+                if (file.type.startsWith('image/')) {
+                    const { data: { text } } = await worker.recognize(file);
+                    const resultEl = document.createElement('div');
+                    resultEl.innerHTML = `<h5>${file.name}</h5><pre>${text}</pre>`;
+                    ocrResults.appendChild(resultEl);
+                }
+            }
+
             await worker.terminate();
+            ocrProgress.textContent = 'OCR processing complete.';
         } catch (error) {
             console.error('OCR Error:', error);
-            ocrOutput.textContent = 'An error occurred during OCR processing.';
+            ocrResults.innerHTML = '<p>An error occurred during OCR processing.</p>';
             ocrProgress.textContent = 'Error.';
         }
     });

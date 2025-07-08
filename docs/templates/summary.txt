@@ -1,0 +1,4 @@
+Company Name	Contact Person	Email	Phone	Summary
+[Company A]	[Contact A]	[Email A]	[Phone A]	[Summary A]
+[Company B]	[Contact B]	[Email B]	[Phone B]	[Summary B]
+[Company C]	[Contact C]	[Email C]	[Phone C]	[Summary C]

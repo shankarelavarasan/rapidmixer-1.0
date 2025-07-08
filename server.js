@@ -13,11 +13,7 @@ import express from "express";
  const app = express(); 
  const PORT = process.env.PORT || 10000; 
   
- const corsOptions = {
-  origin: 'https://shankarelavarasan.github.io',
-  optionsSuccessStatus: 200 // For legacy browser support
-};
-app.use(cors(corsOptions)); 
+app.use(cors()); 
  app.use(express.json()); 
  app.use(express.urlencoded({ extended: true })); 
   
