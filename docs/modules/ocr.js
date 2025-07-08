@@ -1,5 +1,4 @@
 // This module will handle OCR (Image to Text) functionality
-import Tesseract from 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
 
 export function render(container, project) {
     container.innerHTML = `

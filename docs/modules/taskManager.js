@@ -10,6 +10,11 @@ function saveTasks(projectId, tasks) {
 }
 
 export function render(container, project) {
+    if (!project) {
+        container.innerHTML = '<h3>Task Manager</h3><p>Please select a project to see its tasks.</p>';
+        return;
+    }
+
     container.innerHTML = `
         <h3>Task Manager for ${project.name}</h3>
         <div id="taskForm">
