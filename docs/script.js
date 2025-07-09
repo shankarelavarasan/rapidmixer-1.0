@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 promptTextarea.value = '';
 
                 try {
-                    const response = await fetch('/api/ask-gemini', {
+                    const response = await fetch('https://rapid-ai-assistant.onrender.com/api/ask-gemini', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
