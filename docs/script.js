@@ -1,6 +1,11 @@
+import { initializeFileSelection } from './modules/fileManager.js';
+import { initializeTemplateSelection } from './modules/templateManager.js';
+import { initializeVoiceInput } from './modules/voiceManager.js';
+
 document.addEventListener('DOMContentLoaded', () => {
-    const selectFileBtn = document.getElementById('selectFileBtn');
-    const selectFolderBtn = document.getElementById('selectFolderBtn');
+    initializeFileSelection();
+    initializeTemplateSelection();
+    initializeVoiceInput();
     const selectedFilesDiv = document.getElementById('selectedFiles');
     const templateSelect = document.getElementById('templateSelect');
     const voiceBtn = document.getElementById('voiceBtn');
@@ -8,33 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const promptTextarea = document.getElementById('promptTextarea');
     const sendPromptBtn = document.getElementById('sendPromptBtn');
 
-    if (selectFileBtn) {
-        selectFileBtn.addEventListener('click', () => {
-            console.log('Select File button clicked');
-            // Placeholder for file selection logic
-        });
-    }
 
-    if (selectFolderBtn) {
-        selectFolderBtn.addEventListener('click', () => {
-            console.log('Select Folder button clicked');
-            // Placeholder for folder selection logic
-        });
-    }
 
-    if (templateSelect) {
-        templateSelect.addEventListener('change', (e) => {
-            console.log(`Template selected: ${e.target.value}`);
-            // Placeholder for template selection logic
-        });
-    }
 
-    if (voiceBtn) {
-        voiceBtn.addEventListener('click', () => {
-            console.log('Voice button clicked');
-            // Placeholder for voice recording logic
-        });
-    }
 
     if (sendPromptBtn) {
         sendPromptBtn.addEventListener('click', async () => {

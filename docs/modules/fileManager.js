@@ -1,64 +1,48 @@
-// This module handles file and folder selection using the File System Access API
+// docs/modules/fileManager.js
 
-let selectedFiles = [];
-
-/**
- * Opens a directory picker and reads the files within.
- * @returns {Promise<File[]>} A promise that resolves with an array of file handles.
- */
-async function selectFolder() {
-    try {
-        const dirHandle = await window.showDirectoryPicker();
-        const files = [];
-        for await (const entry of dirHandle.values()) {
-            if (entry.kind === 'file') {
-                const file = await entry.getFile();
-                files.push(file);
-            }
-        }
-        selectedFiles = files;
-        console.log('Selected files:', selectedFiles);
-        return files;
-    } catch (err) {
-        console.error('Error selecting folder:', err);
-        return [];
-    }
-}
-
-/**
- * Gets the currently selected files.
- * @returns {File[]} An array of the selected files.
- */
-export function getSelectedFiles() {
-    return selectedFiles;
-}
-
-/**
- * Renders the file manager UI.
- * @param {HTMLElement} container The element to render content into.
- * @param {object} project The active project.
- */
-export function render(container, project) {
-    container.innerHTML = `
-        <div class="file-manager">
-            <h3>File Manager</h3>
-            <button id="selectFolderBtn">Select Folder</button>
-            <div id="fileListContainer"></div>
-        </div>
-    `;
-
+export function initializeFileSelection() {
+    const selectFileBtn = document.getElementById('selectFileBtn');
     const selectFolderBtn = document.getElementById('selectFolderBtn');
-    const fileListContainer = document.getElementById('fileListContainer');
+    const selectedFilesDiv = document.getElementById('selectedFiles');
 
-    selectFolderBtn.addEventListener('click', async () => {
-        const files = await selectFolder();
-        project.files = await Promise.all(files.map(async (file) => ({
-            name: file.name,
-            content: await file.text(),
-        })));
+    if (selectFileBtn) {
+        selectFileBtn.addEventListener('click', () => {
+            console.log('Select File button clicked');
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.addEventListener('change', () => {
+                displaySelectedFiles(input.files);
+            });
+            input.click();
+        });
+    }
 
-        fileListContainer.innerHTML = '<ul>' +
-            files.map(file => `<li>${file.name}</li>`).join('') +
-            '</ul>';
-    });
+    if (selectFolderBtn) {
+        selectFolderBtn.addEventListener('click', () => {
+            console.log('Select Folder button clicked');
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.webkitdirectory = true;
+            input.directory = true;
+            input.multiple = true;
+            input.addEventListener('change', () => {
+                displaySelectedFiles(input.files);
+            });
+            input.click();
+        });
+    }
+
+    function displaySelectedFiles(files) {
+        selectedFilesDiv.innerHTML = ''; // Clear previous selections
+        if (files.length > 0) {
+            const list = document.createElement('ul');
+            for (const file of files) {
+                const item = document.createElement('li');
+                item.textContent = file.webkitRelativePath || file.name;
+                list.appendChild(item);
+            }
+            selectedFilesDiv.appendChild(list);
+        }
+    }
 }
