@@ -8,7 +8,7 @@
 export async function ask(prompt, filesData = []) {
     console.log(`Asking Gemini: ${prompt}`);
 
-    const response = await fetch('/ask-gemini', {
+    const response = await fetch('https://rapid-ai-assistant.onrender.com/ask-gemini', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -1,142 +1,90 @@
-// This module will handle document generation (e.g., PDF, DOCX, TXT)
-import { askGemini } from './gemini.js';
+import { generateContent } from './geminiEngine.js';
+import { exportAsPdf, exportAsDocx, exportAsTxt } from './exportManager.js';
+
+let generatedDocument = '';
 
 export function render(container, project) {
-    if (!project) {
-        container.innerHTML = '<h3>Document Generator</h3><p>Please select a project to generate documents.</p>';
-        return;
-    }
-
     container.innerHTML = `
-        <h3>Document Generator for ${project.name}</h3>
-        <p>Select a template from the Template Manager, then provide a prompt to generate the document.</p>
-        <textarea id="docPrompt" placeholder="Enter a prompt for document generation... e.g., 'Create a summary report based on the provided files using the selected template.'" rows="5" style="width: 95%;"></textarea>
-        <br>
-        <button id="generateDocBtn">Generate Document</button>
-        <hr>
-        <h4>Generated Document:</h4>
-        <div id="docOutput" style="border: 1px solid #ccc; padding: 10px; min-height: 200px; width: 95%;"></div>
-        <br>
-        <button id="exportPdfBtn">Export as PDF</button>
-        <button id="exportDocxBtn">Export as DOCX</button>
-        <button id="exportTxtBtn">Export as TXT</button>
+        <h3>Document Generator</h3>
+        <p>Use AI to generate a document from your files and an optional template.</p>
+        <div class="doc-generator">
+            <textarea id="docPrompt" placeholder="e.g., 'Generate an invoice for Client X using the invoice template and the attached project details.'"></textarea>
+            <button id="generateDocBtn">Generate Document</button>
+        </div>
+        <h4>Generated Document</h4>
+        <div id="docPreview" contenteditable="true"></div>
+        <div class="export-controls">
+            <button id="exportPdfBtn">Export as PDF</button>
+            <button id="exportDocxBtn">Export as DOCX</button>
+            <button id="exportTxtBtn">Export as TXT</button>
+        </div>
     `;
 
+    const docPromptInput = document.getElementById('docPrompt');
     const generateDocBtn = document.getElementById('generateDocBtn');
-    const docPrompt = document.getElementById('docPrompt');
-    const docOutput = document.getElementById('docOutput');
+    const docPreview = document.getElementById('docPreview');
     const exportPdfBtn = document.getElementById('exportPdfBtn');
     const exportDocxBtn = document.getElementById('exportDocxBtn');
     const exportTxtBtn = document.getElementById('exportTxtBtn');
 
-    let generatedContent = '';
+    docPreview.style.border = '1px solid #ccc';
+    docPreview.style.minHeight = '300px';
+    docPreview.style.padding = '10px';
+    docPreview.style.whiteSpace = 'pre-wrap'; // Preserve whitespace and newlines
 
     generateDocBtn.addEventListener('click', async () => {
-        const prompt = docPrompt.value.trim();
-        const templateContent = project.selectedTemplate?.content; // Assuming templateManager sets this
-        const templateName = project.selectedTemplate?.name || 'the provided template';
-
+        const prompt = docPromptInput.value.trim();
         if (!prompt) {
             alert('Please enter a prompt.');
             return;
         }
-        if (!templateContent) {
-            alert('Please select a template from the Template Manager first.');
-            return;
-        }
+
         if (!project.files || project.files.length === 0) {
-            alert('Please add files to the project first.');
+            alert('Please select files in the File Manager first.');
             return;
         }
 
-        docOutput.innerHTML = 'Generating document...';
+        generateDocBtn.textContent = 'Generating...';
+        generateDocBtn.disabled = true;
 
         try {
-            const filesData = await Promise.all(project.files.map(async (file) => ({
-                name: file.name,
-                content: await file.text(), // Assuming text-based files for now
-            })));
-
-            const fullPrompt = `
-                User Prompt: "${prompt}"
-
-                Template (${templateName}):
-                ---
-                ${templateContent}
-                ---
-
-                Files:
-                ${filesData.map(f => `--- File: ${f.name} ---\n${f.content}`).join('\n\n')}
-
-                Instruction: Based on the user prompt, fill the provided template using information from the files. Output only the final, filled document content.
-            `;
-
-            generatedContent = await askGemini(fullPrompt);
-            docOutput.innerHTML = generatedContent; // Display as HTML, assuming Gemini can return basic HTML
+            const fullPrompt = `You are a document generation assistant. Use the user's prompt, the provided template (if any), and the attached files to create a complete document. The output should be the final document content itself, formatted appropriately. \n\nUser Prompt: ${prompt}`;
+            generatedDocument = await generateContent(project, fullPrompt);
+            docPreview.innerText = generatedDocument; // Use innerText to avoid rendering HTML tags as elements
 
         } catch (error) {
-            console.error('Document Generation Error:', error);
-            docOutput.textContent = 'An error occurred during document generation.';
+            console.error('Error generating document:', error);
+            alert('Failed to generate document. See console for details.');
+        } finally {
+            generateDocBtn.textContent = 'Generate Document';
+            generateDocBtn.disabled = false;
         }
     });
 
     exportPdfBtn.addEventListener('click', () => {
-        if (!generatedContent.trim()) {
-            alert('Please generate the document first.');
+        const content = docPreview.innerText;
+        if (!content) {
+            alert('No document to export.');
             return;
         }
-        if (window.jspdf) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text(docOutput.innerText, 10, 10);
-            doc.save(`${project.name}_document.pdf`);
-        } else {
-            alert('Error: jsPDF library not found.');
-        }
+        exportAsPdf(content, 'generated_document.pdf');
     });
 
     exportDocxBtn.addEventListener('click', () => {
-        if (!generatedContent.trim()) {
-            alert('Please generate the document first.');
+        const content = docPreview.innerText;
+        if (!content) {
+            alert('No document to export.');
             return;
         }
-        if (window.docx) {
-             const { Document, Packer, Paragraph, TextRun } = docx;
-             const doc = new Document({
-                 sections: [{
-                     properties: {},
-                     children: [
-                         new Paragraph({
-                             children: generatedContent.split('\n').map(line => new TextRun({text: line, break: 1}))
-                         }),
-                     ],
-                 }],
-             });
-
-             Packer.toBlob(doc).then(blob => {
-                 const url = URL.createObjectURL(blob);
-                 const a = document.createElement('a');
-                 a.href = url;
-                 a.download = `${project.name}_document.docx`;
-                 a.click();
-                 URL.revokeObjectURL(url);
-             });
-        } else {
-            alert('Error: docx library not found.');
-        }
+        exportAsDocx(content, 'generated_document.docx');
     });
 
     exportTxtBtn.addEventListener('click', () => {
-        if (!generatedContent.trim()) {
-            alert('Please generate the document first.');
+        const content = docPreview.innerText;
+        if (!content) {
+            alert('No document to export.');
             return;
         }
-        const blob = new Blob([docOutput.innerText], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${project.name}_document.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
+        exportAsTxt(content, 'generated_document.txt');
     });
 }

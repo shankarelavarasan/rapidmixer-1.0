@@ -1,119 +1,108 @@
-// This module will handle the Task Manager functionality
+import { generateContent } from './geminiEngine.js';
+import { exportAsTxt } from './exportManager.js';
 
-function getTasks(projectId) {
-    const tasks = localStorage.getItem(`tasks_${projectId}`);
-    return tasks ? JSON.parse(tasks) : [];
+let tasks = [];
+
+// Using a generic key for simplicity, not project-specific for now
+const TASKS_STORAGE_KEY = 'rapidAITasks';
+
+function getTasks() {
+    const tasksJson = localStorage.getItem(TASKS_STORAGE_KEY);
+    return tasksJson ? JSON.parse(tasksJson) : [];
 }
 
-function saveTasks(projectId, tasks) {
-    localStorage.setItem(`tasks_${projectId}`, JSON.stringify(tasks));
-}
-
-import { askGemini } from './gemini.js';
-
-function getTasks(projectId) {
-    const tasks = localStorage.getItem(`tasks_${projectId}`);
-    return tasks ? JSON.parse(tasks) : [];
-}
-
-function saveTasks(projectId, tasks) {
-    localStorage.setItem(`tasks_${projectId}`, JSON.stringify(tasks));
+function saveTasks(tasks) {
+    localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
 }
 
 export function render(container, project) {
-    if (!project) {
-        container.innerHTML = '<h3>Task Manager</h3><p>Please select a project to see its tasks.</p>';
-        return;
-    }
+    tasks = getTasks();
 
     container.innerHTML = `
-        <h3>Task Manager for ${project.name}</h3>
-        <div id="taskGenerator">
-            <textarea id="taskPrompt" placeholder="Enter a prompt to generate tasks..."></textarea>
+        <h3>Task Manager</h3>
+        <p>Generate a list of tasks from your files using a prompt.</p>
+        <div class="task-generator">
+            <textarea id="taskPrompt" placeholder="e.g., 'Create a checklist for onboarding a new client based on the attached documents.'"></textarea>
             <button id="generateTasksBtn">Generate Tasks</button>
         </div>
+        <h4>Generated Tasks</h4>
         <ul id="taskList"></ul>
+        <div class="export-controls">
+            <button id="exportTasksBtn">Export as TXT</button>
+        </div>
     `;
 
-    const taskPrompt = document.getElementById('taskPrompt');
-    const generateTasksBtn = document.getElementById('generateTasksBtn');
     const taskList = document.getElementById('taskList');
+    const generateTasksBtn = document.getElementById('generateTasksBtn');
+    const taskPromptInput = document.getElementById('taskPrompt');
+    const exportTasksBtn = document.getElementById('exportTasksBtn');
 
-    const renderTasks = () => {
-        const tasks = getTasks(project.id);
+    function renderTasks() {
         taskList.innerHTML = '';
         tasks.forEach((task, index) => {
             const li = document.createElement('li');
+            li.className = task.completed ? 'completed' : '';
             li.innerHTML = `
-                <span class="${task.completed ? 'completed' : ''}">${task.text}</span>
-                <div>
-                    <button data-index="${index}" class="complete-btn">✔️</button>
-                    <button data-index="${index}" class="delete-btn">❌</button>
-                </div>
+                <input type="checkbox" data-index="${index}" class="complete-chk" ${task.completed ? 'checked' : ''}>
+                <span>${task.text}</span>
+                <button data-index="${index}" class="delete-btn">❌</button>
             `;
             taskList.appendChild(li);
         });
-    };
+    }
 
     generateTasksBtn.addEventListener('click', async () => {
-        const prompt = taskPrompt.value.trim();
-        if (prompt && project.files && project.files.length > 0) {
-            const filesData = await Promise.all(project.files.map(async (file) => ({
-                name: file.name,
-                type: file.type,
-                content: await file.text(),
-            })));
+        const prompt = taskPromptInput.value.trim();
+        if (!prompt) {
+            alert('Please enter a prompt.');
+            return;
+        }
 
-            const fullPrompt = `${prompt}\n\nHere are the files:\n\n${filesData.map(f => `--- ${f.name} ---\n${f.content}`).join('\n\n')}`;
-            const generatedTasks = await askGemini(fullPrompt);
+        if (!project.files || project.files.length === 0) {
+            alert('Please select files in the File Manager first.');
+            return;
+        }
 
-            // Assuming Gemini returns a list of tasks separated by newlines
-            const newTasks = generatedTasks.split('\n').map(text => ({ text, completed: false }));
-            const existingTasks = getTasks(project.id);
-            const allTasks = existingTasks.concat(newTasks);
-            saveTasks(project.id, allTasks);
+        generateTasksBtn.textContent = 'Generating...';
+        generateTasksBtn.disabled = true;
+
+        try {
+            const fullPrompt = `You are a task generation assistant. Based on the user's prompt and the provided files, create a clear, actionable list of tasks. Return ONLY the tasks, each on a new line. Do not add any introductory text, numbering, or bullet points. \n\nUser Prompt: ${prompt}`;
+            const result = await generateContent(project, fullPrompt);
+            const generatedTasks = result.split('\n').filter(t => t.trim() !== '');
+            
+            tasks = generatedTasks.map(text => ({ text, completed: false }));
+            saveTasks(tasks);
             renderTasks();
+
+        } catch (error) {
+            console.error('Error generating tasks:', error);
+            alert('Failed to generate tasks. See console for details.');
+        } finally {
+            generateTasksBtn.textContent = 'Generate Tasks';
+            generateTasksBtn.disabled = false;
         }
     });
 
     taskList.addEventListener('click', (e) => {
-        const tasks = getTasks(project.id);
+        const index = e.target.dataset.index;
         if (e.target.classList.contains('delete-btn')) {
-            const index = e.target.dataset.index;
             tasks.splice(index, 1);
-        } else if (e.target.classList.contains('complete-btn')) {
-            const index = e.target.dataset.index;
-            tasks[index].completed = !tasks[index].completed;
+        } else if (e.target.classList.contains('complete-chk')) {
+            tasks[index].completed = e.target.checked;
         }
-        saveTasks(project.id, tasks);
+        saveTasks(tasks);
         renderTasks();
     });
 
-    renderTasks();
+    exportTasksBtn.addEventListener('click', () => {
+        if (tasks.length === 0) {
+            alert('No tasks to export.');
+            return;
+        }
+        const taskText = tasks.map(t => `- [${t.completed ? 'x' : ' '}] ${t.text}`).join('\n');
+        exportAsTxt(taskText, 'tasks.txt');
+    });
 
-    const style = document.createElement('style');
-    style.textContent = `
-        #taskList li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        #taskList li .completed {
-            text-decoration: line-through;
-            color: #aaa;
-        }
-        #taskGenerator {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        #taskPrompt {
-            width: 100%;
-            height: 100px;
-        }
-    `;
-    container.appendChild(style);
+    renderTasks();
 }
