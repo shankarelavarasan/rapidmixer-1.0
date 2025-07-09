@@ -17,10 +17,10 @@ app.use(cors());
  app.use(express.json()); 
  app.use(express.urlencoded({ extended: true })); 
   
- app.use('/', geminiRoutes); 
-  
  // Serve frontend files from the 'docs' directory 
  app.use(express.static('docs')); 
+ 
+ app.use('/api', geminiRoutes); 
   
  app.listen(PORT, () => { 
    console.log(`✅ Server running on port ${PORT}`); 
