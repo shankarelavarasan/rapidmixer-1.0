@@ -8,24 +8,37 @@
     <script src="assets/libs/jspdf.umd.min.js"></script>
 </head>
 <body>
-    <div id="sidebar">
-        <h2>Projects</h2>
-        <ul id="projectList"></ul>
-        <button id="newProjectBtn">➕ புதிய Project</button>
+    <div class="container">
+        <div class="left-panel">
+            <div class="panel-section">
+                <h3>File/Folder Selection</h3>
+                <button id="selectFileBtn">Select File</button>
+                <button id="selectFolderBtn">Select Folder</button>
+                <div id="selectedFiles"></div>
+            </div>
+            <div class="panel-section">
+                <h3>Template Selection</h3>
+                <select id="templateSelect">
+                    <option value="">Select a template</option>
+                </select>
+            </div>
+            <div class="panel-section">
+                <h3>Voice to Text</h3>
+                <button id="voiceBtn">Start Recording</button>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="chat-container" id="chatContainer">
+                <!-- Chat messages will be appended here -->
+            </div>
+            <div class="prompt-container">
+                <textarea id="promptTextarea" placeholder="Enter your prompt here..."></textarea>
+                <button id="sendPromptBtn">Send</button>
+            </div>
+        </div>
     </div>
 
-    <div id="mainContent">
-        <div id="projectHeader"></div>
-        <div id="tabContainer">
-            <button class="tab-button active" data-tab="chat">Chat</button>
-            <button class="tab-button" data-tab="fileManager">File Manager</button>
-            <button class="tab-button" data-tab="templateManager">Template Manager</button>
-            <button class="tab-button" data-tab="ocr">OCR</button>
-            <button class="tab-button" data-tab="voiceToText">Voice-to-Text</button>
-            <button class="tab-button" data-tab="taskManager">Task Manager</button>
-            <button class="tab-button" data-tab="docGenerator">Doc Generator</button>
-        </div>
-        <div id="moduleView">
+    <div id="moduleView" style="display: none;">
             <div id="chat" class="tab-content active"></div>
             <div id="ocr" class="tab-content"></div>
             <div id="voiceToText" class="tab-content"></div>
