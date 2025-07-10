@@ -4,14 +4,19 @@ import express from 'express';
  const router = express.Router(); 
  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); 
  
- router.post('/ask-gemini', async (req, res) => { 
+ /**
+ * @route POST /api/ask-gemini
+ * @description Send a prompt to the Gemini API and get a response.
+ * @access Public
+ */
+router.post('/ask-gemini', async (req, res) => { 
    try { 
      const { prompt, template, files } = req.body; 
  
-     let combinedContent = `User Prompt: ${prompt}\n\n`;
+     let combinedContent = prompt;
 
      if (template) {
-        combinedContent += `Template: ${template}\n\n`;
+        combinedContent = `${template}\n\n${prompt}`;
      }
  
  
