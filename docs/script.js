@@ -1,11 +1,11 @@
 import { initializeFileSelection } from './modules/fileManager.js';
 import { initializeTemplateSelection, getTemplateContent } from './modules/templateManager.js';
-import { initializeVoiceRecording } from './modules/voiceManager.js';
+import { initializeVoiceInput } from './modules/voiceManager.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     initializeFileSelection();
     await initializeTemplateSelection();
-    initializeVoiceRecording();
+    initializeVoiceInput();
 
     const sendPromptBtn = document.getElementById('sendPromptBtn');
     const promptTextarea = document.getElementById('promptTextarea');
