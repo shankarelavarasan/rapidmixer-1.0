@@ -14,19 +14,7 @@ import express from 'express';
         combinedContent += `Template: ${template}\n\n`;
      }
  
-     if (files && Array.isArray(files) && files.length > 0) { 
-        const fileParts = files.map(file => {
-            return {
-                inlineData: {
-                    data: file.content,
-                    mimeType: file.type
-                }
-            }
-        });
-        const result = await model.generateContent([combinedContent, ...fileParts]);
-     } else {
-        const result = await model.generateContent(combinedContent);
-     } 
+ 
  
      if (!combinedContent.trim()) { 
        console.warn("Received request with no prompt or file data."); 
@@ -40,6 +28,7 @@ import express from 'express';
      } 
  
      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest"}); 
+ 
 
      let result;
      if (files && Array.isArray(files) && files.length > 0) {
