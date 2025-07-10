@@ -6,15 +6,26 @@ import express from 'express';
  
  router.post('/ask-gemini', async (req, res) => { 
    try { 
-     const { prompt, filesData } = req.body; 
+     const { prompt, template, files } = req.body; 
  
-     let combinedContent = prompt ? `${prompt}\n\n` : ''; 
+     let combinedContent = `User Prompt: ${prompt}\n\n`;
+
+     if (template) {
+        combinedContent += `Template: ${template}\n\n`;
+     }
  
-     if (filesData && Array.isArray(filesData) && filesData.length > 0) { 
-       const fileContents = filesData.map(file => 
-         `File: ${file.name}\nContent:\n${file.content}` 
-       ).join('\n\n---\n\n'); 
-       combinedContent += `Analyze the following file(s):\n\n${fileContents}`; 
+     if (files && Array.isArray(files) && files.length > 0) { 
+        const fileParts = files.map(file => {
+            return {
+                inlineData: {
+                    data: file.content,
+                    mimeType: file.type
+                }
+            }
+        });
+        const result = await model.generateContent([combinedContent, ...fileParts]);
+     } else {
+        const result = await model.generateContent(combinedContent);
      } 
  
      if (!combinedContent.trim()) { 
@@ -28,13 +39,22 @@ import express from 'express';
          console.warn(`Prompt was truncated due to length: ${combinedContent.length}`); 
      } 
  
-     const content = combinedContent; 
-     console.log('Prompt sent to Gemini (first 200 chars):', content.substring(0, 200)); 
-     console.log('Prompt length:', content.length); 
- 
      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest"}); 
- 
-     const result = await model.generateContent(content); 
+
+     let result;
+     if (files && Array.isArray(files) && files.length > 0) {
+        const fileParts = files.map(file => {
+            return {
+                inlineData: {
+                    data: file.content,
+                    mimeType: file.type
+                }
+            }
+        });
+        result = await model.generateContent([combinedContent, ...fileParts]);
+     } else {
+        result = await model.generateContent(combinedContent);
+     }
  
      const response = result.response; 
      const text = response.text(); 

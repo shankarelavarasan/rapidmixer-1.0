@@ -1,5 +1,7 @@
 // docs/modules/fileManager.js
 
+window.selectedFiles = [];
+
 export function initializeFileSelection() {
     const selectFileBtn = document.getElementById('selectFileBtn');
     const selectFolderBtn = document.getElementById('selectFolderBtn');
@@ -33,16 +35,30 @@ export function initializeFileSelection() {
         });
     }
 
-    function displaySelectedFiles(files) {
+        function displaySelectedFiles(files) {
         selectedFilesDiv.innerHTML = ''; // Clear previous selections
+        window.selectedFiles = [];
         if (files.length > 0) {
             const list = document.createElement('ul');
             for (const file of files) {
                 const item = document.createElement('li');
                 item.textContent = file.webkitRelativePath || file.name;
                 list.appendChild(item);
+                readFile(file);
             }
             selectedFilesDiv.appendChild(list);
         }
+    }
+
+    function readFile(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            window.selectedFiles.push({
+                name: file.name,
+                content: e.target.result.split(',')[1], // Get base64 content
+                type: file.type
+            });
+        };
+        reader.readAsDataURL(file);
     }
 }

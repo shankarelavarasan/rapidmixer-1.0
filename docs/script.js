@@ -1,6 +1,8 @@
 import { initializeFileSelection } from './modules/fileManager.js';
 import { initializeTemplateSelection } from './modules/templateManager.js';
 import { initializeVoiceInput } from './modules/voiceManager.js';
+import { constructGeminiPrompt } from './modules/geminiEngine.js';
+import { displayOutput } from './modules/outputManager.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeFileSelection();
@@ -20,11 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sendPromptBtn) {
         sendPromptBtn.addEventListener('click', async () => {
             const prompt = promptTextarea.value;
+            const template = templateSelect.value;
+
             if (prompt.trim()) {
                 const userMessage = document.createElement('div');
                 userMessage.textContent = `You: ${prompt}`;
                 chatContainer.appendChild(userMessage);
                 promptTextarea.value = '';
+
+                const geminiPrompt = constructGeminiPrompt(prompt, template);
 
                 try {
                     const response = await fetch('https://rapid-ai-assistant.onrender.com/api/ask-gemini', {
@@ -32,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ prompt }),
+                        body: geminiPrompt,
                     });
 
                     if (!response.ok) {
@@ -40,9 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     const data = await response.json();
-                    const botMessage = document.createElement('div');
-                    botMessage.innerHTML = data.response; // Using innerHTML to render potential markdown
-                    chatContainer.appendChild(botMessage);
+                    displayOutput(data);
                 } catch (error) {
                     console.error('Error sending prompt:', error);
                     const errorMessage = document.createElement('div');

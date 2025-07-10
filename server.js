@@ -13,7 +13,7 @@ import express from "express";
  const app = express(); 
  const PORT = process.env.PORT || 10000; 
   
-app.use(cors()); 
+app.use(cors({ origin: 'https://shankarelavarasan.github.io' })); 
  app.use(express.json()); 
  app.use(express.urlencoded({ extended: true })); 
   
