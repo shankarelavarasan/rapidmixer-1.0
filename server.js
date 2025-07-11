@@ -23,11 +23,23 @@ app.use(cors({
  app.use(express.urlencoded({ extended: true })); 
   
  // Serve frontend files from the 'docs' directory 
- app.use(express.static('docs')); 
- 
+ app.use(express.static('docs'));
 
-
-
+/**
+ * @route GET /api/templates
+ * @description Get a list of available template files.
+ * @access Public
+ */
+app.get('/api/templates', (req, res) => {
+    const templatesDir = path.join(__dirname, 'docs', 'templates');
+    fs.readdir(templatesDir, (err, files) => {
+        if (err) {
+            console.error('Error reading templates directory:', err);
+            return res.status(500).send('Error reading templates directory');
+        }
+        res.json(files);
+    });
+});
 
 // Gemini API routes
 app.use('/api', geminiRoutes); 
