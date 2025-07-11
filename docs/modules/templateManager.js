@@ -5,7 +5,7 @@ export async function initializeTemplateSelection() {
 
     if (templateSelect) {
         try {
-            const response = await fetch('/api/templates');
+            const response = await fetch('https://rapid-ai-assistant.onrender.com/api/templates');
             const templates = await response.json();
             templates.forEach(template => {
                 const option = document.createElement('option');

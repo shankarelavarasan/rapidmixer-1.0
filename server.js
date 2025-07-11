@@ -14,7 +14,11 @@ import fs from 'fs';
  const app = express(); 
  const PORT = process.env.PORT || 10000; 
   
-app.use(cors()); 
+app.use(cors({ 
+   origin: '*', // Allow all origins 
+   methods: ['GET', 'POST'], // Allowed methods 
+   allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers 
+ })); 
  app.use(express.json()); 
  app.use(express.urlencoded({ extended: true })); 
   
@@ -23,21 +27,7 @@ app.use(cors());
  
 
 
-/**
- * @route GET /api/templates
- * @description Get a list of available template files.
- * @access Public
- */
-app.get('/api/templates', (req, res) => {
-    const templatesDir = path.join(__dirname, 'docs', 'templates');
-    fs.readdir(templatesDir, (err, files) => {
-        if (err) {
-            console.error('Error reading templates directory:', err);
-            return res.status(500).send('Error reading templates directory');
-        }
-        res.json(files);
-    });
-});
+
 
 // Gemini API routes
 app.use('/api', geminiRoutes); 
