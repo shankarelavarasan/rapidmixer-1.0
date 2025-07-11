@@ -39,6 +39,10 @@ export function initializeFileSelection() {
         selectedFilesDiv.innerHTML = ''; // Clear previous selections
         window.selectedFiles = [];
         if (files.length > 0) {
+            const countHeader = document.createElement('p');
+            countHeader.textContent = `${files.length} file(s) selected:`;
+            selectedFilesDiv.appendChild(countHeader);
+
             const list = document.createElement('ul');
             for (const file of files) {
                 const item = document.createElement('li');
