@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapid AI Assistant</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #4a6da7;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .feature {
+            margin-bottom: 30px;
+        }
+        .feature h3 {
+            color: #4a6da7;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        a {
+            color: #4a6da7;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #4a6da7;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #3a5a8f;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Rapid AI Assistant</h1>
+        <p>A Node.js backend for AI-powered content generation using Google's Gemini API</p>
+    </header>
+
+    <div class="container">
+        <section class="feature">
+            <h2>About the Project</h2>
+            <p>Rapid AI Assistant is a Node.js backend application that leverages Google's Gemini API to provide AI-powered content generation. The application offers template-based processing and robust error handling to ensure reliable operation.</p>
+            <a href="https://github.com/shankarelavarasan/rapid-ai-assistant" class="btn">View on GitHub</a>
+        </section>
+
+        <section class="feature">
+            <h2>Key Features</h2>
+            <ul>
+                <li>Integration with Google's Gemini API for AI content generation</li>
+                <li>Template-based processing for consistent outputs</li>
+                <li>Robust error handling with custom error types</li>
+                <li>Efficient file processing with caching</li>
+                <li>RESTful API endpoints for easy integration</li>
+            </ul>
+        </section>
+
+        <section class="feature">
+            <h2>Recent Improvements</h2>
+            <h3>Enhanced Error Handling</h3>
+            <p>Implemented a comprehensive error handling strategy with custom error types and centralized error handling functions.</p>
+            
+            <h3>Improved Code Organization</h3>
+            <p>Refactored the codebase into service modules for better separation of concerns and maintainability.</p>
+            
+            <h3>Comprehensive Testing</h3>
+            <p>Added extensive test coverage for critical components including error utilities, file processing, template operations, and Gemini API interactions.</p>
+        </section>
+
+        <section class="feature">
+            <h2>API Endpoints</h2>
+            <ul>
+                <li><strong>/api/ask-gemini</strong> - Send prompts to the Gemini API</li>
+                <li><strong>/api/templates</strong> - List available templates</li>
+                <li><strong>/api/templates/:name</strong> - Get a specific template</li>
+            </ul>
+        </section>
+
+        <section class="feature">
+            <h2>Documentation</h2>
+            <p>For more detailed information about the project, check out our documentation:</p>
+            <ul>
+                <li><a href="https://github.com/shankarelavarasan/rapid-ai-assistant/blob/main/docs/ARCHITECTURE.md">Architecture Overview</a></li>
+                <li><a href="https://github.com/shankarelavarasan/rapid-ai-assistant/blob/main/docs/ERROR_HANDLING.md">Error Handling Strategy</a></li>
+            </ul>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Rapid AI Assistant. All rights reserved.</p>
+    </footer>
+</body>
+</html>
