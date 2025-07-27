@@ -2,76 +2,69 @@
 
 export async function initializeTemplateSelection() {
     const templateSelect = document.getElementById('templateSelect');
+    const selectTemplateFileBtn = document.getElementById('selectTemplateFileBtn');
 
-    if (templateSelect) {
-        // Load local templates instead of fetching from backend
-        const templates = {
-            'bank': 'Bank Project Template',
-            'bill': 'Bill Entry Template',
-            'document': 'Company Document Template',
-            'invoice': 'Invoice Processing Template',
-            'summary': 'Document Summary Template'
-        };
+    if (templateSelect && selectTemplateFileBtn) {
+        window.templateFiles = [];
 
-        // Clear existing options
-        templateSelect.innerHTML = '';
-
-        // Add default option
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = 'Select a template';
-        templateSelect.appendChild(defaultOption);
-
-        // Add template options
-        Object.entries(templates).forEach(([value, text]) => {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = text;
-            templateSelect.appendChild(option);
+        selectTemplateFileBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.addEventListener('change', () => {
+                loadTemplateFiles(input.files);
+            });
+            input.click();
         });
 
         templateSelect.addEventListener('change', (e) => {
-            const selectedTemplate = e.target.value;
-            console.log(`Template selected: ${selectedTemplate}`);
-            
-            // Apply template directly without server call
-            applyLocalTemplate(selectedTemplate);
-        });
+              const selectedName = e.target.value;
+              const selectedTemplate = window.templateFiles.find(file => file.name === selectedName);
+              if (selectedTemplate) {
+                  applyTemplate(selectedName);
+              }
+          });
     }
 }
 
-function applyLocalTemplate(templateName) {
-    const promptTextarea = document.getElementById('promptTextarea');
-    if (!promptTextarea) return;
+function loadTemplateFiles(files) {
+    const templateSelect = document.getElementById('templateSelect');
+    templateSelect.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select a template';
+    templateSelect.appendChild(defaultOption);
 
-    // Get template content from local storage or predefined templates
-    const templateContent = getLocalTemplateContent(templateName);
-    
-    promptTextarea.value = `Using template: ${templateName}\n\n${templateContent}`;
-    
-    // Dispatch event to notify other components
-    const event = new CustomEvent('templateApplied', {
-        detail: { templateName }
-    });
-    document.dispatchEvent(event);
+    window.templateFiles = [];
+    const allowedExtensions = ['.docx', '.pdf', '.txt', '.md'];
+
+    Array.from(files).forEach(file => {
+         const ext = file.name.slice(file.name.lastIndexOf('.'));
+         if (allowedExtensions.includes(ext)) {
+             const reader = new FileReader();
+             reader.onload = (e) => {
+                 window.templateFiles.push({
+                     name: file.name,
+                     content: e.target.result.split(',')[1],
+                     type: file.type
+                 });
+                 const option = document.createElement('option');
+                 option.value = file.name;
+                 option.textContent = file.name;
+                 templateSelect.appendChild(option);
+             };
+             reader.readAsDataURL(file);
+         }
+     });
 }
 
-function getLocalTemplateContent(templateName) {
-    // This could be extended to load from localStorage or local files
-    const templates = {
-        'bank': 'Process bank statements and extract transactions',
-        'bill': 'Extract bill details including vendor, amount, and date',
-        'document': 'Process company documents and extract key information',
-        'invoice': 'Extract invoice details including line items and totals',
-        'summary': 'Generate a summary of the document content'
-    };
-    
-    return templates[templateName] || '';
-}
-
-export async function getTemplateContent(templateName) {
-    if (!templateName) return '';
-    
-    // Use local template content instead of fetching from server
-    return getLocalTemplateContent(templateName);
-}
+function applyTemplate(templateName) {
+     const promptTextarea = document.getElementById('promptTextarea');
+     if (!promptTextarea) return;
+ 
+     promptTextarea.value = `Using template: ${templateName}`;
+     
+     const event = new CustomEvent('templateApplied', {
+         detail: { templateName }
+     });
+     document.dispatchEvent(event);
+ }

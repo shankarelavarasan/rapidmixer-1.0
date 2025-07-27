@@ -19,6 +19,9 @@ export function initializeVoiceInput() {
                 return true;
             } catch (err) {
                 console.error('Microphone permission error:', err);
+                if (err.name === 'NotFoundError') {
+                    alert('No microphone device found. Please connect a microphone and try again.');
+                }
                 return false;
             }
         }

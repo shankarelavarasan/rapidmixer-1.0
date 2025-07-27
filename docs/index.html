@@ -19,6 +19,7 @@
 
             <div class="panel-section">
                 <h3>Template Selection</h3>
+                <button id="selectTemplateFileBtn">Select Template File</button>
                 <select id="templateSelect">
                     <option value="">Select a template</option>
                 </select>
@@ -32,9 +33,19 @@
             <div class="chat-container" id="chatContainer">
                 <!-- Chat messages will be appended here -->
             </div>
+            <div id="previewContainer" style="display: none;">
+                <h3>Output Preview</h3>
+                <div id="previewContent"></div>
+                <div class="export-options">
+                    <button id="exportPdfBtn">Export as PDF</button>
+                    <button id="exportWordBtn">Export as Word</button>
+                    <button id="exportExcelBtn">Export as Excel</button>
+                    <button id="exportTextBtn">Export as Text</button>
+                </div>
+            </div>
             <div class="prompt-container">
                 <textarea id="promptTextarea" placeholder="Enter your prompt here..."></textarea>
-                <button id="sendPromptBtn">Send</button>
+                <button id="processBtn">Process</button>
             </div>
         </div>
     </div>
@@ -51,7 +62,8 @@
     </div>
 
     <script src="assets/libs/jspdf.umd.min.js"></script>
-    <script src="assets/libs/docx.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/docx.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="script.js" type="module"></script>
 </body>
 </html>

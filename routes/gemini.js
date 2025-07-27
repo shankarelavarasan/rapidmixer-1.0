@@ -11,12 +11,12 @@ import express from 'express';
  */
 router.post('/ask-gemini', async (req, res) => { 
    try { 
-     const { prompt, template, files } = req.body; 
+     const { prompt, templateFile, files } = req.body; 
  
      let combinedContent = prompt;
 
-     if (template) {
-        combinedContent = `${template}\n\n${prompt}`;
+     if (templateFile) {
+         combinedContent = `Use the provided template file to process the input with this prompt: ${prompt}`;
      }
  
  
@@ -36,19 +36,24 @@ router.post('/ask-gemini', async (req, res) => {
  
 
      let result;
+     let fileParts = [];
      if (files && Array.isArray(files) && files.length > 0) {
-        const fileParts = files.map(file => {
-            return {
-                inlineData: {
-                    data: file.content,
-                    mimeType: file.type
-                }
-            }
-        });
-        result = await model.generateContent([combinedContent, ...fileParts]);
-     } else {
-        result = await model.generateContent(combinedContent);
+         fileParts = files.map(file => ({
+             inlineData: {
+                 data: file.content,
+                 mimeType: file.type
+             }
+         }));
      }
+     if (templateFile) {
+         fileParts.push({
+             inlineData: {
+                 data: templateFile.content,
+                 mimeType: templateFile.type
+             }
+         });
+     }
+     result = await model.generateContent([combinedContent, ...fileParts]);
  
      const response = result.response; 
      const text = response.text(); 
