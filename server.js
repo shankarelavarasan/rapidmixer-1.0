@@ -12,7 +12,7 @@ import fs from 'fs';
  const __dirname = path.dirname(__filename); 
   
  const app = express(); 
- const PORT = process.env.PORT || 10000; 
+ const PORT = process.env.PORT || 3000; 
   
 app.use((req, res, next) => {
   console.log(`Received request: ${req.method} ${req.url}`);

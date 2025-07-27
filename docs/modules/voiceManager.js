@@ -13,17 +13,15 @@ export function initializeVoiceInput() {
 
         let isRecording = false;
 
-        voiceBtn.addEventListener('click', () => {
-            if (isRecording) {
-                recognition.stop();
-                isRecording = false;
-                voiceBtn.textContent = '🎤 Voice';
-            } else {
-                recognition.start();
-                isRecording = true;
-                voiceBtn.textContent = '🛑 Stop';
+        async function checkMicrophonePermission() {
+            try {
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+                return true;
+            } catch (err) {
+                console.error('Microphone permission error:', err);
+                return false;
             }
-        });
+        }
 
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
@@ -32,12 +30,35 @@ export function initializeVoiceInput() {
 
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
+            if (event.error === 'not-allowed') {
+                alert('Please grant microphone permissions and ensure you\'re using HTTPS');
+                voiceBtn.textContent = '🎤 Voice';
+                isRecording = false;
+            }
         };
 
         recognition.onend = () => {
             isRecording = false;
             voiceBtn.textContent = '🎤 Voice';
         };
+
+        // Call this function before starting recognition
+        voiceBtn.addEventListener('click', async () => {
+            if (isRecording) {
+                recognition.stop();
+                isRecording = false;
+                voiceBtn.textContent = '🎤 Voice';
+            } else {
+                const hasPermission = await checkMicrophonePermission();
+                if (hasPermission) {
+                    recognition.start();
+                    isRecording = true;
+                    voiceBtn.textContent = '🛑 Stop';
+                } else {
+                    alert('Microphone access is required for voice input.');
+                }
+            }
+        });
 
     } else {
         if(voiceBtn) {
