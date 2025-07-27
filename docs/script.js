@@ -1,11 +1,13 @@
 import { initializeFileSelection } from './modules/fileManager.js';
 import { initializeTemplateSelection, getTemplateContent } from './modules/templateManager.js';
 import { initializeVoiceInput } from './modules/voiceManager.js';
+import { initializeTaskProcessing, processTask } from './modules/taskProcessor.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     initializeFileSelection();
     await initializeTemplateSelection();
     initializeVoiceInput();
+    initializeTaskProcessing();
 
     const sendPromptBtn = document.getElementById('sendPromptBtn');
     const promptTextarea = document.getElementById('promptTextarea');
@@ -27,32 +29,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             const selectedTemplate = templateSelect.value;
             const templateContent = await getTemplateContent(selectedTemplate);
 
-            const requestBody = {
-                prompt: prompt,
-                template: templateContent,
-                files: window.selectedFiles || []
-            };
+            // Process locally if possible, otherwise fall back to server
+            if (window.selectedFiles && window.selectedFiles.length > 0) {
+                // Local processing
+                const results = await processTask(window.selectedFiles, templateSelect.value);
+                const data = {
+                    response: JSON.stringify(results, null, 2)
+                };
+            } else {
+                // Fall back to server for non-file prompts
+                const requestBody = {
+                    prompt: prompt,
+                    template: templateContent,
+                    files: window.selectedFiles || []
+                };
 
-            const response = await fetch('https://rapid-ai-assistant.onrender.com/api/ask-gemini', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestBody)
-            });
+                const response = await fetch('https://rapid-ai-assistant.onrender.com/api/ask-gemini', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
             }
 
-            const data = await response.json();
-
-            // Add AI response to chat
+            // Add response to chat
             const aiMessage = document.createElement('div');
             aiMessage.classList.add('chat-message', 'ai-message');
-            // Use a pre tag to preserve formatting
             const pre = document.createElement('pre');
-            pre.textContent = data.response;
+            
+            // Format results differently for local vs server processing
+            if (window.selectedFiles && window.selectedFiles.length > 0) {
+                pre.textContent = `Local processing complete:\n${data.response}`;
+            } else {
+                pre.textContent = data.response;
+            }
+            
             aiMessage.appendChild(pre);
             chatContainer.appendChild(aiMessage);
 

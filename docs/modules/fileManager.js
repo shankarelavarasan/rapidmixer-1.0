@@ -47,6 +47,34 @@ export function initializeFileSelection() {
             for (const file of files) {
                 const item = document.createElement('li');
                 item.textContent = file.webkitRelativePath || file.name;
+                
+                // Add template selection dropdown for each file
+                const templateSelect = document.createElement('select');
+                templateSelect.className = 'template-select';
+                templateSelect.dataset.fileName = file.name;
+                
+                // Add default options
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select template';
+                templateSelect.appendChild(defaultOption);
+                
+                const bankOption = document.createElement('option');
+                bankOption.value = 'bank';
+                bankOption.textContent = 'Bank Project';
+                templateSelect.appendChild(bankOption);
+                
+                const billOption = document.createElement('option');
+                billOption.value = 'bill';
+                billOption.textContent = 'Bill Entry';
+                templateSelect.appendChild(billOption);
+                
+                const docOption = document.createElement('option');
+                docOption.value = 'document';
+                docOption.textContent = 'Company Document';
+                templateSelect.appendChild(docOption);
+                
+                item.appendChild(templateSelect);
                 list.appendChild(item);
                 readFile(file);
             }
@@ -60,9 +88,32 @@ export function initializeFileSelection() {
             window.selectedFiles.push({
                 name: file.name,
                 content: e.target.result.split(',')[1], // Get base64 content
+                type: file.type,
+                path: file.webkitRelativePath || file.name,
+                rawContent: e.target.result
+            });
+            
+            // Process file content directly without uploading
+            processFileLocally({
+                name: file.name,
+                content: e.target.result,
                 type: file.type
             });
         };
         reader.readAsDataURL(file);
+    }
+    
+    function processFileLocally(fileData) {
+        // Process file content directly on client side
+        console.log('Processing file locally:', fileData.name);
+        
+        // Here you would add your specific processing logic
+        // For example: text extraction, data parsing, etc.
+        
+        // Dispatch event to notify other components
+        const event = new CustomEvent('fileProcessed', {
+            detail: { fileName: fileData.name }
+        });
+        document.dispatchEvent(event);
     }
 }
