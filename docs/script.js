@@ -100,9 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 previewContainer.style.display = 'block';
 
                 const combinedContent = data.responses.map(resp => (resp.file ? `Response for ${resp.file}:
-` : '') + resp.response).join('
-
-');
+` : '') + resp.response).join('\n\n');
                 setupExportButtons(combinedContent);
 
                 const aiMessage = document.createElement('div');
