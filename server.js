@@ -5,6 +5,7 @@ import express from "express";
  import geminiRoutes from './routes/gemini.js'; 
  import cors from "cors";
 import fs from 'fs'; 
+import { errorHandler, FileProcessingError } from './middleware/errorHandler.js';
   
  dotenv.config(); 
   
@@ -35,20 +36,22 @@ app.use((req, res, next) => {
  * @description Get a list of available template files.
  * @access Public
  */
-app.get('/api/templates', (req, res) => {
-    const templatesDir = path.join(__dirname, 'docs', 'templates');
-    fs.readdir(templatesDir, (err, files) => {
-        if (err) {
-            console.error('Error reading templates directory:', err);
-            return res.status(500).send('Error reading templates directory');
-        }
+app.get('/api/templates', async (req, res, next) => {
+    try {
+        const templatesDir = path.join(__dirname, 'docs', 'templates');
+        const files = await fs.promises.readdir(templatesDir);
         res.json(files);
-    });
+    } catch (err) {
+        next(new FileProcessingError('Error reading templates directory'));
+    }
 });
 
 // Gemini API routes
 app.use('/api', geminiRoutes); 
   
- app.listen(PORT, () => { 
+ // Error handling middleware should be the last middleware
+app.use(errorHandler);
+
+app.listen(PORT, () => { 
    console.log(`✅ Server running on port ${PORT}`); 
  });

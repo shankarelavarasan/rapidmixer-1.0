@@ -1,11 +1,11 @@
 import express from 'express'; 
-import { GoogleGenerativeAI } from '@google/generative-ai'; 
-import pdf from 'pdf-parse';
-import XLSX from 'xlsx';
-import mammoth from 'mammoth';
+import { extractText } from '../services/fileProcessingService.js';
+import { getGeminiModel, generateContent, processBatch } from '../services/geminiService.js';
+import { FileProcessingError } from '../middleware/errorHandler.js';
+import { withErrorHandling } from '../utils/errorUtils.js';
+import { validateParams } from '../utils/errorUtils.js';
  
 const router = express.Router(); 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); 
  
  /**
  * @route POST /api/ask-gemini
@@ -15,14 +15,15 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 router.post('/ask-gemini', async (req, res) => { 
    try { 
      const { prompt, templateFile, files } = req.body; 
+     
+     // Validate required parameters
+     validateParams({ prompt }, ['prompt']);
  
      let combinedContent = prompt;
 
      if (templateFile) {
          combinedContent = `Use the provided template file to process the input with this prompt: ${prompt}`;
      }
- 
- 
  
      if (!combinedContent.trim()) { 
        console.warn("Received request with no prompt or file data."); 
@@ -35,83 +36,53 @@ router.post('/ask-gemini', async (req, res) => {
          console.warn(`Prompt was truncated due to length: ${combinedContent.length}`); 
      } 
  
-     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest"}); 
- 
-
+     // Initialize Gemini model
+     const model = getGeminiModel(process.env.GEMINI_API_KEY);
      const responses = [];
 
-     const extractText = async (file) => {
-          const ext = file.name.split('.').pop().toLowerCase();
-          const buffer = Buffer.from(file.content, 'base64');
-          const imageExt = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
-          if (imageExt.includes(ext)) {
-              return null; // Indicate it's an image
-          }
-          if (ext === 'pdf') {
-              try {
-                  const data = await pdf(buffer);
-                  return data.text;
-              } catch (error) {
-                  console.error('PDF parsing error:', error);
-                  return 'Error: Could not parse PDF file';
-              }
-          } else if (ext === 'xlsx' || ext === 'xls') {
-              const workbook = XLSX.read(buffer, { type: 'buffer' });
-              let text = '';
-              workbook.SheetNames.forEach(sheetName => {
-                  const sheet = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName]);
-                  text += sheet;
-              });
-              return text;
-          } else if (ext === 'docx') {
-              const { value } = await mammoth.extractRawText({ buffer });
-              return value;
-          } else if (ext === 'txt' || ext === 'md') {
-              return buffer.toString('utf-8');
-          } else {
-              return 'Unsupported file type';
-          }
-      };
-
+     // Process template if provided
      let templateText = '';
      if (templateFile) {
          templateText = await extractText(templateFile);
          combinedContent = `Use this template: ${templateText}. ${combinedContent}`;
      }
 
+     // Process files if provided
      if (files && Array.isArray(files) && files.length > 0) {
-          for (const file of files) {
-              const fileText = await extractText(file);
-              let result;
-              if (fileText !== null) {
-                  const fullPrompt = `${combinedContent} Process this file content: ${fileText}`;
-                  result = await model.generateContent(fullPrompt);
-              } else {
-                  // Handle image
-                  const filePart = {
-                      inlineData: {
-                          data: file.content,
-                          mimeType: file.type
-                      }
-                  };
-                  result = await model.generateContent([combinedContent, filePart]);
-              }
-              const responseText = result.response.text();
-              responses.push({ file: file.name, response: responseText });
-          }
-      } else {
-          const result = await model.generateContent(combinedContent);
-          const responseText = result.response.text();
-          responses.push({ response: responseText });
-      }
+         // Prepare files with extracted text
+         const processedFiles = await Promise.all(files.map(async (file) => {
+             const fileText = await extractText(file);
+             return {
+                 ...file,
+                 text: fileText,
+                 isImage: fileText === null
+             };
+         }));
+         
+         // Process files in batch
+         const batchResponses = await processBatch(model, combinedContent, processedFiles);
+         responses.push(...batchResponses);
+     } else {
+         // Process single prompt without files
+         const result = await generateContent(model, combinedContent);
+         const responseText = result.response.text();
+         responses.push({ response: responseText });
+     }
+     
      res.json({ responses }); 
    } catch (err) { 
-     console.error("Gemini API fetch error:", err); 
-     let userErrorMessage = "Something went wrong while processing your request."; 
-     if (err.message) { 
-         userErrorMessage += ` Details: ${err.message}`; 
-     } 
-     res.status(500).json({ response: userErrorMessage }); 
+     console.error("Error processing request:", err); 
+     let status = 500;
+     let message = "Something went wrong while processing your request.";
+     
+     if (err instanceof FileProcessingError) {
+         status = 422;
+         message = err.message;
+     } else if (err.message) {
+         message += ` Details: ${err.message}`;
+     }
+     
+     res.status(status).json({ response: message }); 
    } 
  }); 
  
