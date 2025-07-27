@@ -39,7 +39,6 @@ router.post('/ask-gemini', async (req, res) => {
  
 
      const responses = [];
-     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
      const extractText = async (file) => {
           const ext = file.name.split('.').pop().toLowerCase();
