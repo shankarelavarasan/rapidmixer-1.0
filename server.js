@@ -3,9 +3,13 @@ import express from "express";
  import path from "path"; 
  import { fileURLToPath } from "url"; 
  import geminiRoutes from './routes/gemini.js'; 
+ import githubRoutes from './routes/github.js';
  import cors from "cors";
 import fs from 'fs'; 
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import { errorHandler, FileProcessingError } from './middleware/errorHandler.js';
+import { uploadSingleFile, uploadMultipleFiles } from './middleware/upload.js';
   
  dotenv.config(); 
   
@@ -14,7 +18,28 @@ import { errorHandler, FileProcessingError } from './middleware/errorHandler.js'
   
  const app = express(); 
  const PORT = process.env.PORT || 3000; 
+
+// Create HTTP server and Socket.IO instance for real-time progress updates
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
   
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+
+// Make io available to routes
+app.set('io', io);
+
 app.use((req, res, next) => {
   console.log(`Received request: ${req.method} ${req.url}`);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -46,12 +71,27 @@ app.get('/api/templates', async (req, res, next) => {
     }
 });
 
-// Gemini API routes
-app.use('/api', geminiRoutes); 
-  
- // Error handling middleware should be the last middleware
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Create output directory if it doesn't exist
+const outputDir = path.join(__dirname, 'output');
+if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+}
+
+// API routes
+app.use('/api', geminiRoutes);
+app.use('/api/github', githubRoutes);
+
+// Error handling middleware should be the last middleware
 app.use(errorHandler);
 
-app.listen(PORT, () => { 
-   console.log(`✅ Server running on port ${PORT}`); 
- });
+// Start the HTTP server
+httpServer.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Socket.IO server running`);
+});

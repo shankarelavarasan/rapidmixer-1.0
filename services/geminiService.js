@@ -40,7 +40,7 @@ export const generateContent = withErrorHandling(
 export const processBatch = withErrorHandling(
     async (model, basePrompt, files, options = {}) => {
         const responses = [];
-        const { maxConcurrent = 3 } = options;
+        const { maxConcurrent = 3, outputFormat = 'text' } = options;
         
         // Process files in batches to avoid overwhelming the API
         for (let i = 0; i < files.length; i += maxConcurrent) {
@@ -64,13 +64,21 @@ export const processBatch = withErrorHandling(
                     }
                     
                     const responseText = result.response.text();
-                    return { file: file.name, response: responseText, success: true };
+                    return { 
+                        file: file.name, 
+                        path: file.path || file.name,
+                        response: responseText, 
+                        success: true,
+                        outputFormat
+                    };
                 } catch (error) {
                     console.error(`Error processing file ${file.name}:`, error);
                     return { 
                         file: file.name, 
+                        path: file.path || file.name,
                         response: `Error processing file: ${error.message}`, 
-                        success: false 
+                        success: false,
+                        outputFormat
                     };
                 }
             });
@@ -82,4 +90,55 @@ export const processBatch = withErrorHandling(
         return responses;
     },
     { context: 'batch processing', defaultMessage: 'Failed to process files' }
+);
+
+/**
+ * Processes a folder structure with Gemini
+ * @param {Object} model - Gemini model instance
+ * @param {string} basePrompt - Base prompt to use for all files
+ * @param {Object} folderStructure - Processed folder structure with extracted text
+ * @param {Object} options - Processing options
+ * @returns {Promise<Object>} Object with responses for each folder
+ */
+export const processFolderStructure = withErrorHandling(
+    async (model, basePrompt, folderStructure, options = {}) => {
+        const { outputFormat = 'text', processingMode = 'individual' } = options;
+        
+        // If processing as a single unit, combine all text and process once
+        if (processingMode === 'combined') {
+            // Import here to avoid circular dependency
+            const { combineExtractedText } = await import('./folderService.js');
+            const combinedText = combineExtractedText(folderStructure);
+            
+            const fullPrompt = `${basePrompt}\n\nProcess this combined content from multiple files:\n${combinedText}`;
+            const result = await model.generateContent(fullPrompt);
+            const responseText = result.response.text();
+            
+            return {
+                combined: true,
+                response: responseText,
+                outputFormat
+            };
+        }
+        
+        // Process each folder separately
+        const responses = {};
+        
+        for (const [folderPath, files] of Object.entries(folderStructure)) {
+            // Process files in this folder
+            const folderResponses = await processBatch(model, basePrompt, files, {
+                ...options,
+                outputFormat
+            });
+            
+            responses[folderPath] = folderResponses;
+        }
+        
+        return {
+            combined: false,
+            responses,
+            outputFormat
+        };
+    },
+    { context: 'folder processing', defaultMessage: 'Failed to process folder' }
 );

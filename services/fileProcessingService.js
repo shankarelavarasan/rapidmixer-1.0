@@ -13,13 +13,13 @@ import { withErrorHandling } from '../utils/errorUtils.js';
  * @param {Object} file - File object with name and content
  * @param {string} file.name - File name with extension
  * @param {string} file.content - Base64 encoded file content
- * @returns {Promise<string|null>} Extracted text or null for images
+ * @returns {Promise<string|null>} Extracted text or null for images (if OCR is not available)
  * @throws {FileProcessingError} If file processing fails
  */
 export const extractText = async (file) => {
     const ext = file.name.split('.').pop().toLowerCase();
     const buffer = Buffer.from(file.content, 'base64');
-    const imageExt = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
+    const imageExt = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff', 'tif'];
     
     try {
         // Skip validation for images
@@ -28,6 +28,7 @@ export const extractText = async (file) => {
         }
 
         if (imageExt.includes(ext)) {
+            // OCR will be handled by ocrService.js
             return null; // Indicate it's an image
         }
         

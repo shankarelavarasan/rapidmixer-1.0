@@ -38,6 +38,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     workModeBtn.addEventListener('click', () => setMode('work'));
     chatModeBtn.addEventListener('click', () => setMode('chat'));
     setMode('work'); // Initialize
+    
+    // Add event listener for the Submit button (GitHub integration)
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.addEventListener('click', async () => {
+        try {
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('chat-message', 'user-message');
+            userMessage.textContent = 'Pushing changes to GitHub...';
+            chatContainer.appendChild(userMessage);
+            
+            const response = await fetch('/api/github/push', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: 'Update from Rapid AI Assistant' })
+            });
+            
+            const data = await response.json();
+            
+            const aiMessage = document.createElement('div');
+            aiMessage.classList.add('chat-message', 'ai-message');
+            
+            if (response.ok) {
+                aiMessage.textContent = `Successfully pushed to GitHub: ${data.message}`;
+            } else {
+                aiMessage.textContent = `Error pushing to GitHub: ${data.error}`;
+                aiMessage.classList.add('error-message');
+            }
+            
+            chatContainer.appendChild(aiMessage);
+        } catch (error) {
+            console.error('Error pushing to GitHub:', error);
+            const errorMessage = document.createElement('div');
+            errorMessage.classList.add('chat-message', 'error-message');
+            errorMessage.textContent = `Error: ${error.message}`;
+            chatContainer.appendChild(errorMessage);
+        }
+    });
 
     processBtn.addEventListener('click', async () => {
         const prompt = promptTextarea.value;

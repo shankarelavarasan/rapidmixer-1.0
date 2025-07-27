@@ -60,7 +60,7 @@ body {
     resize: none;
 }
 
-#sendPromptBtn {
+#processBtn, #submitBtn {
     background-color: #007bff;
     color: white;
     border: none;
@@ -71,8 +71,16 @@ body {
     margin-left: 10px;
 }
 
-#sendPromptBtn:hover {
+#processBtn:hover, #submitBtn:hover {
     background-color: #0056b3;
+}
+
+#submitBtn {
+    background-color: #28a745;
+}
+
+#submitBtn:hover {
+    background-color: #218838;
 }
 
 button {
