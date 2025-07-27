@@ -1,8 +1,11 @@
 import express from 'express'; 
- import { GoogleGenerativeAI } from '@google/generative-ai'; 
+import { GoogleGenerativeAI } from '@google/generative-ai'; 
+import pdf from 'pdf-parse';
+import XLSX from 'xlsx';
+import mammoth from 'mammoth';
  
- const router = express.Router(); 
- const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); 
+const router = express.Router(); 
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); 
  
  /**
  * @route POST /api/ask-gemini
@@ -35,29 +38,69 @@ router.post('/ask-gemini', async (req, res) => {
      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest"}); 
  
 
-     let result;
-     let fileParts = [];
-     if (files && Array.isArray(files) && files.length > 0) {
-         fileParts = files.map(file => ({
-             inlineData: {
-                 data: file.content,
-                 mimeType: file.type
-             }
-         }));
-     }
+     const responses = [];
+     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+
+     const extractText = async (file) => {
+          const ext = file.name.split('.').pop().toLowerCase();
+          const buffer = Buffer.from(file.content, 'base64');
+          const imageExt = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
+          if (imageExt.includes(ext)) {
+              return null; // Indicate it's an image
+          }
+          if (ext === 'pdf') {
+              const data = await pdf(buffer);
+              return data.text;
+          } else if (ext === 'xlsx' || ext === 'xls') {
+              const workbook = XLSX.read(buffer, { type: 'buffer' });
+              let text = '';
+              workbook.SheetNames.forEach(sheetName => {
+                  const sheet = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName]);
+                  text += sheet;
+              });
+              return text;
+          } else if (ext === 'docx') {
+              const { value } = await mammoth.extractRawText({ buffer });
+              return value;
+          } else if (ext === 'txt' || ext === 'md') {
+              return buffer.toString('utf-8');
+          } else {
+              return 'Unsupported file type';
+          }
+      };
+
+     let templateText = '';
      if (templateFile) {
-         fileParts.push({
-             inlineData: {
-                 data: templateFile.content,
-                 mimeType: templateFile.type
-             }
-         });
+         templateText = await extractText(templateFile);
+         combinedContent = `Use this template: ${templateText}. ${combinedContent}`;
      }
-     result = await model.generateContent([combinedContent, ...fileParts]);
- 
-     const response = result.response; 
-     const text = response.text(); 
-     res.json({ response: text }); 
+
+     if (files && Array.isArray(files) && files.length > 0) {
+          for (const file of files) {
+              const fileText = await extractText(file);
+              let result;
+              if (fileText !== null) {
+                  const fullPrompt = `${combinedContent} Process this file content: ${fileText}`;
+                  result = await model.generateContent(fullPrompt);
+              } else {
+                  // Handle image
+                  const filePart = {
+                      inlineData: {
+                          data: file.content,
+                          mimeType: file.type
+                      }
+                  };
+                  result = await model.generateContent([combinedContent, filePart]);
+              }
+              const responseText = result.response.text();
+              responses.push({ file: file.name, response: responseText });
+          }
+      } else {
+          const result = await model.generateContent(combinedContent);
+          const responseText = result.response.text();
+          responses.push({ response: responseText });
+      }
+     res.json({ responses }); 
    } catch (err) { 
      console.error("Gemini API fetch error:", err); 
      let userErrorMessage = "Something went wrong while processing your request."; 

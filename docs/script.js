@@ -15,10 +15,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     const templateSelect = document.getElementById('templateSelect');
     const previewContainer = document.getElementById('previewContainer');
     const previewContent = document.getElementById('previewContent');
+    const leftPanel = document.querySelector('.left-panel');
+    const workModeBtn = document.getElementById('workModeBtn');
+    const chatModeBtn = document.getElementById('chatModeBtn');
+    let currentMode = 'work'; // Default to work mode
+
+    function setMode(mode) {
+        currentMode = mode;
+        if (mode === 'work') {
+            leftPanel.style.display = 'block';
+            previewContainer.style.display = 'none';
+            workModeBtn.classList.add('active');
+            chatModeBtn.classList.remove('active');
+        } else {
+            leftPanel.style.display = 'none';
+            previewContainer.style.display = 'none';
+            workModeBtn.classList.remove('active');
+            chatModeBtn.classList.add('active');
+        }
+    }
+
+    workModeBtn.addEventListener('click', () => setMode('work'));
+    chatModeBtn.addEventListener('click', () => setMode('chat'));
+    setMode('work'); // Initialize
 
     processBtn.addEventListener('click', async () => {
         const prompt = promptTextarea.value;
         if (!prompt.trim()) return;
+
+        const numFiles = window.selectedFiles ? window.selectedFiles.length : 0;
+        if (numFiles > 0) {
+            if (!confirm(`You are about to generate responses for ${numFiles} files. Proceed?`)) {
+                return;
+            }
+        }
 
         // Add user message to chat
         const userMessage = document.createElement('div');
@@ -28,13 +58,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         promptTextarea.value = '';
 
         try {
-            const selectedTemplateName = templateSelect.value;
-            const selectedTemplate = window.templateFiles.find(file => file.name === selectedTemplateName);
-            const requestBody = {
-                prompt: prompt,
-                templateFile: selectedTemplate ? { name: selectedTemplate.name, content: selectedTemplate.content, type: selectedTemplate.type } : null,
-                files: window.selectedFiles || []
-            };
+            let requestBody = { prompt };
+            if (currentMode === 'work') {
+                const selectedTemplateName = templateSelect.value;
+                const selectedTemplate = window.templateFiles.find(file => file.name === selectedTemplateName);
+                requestBody.templateFile = selectedTemplate ? { name: selectedTemplate.name, content: selectedTemplate.content, type: selectedTemplate.type } : null;
+                requestBody.files = window.selectedFiles || [];
+            }
 
             const response = await fetch('https://rapid-ai-assistant.onrender.com/api/ask-gemini', {
                 method: 'POST',
@@ -50,17 +80,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const data = await response.json();
 
-            // Display preview
-            previewContent.textContent = data.response;
-            previewContainer.style.display = 'block';
+            if (currentMode === 'work') {
+                // Display preview
+                previewContent.innerHTML = '';
+                if (data.responses && Array.isArray(data.responses)) {
+                    data.responses.forEach(resp => {
+                        const section = document.createElement('div');
+                        const heading = document.createElement('h4');
+                        heading.textContent = resp.file ? `Response for ${resp.file}:` : 'Response:';
+                        section.appendChild(heading);
+                        const content = document.createElement('p');
+                        content.textContent = resp.response;
+                        section.appendChild(content);
+                        previewContent.appendChild(section);
+                    });
+                } else {
+                    previewContent.textContent = 'Unexpected response format.';
+                }
+                previewContainer.style.display = 'block';
 
-            // Add response to chat
-            const aiMessage = document.createElement('div');
-            aiMessage.classList.add('chat-message', 'ai-message');
-            aiMessage.textContent = 'Processing complete. Check preview.';
-            chatContainer.appendChild(aiMessage);
+                const combinedContent = data.responses.map(resp => (resp.file ? `Response for ${resp.file}:
+` : '') + resp.response).join('
 
-        setupExportButtons(data.response);
+');
+                setupExportButtons(combinedContent);
+
+                const aiMessage = document.createElement('div');
+                aiMessage.classList.add('chat-message', 'ai-message');
+                aiMessage.textContent = 'Processing complete. Check preview.';
+                chatContainer.appendChild(aiMessage);
+            } else {
+                // Chat mode: display response in chat
+                const aiMessage = document.createElement('div');
+                aiMessage.classList.add('chat-message', 'ai-message');
+                aiMessage.textContent = data.responses[0].response;
+                chatContainer.appendChild(aiMessage);
+            }
         } catch (error) {
             console.error('Error processing:', error);
             const errorMessage = document.createElement('div');

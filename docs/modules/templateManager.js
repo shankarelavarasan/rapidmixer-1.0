@@ -9,12 +9,13 @@ export async function initializeTemplateSelection() {
 
         selectTemplateFileBtn.addEventListener('click', () => {
             const input = document.createElement('input');
-            input.type = 'file';
-            input.addEventListener('change', () => {
-                loadTemplateFiles(input.files);
-            });
-            input.click();
-        });
+    input.type = 'file';
+    input.multiple = false;
+    input.addEventListener('change', () => {
+        loadTemplateFiles(input.files);
+    });
+    input.click();
+});
 
         templateSelect.addEventListener('change', (e) => {
               const selectedName = e.target.value;
@@ -35,7 +36,7 @@ function loadTemplateFiles(files) {
     templateSelect.appendChild(defaultOption);
 
     window.templateFiles = [];
-    const allowedExtensions = ['.docx', '.pdf', '.txt', '.md'];
+    const allowedExtensions = ['.docx', '.pdf', '.txt', '.md', '.xlsx', '.xls'];
 
     Array.from(files).forEach(file => {
          const ext = file.name.slice(file.name.lastIndexOf('.'));
@@ -51,6 +52,11 @@ function loadTemplateFiles(files) {
                  option.value = file.name;
                  option.textContent = file.name;
                  templateSelect.appendChild(option);
+                 // Automatically select if single file
+                 if (window.templateFiles.length === 1) {
+                     templateSelect.value = file.name;
+                     applyTemplate(file.name);
+                 }
              };
              reader.readAsDataURL(file);
          }
