@@ -48,8 +48,13 @@ router.post('/ask-gemini', async (req, res) => {
               return null; // Indicate it's an image
           }
           if (ext === 'pdf') {
-              const data = await pdf(buffer);
-              return data.text;
+              try {
+                  const data = await pdf(buffer);
+                  return data.text;
+              } catch (error) {
+                  console.error('PDF parsing error:', error);
+                  return 'Error: Could not parse PDF file';
+              }
           } else if (ext === 'xlsx' || ext === 'xls') {
               const workbook = XLSX.read(buffer, { type: 'buffer' });
               let text = '';
