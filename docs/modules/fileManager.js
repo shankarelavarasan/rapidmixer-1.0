@@ -34,7 +34,7 @@ export function initializeFileSelection() {
         });
     }
 
-        function displaySelectedFiles(files) {
+    function displaySelectedFiles(files) {
         selectedFilesDiv.innerHTML = ''; // Clear previous selections
         stateManager.setSelectedFiles([]);
         if (files.length > 0) {
