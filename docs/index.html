@@ -5,72 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapid AI Assistant</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Removed duplicate jspdf script -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
     <div class="mode-selection">
-        <button id="workModeBtn">Work Mode</button>
-        <button id="chatModeBtn">Chat Mode</button>
+        <button id="workModeBtn" name="workModeBtn">Work Mode</button>
+        <button id="chatModeBtn" name="chatModeBtn">Chat Mode</button>
     </div>
     <div class="container">
         <div class="left-panel">
             <div class="panel-section">
                 <h3>File/Folder Selection</h3>
-                <button id="selectFileBtn">Select File</button>
-                <button id="selectFolderBtn">Select Folder</button>
-                <div id="selectedFiles"></div>
+                <button id="selectFileBtn" name="selectFileBtn">Select File</button>
+                <button id="selectFolderBtn" name="selectFolderBtn">Select Folder</button>
+                <div id="selectedFiles" name="selectedFilesContainer"></div>
             </div>
 
             <div class="panel-section">
                 <h3>Template Selection</h3>
-                <button id="selectTemplateFileBtn">Select Template File</button>
-                <select id="templateSelect">
+                <button id="selectTemplateFileBtn" name="selectTemplateBtn">Select Template File</button>
+                <select id="templateSelect" name="templateSelect" aria-label="Template selection">
                     <option value="">Select a template</option>
                 </select>
             </div>
             <div class="panel-section">
                 <h3>Voice to Text</h3>
-                <button id="voiceBtn">Start Recording</button>
+                <button id="voiceBtn" name="voiceRecordBtn">Start Recording</button>
             </div>
         </div>
         <div class="right-panel">
-            <div class="chat-container" id="chatContainer">
+            <div class="chat-container" id="chatContainer" name="chatContainerDiv">
                 <!-- Chat messages will be appended here -->
             </div>
-            <div id="previewContainer" style="display: none;">
+            <div id="previewContainer" name="previewContainerDiv" style="display: none;">
                 <h3>Output Preview</h3>
-                <div id="previewContent"></div>
+                <div id="previewContent" name="previewContentDiv"></div>
                 <div class="export-options">
-                    <button id="exportPdfBtn">Export as PDF</button>
-                    <button id="exportWordBtn">Export as Word</button>
-                    <button id="exportExcelBtn">Export as Excel</button>
-                    <button id="exportTextBtn">Export as Text</button>
+                    <button id="exportPdfBtn" name="exportPdfBtn">Export as PDF</button>
+                    <button id="exportWordBtn" name="exportWordBtn">Export as Word</button>
+                    <button id="exportExcelBtn" name="exportExcelBtn">Export as Excel</button>
+                    <button id="exportTextBtn" name="exportTextBtn">Export as Text</button>
                 </div>
             </div>
             <div class="prompt-container">
-                <textarea id="promptTextarea" placeholder="Enter your prompt here..." rows="3"></textarea>
+                <textarea id="promptTextarea" name="promptInput" placeholder="Enter your prompt here..." rows="3" aria-label="Prompt input"></textarea>
                 <div class="button-group">
-                    <button id="processBtn">Process</button>
-                    <button id="submitBtn">Submit</button>
+                    <button id="processBtn" name="processBtn">Process</button>
+                    <button id="submitBtn" name="submitBtn">Submit</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="moduleView" style="display: none;">
-            <div id="chat" class="tab-content active"></div>
-            <div id="ocr" class="tab-content"></div>
-            <div id="voiceToText" class="tab-content"></div>
-            <div id="taskManager" class="tab-content"></div>
-            <div id="docGenerator" class="tab-content"></div>
-            <div id="fileManager" class="tab-content"></div>
-            <div id="templateManager" class="tab-content"></div>
+    <div id="moduleView" name="moduleViewContainer" style="display: none;">
+            <div id="chat" name="chatTabContent" class="tab-content active"></div>
+            <div id="ocr" name="ocrTabContent" class="tab-content"></div>
+            <div id="voiceToText" name="voiceToTextTabContent" class="tab-content"></div>
+            <div id="taskManager" name="taskManagerTabContent" class="tab-content"></div>
+            <div id="docGenerator" name="docGeneratorTabContent" class="tab-content"></div>
+            <div id="fileManager" name="fileManagerTabContent" class="tab-content"></div>
+            <div id="templateManager" name="templateManagerTabContent" class="tab-content"></div>
         </div>
     </div>
 
+    <!-- External Libraries with CORS and Integrity -->
     <script src="assets/libs/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/docx.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/docx.umd.min.js" crossorigin="anonymous" integrity="sha384-yFNGPkH8BrfLxE1bBZVwqRaHL+XhIYSFkEm+eXtD5kBPH0qJVrGtMNtmGhHXN+L8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" crossorigin="anonymous" integrity="sha384-ZA0gtTqGWwR3CQvX+Dw8VvHFKI2Q7+0H+YZpE4HJzXq1I1tW5FZF9CgLF4ZDX7Y5"></script>
     <script src="script.js" type="module"></script>
 </body>
 </html>

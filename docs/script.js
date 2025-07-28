@@ -6,6 +6,22 @@ import { uiManager } from './modules/uiManager.js';
 import { errorHandler } from './modules/errorHandler.js';
 import { stateManager } from './modules/stateManager.js';
 
+// API Configuration
+const API_CONFIG = {
+    development: {
+        baseUrl: 'http://localhost:10000',
+        wsUrl: 'ws://localhost:10000'
+    },
+    production: {
+        baseUrl: 'https://rapid-ai-assistant.onrender.com',
+        wsUrl: 'wss://rapid-ai-assistant.onrender.com'
+    }
+};
+
+// Get environment based on hostname
+const isProduction = window.location.hostname === 'shankarelavarasan.github.io';
+const API_URLS = isProduction ? API_CONFIG.production : API_CONFIG.development;
+
 document.addEventListener('DOMContentLoaded', async () => {
     initializeFileSelection();
     await initializeTemplateSelection();
@@ -20,11 +36,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             uiManager.addMessage('Pushing changes to GitHub...', 'user');
             
-            const response = await errorHandler.wrapAsync(fetch('/api/github/push', {
+            const response = await errorHandler.wrapAsync(fetch(`${API_URLS.baseUrl}/api/github/push`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({ message: 'Update from Rapid AI Assistant' })
             }));
             
@@ -75,11 +92,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 requestBody.files = stateManager.state.selectedFiles;
             }
 
-            const response = await errorHandler.wrapAsync(fetch('https://rapid-ai-assistant.onrender.com/api/ask-gemini', {
+            const response = await errorHandler.wrapAsync(fetch(`${API_URLS.baseUrl}/api/ask-gemini`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify(requestBody)
             }));
 

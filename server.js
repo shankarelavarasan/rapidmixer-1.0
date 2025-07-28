@@ -1,31 +1,32 @@
 import express from "express"; 
- import dotenv from "dotenv"; 
- import path from "path"; 
- import { fileURLToPath } from "url"; 
- import geminiRoutes from './routes/gemini.js'; 
- import githubRoutes from './routes/github.js';
- import cors from "cors";
+import dotenv from "dotenv"; 
+import path from "path"; 
+import { fileURLToPath } from "url"; 
+import geminiRoutes from './routes/gemini.js'; 
+import githubRoutes from './routes/github.js';
+import cors from "cors";
 import fs from 'fs'; 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import logger from './config/logger.js';
 import { errorHandler, FileProcessingError } from './middleware/errorHandler.js';
 import { uploadSingleFile, uploadMultipleFiles } from './middleware/upload.js';
-  
- dotenv.config(); 
-  
- const __filename = fileURLToPath(import.meta.url); 
- const __dirname = path.dirname(__filename); 
-  
- const app = express(); 
- const PORT = process.env.PORT || 3000; 
+
+dotenv.config(); 
+
+const __filename = fileURLToPath(import.meta.url); 
+const __dirname = path.dirname(__filename); 
+
+const app = express(); 
+const PORT = process.env.PORT || 3000; 
 
 // Create HTTP server and Socket.IO instance for real-time progress updates
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
+    origin: ['http://localhost:10000', 'https://shankarelavarasan.github.io'],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    credentials: true
   }
 });
 
@@ -41,21 +42,19 @@ io.on('connection', (socket) => {
 // Make io available to routes
 app.set('io', io);
 
-app.use((req, res, next) => {
-  logger.info(`Received request: ${req.method} ${req.url}`);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-}); 
- app.use(express.json()); 
- app.use(express.urlencoded({ extended: true })); 
-  
- // Serve frontend files from the 'docs' directory 
- app.use(express.static('docs'));
+// CORS configuration
+app.use(cors({
+  origin: ['http://localhost:10000', 'https://shankarelavarasan.github.io'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true })); 
+
+// Serve frontend files from the 'docs' directory 
+app.use(express.static('docs'));
 
 /**
  * @route GET /api/templates
