@@ -41,7 +41,7 @@ class TemplateError extends Error {
     }
 }
 
-module.exports = {
+export {
     errorHandler,
     FileProcessingError,
     TemplateError
