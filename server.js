@@ -8,6 +8,7 @@ import express from "express";
 import fs from 'fs'; 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import logger from './config/logger.js';
 import { errorHandler, FileProcessingError } from './middleware/errorHandler.js';
 import { uploadSingleFile, uploadMultipleFiles } from './middleware/upload.js';
   
@@ -30,10 +31,10 @@ const io = new Server(httpServer, {
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
+  logger.info('Client connected: %s', socket.id);
   
   socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
+    logger.info('Client disconnected: %s', socket.id);
   });
 });
 
@@ -41,7 +42,7 @@ io.on('connection', (socket) => {
 app.set('io', io);
 
 app.use((req, res, next) => {
-  console.log(`Received request: ${req.method} ${req.url}`);
+  logger.info(`Received request: ${req.method} ${req.url}`);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -92,6 +93,6 @@ app.use(errorHandler);
 
 // Start the HTTP server
 httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Socket.IO server running`);
+  logger.info(`Server running on port ${PORT}`);
+  logger.info(`Socket.IO server running`);
 });
