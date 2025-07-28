@@ -1,6 +1,5 @@
 // docs/modules/fileManager.js
-
-window.selectedFiles = [];
+import { stateManager } from './stateManager.js';
 
 export function initializeFileSelection() {
     const selectFileBtn = document.getElementById('selectFileBtn');
@@ -37,7 +36,7 @@ export function initializeFileSelection() {
 
         function displaySelectedFiles(files) {
         selectedFilesDiv.innerHTML = ''; // Clear previous selections
-        window.selectedFiles = [];
+        stateManager.setSelectedFiles([]);
         if (files.length > 0) {
             const countHeader = document.createElement('p');
             countHeader.textContent = `${files.length} file(s) selected:`;
@@ -85,7 +84,8 @@ export function initializeFileSelection() {
     function readFile(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            window.selectedFiles.push({
+            const currentFiles = stateManager.state.selectedFiles;
+            stateManager.setSelectedFiles([...currentFiles, {
                 name: file.name,
                 content: e.target.result.split(',')[1], // Get base64 content
                 type: file.type,

@@ -1,11 +1,12 @@
 // docs/modules/templateManager.js
+import { stateManager } from './stateManager.js';
 
 export async function initializeTemplateSelection() {
     const templateSelect = document.getElementById('templateSelect');
     const selectTemplateFileBtn = document.getElementById('selectTemplateFileBtn');
 
     if (templateSelect && selectTemplateFileBtn) {
-        window.templateFiles = [];
+        stateManager.setState({ selectedTemplate: null });
 
         selectTemplateFileBtn.addEventListener('click', () => {
             const input = document.createElement('input');
@@ -35,7 +36,7 @@ function loadTemplateFiles(files) {
     defaultOption.textContent = 'Select a template';
     templateSelect.appendChild(defaultOption);
 
-    window.templateFiles = [];
+    stateManager.setState({ selectedTemplate: null });
     const allowedExtensions = ['.docx', '.pdf', '.txt', '.md', '.xlsx', '.xls'];
 
     Array.from(files).forEach(file => {
@@ -43,17 +44,18 @@ function loadTemplateFiles(files) {
          if (allowedExtensions.includes(ext)) {
              const reader = new FileReader();
              reader.onload = (e) => {
-                 window.templateFiles.push({
+                 const template = {
                      name: file.name,
                      content: e.target.result.split(',')[1],
                      type: file.type
-                 });
+                 };
+                 stateManager.setSelectedTemplate(template);
                  const option = document.createElement('option');
                  option.value = file.name;
                  option.textContent = file.name;
                  templateSelect.appendChild(option);
                  // Automatically select if single file
-                 if (window.templateFiles.length === 1) {
+                 if (stateManager.state.selectedTemplate) {
                      templateSelect.value = file.name;
                      applyTemplate(file.name);
                  }

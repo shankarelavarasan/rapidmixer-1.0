@@ -2,169 +2,130 @@ import { initializeFileSelection } from './modules/fileManager.js';
 import { initializeTemplateSelection } from './modules/templateManager.js';
 import { initializeVoiceInput } from './modules/voiceManager.js';
 import { initializeTaskProcessing, processTask } from './modules/taskProcessor.js';
+import { uiManager } from './modules/uiManager.js';
+import { errorHandler } from './modules/errorHandler.js';
+import { stateManager } from './modules/stateManager.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     initializeFileSelection();
     await initializeTemplateSelection();
     initializeVoiceInput();
     initializeTaskProcessing();
+    uiManager.initialize();
 
-    const processBtn = document.getElementById('processBtn');
-    const promptTextarea = document.getElementById('promptTextarea');
-    const chatContainer = document.getElementById('chatContainer');
     const templateSelect = document.getElementById('templateSelect');
-    const previewContainer = document.getElementById('previewContainer');
-    const previewContent = document.getElementById('previewContent');
-    const leftPanel = document.querySelector('.left-panel');
-    const workModeBtn = document.getElementById('workModeBtn');
-    const chatModeBtn = document.getElementById('chatModeBtn');
-    let currentMode = 'work'; // Default to work mode
-
-    const promptContainer = document.querySelector('.prompt-container');
-
-    function setMode(mode) {
-        currentMode = mode;
-        if (mode === 'work') {
-            leftPanel.style.display = 'block';
-            previewContainer.style.display = 'none';
-            promptContainer.style.display = 'flex';
-            promptContainer.style.visibility = 'visible';
-            workModeBtn.classList.add('active');
-            chatModeBtn.classList.remove('active');
-        } else {
-            leftPanel.style.display = 'none';
-            previewContainer.style.display = 'none';
-            promptContainer.style.display = 'flex';
-            promptContainer.style.visibility = 'visible';
-            workModeBtn.classList.remove('active');
-            chatModeBtn.classList.add('active');
-        }
-    }
-
-    workModeBtn.addEventListener('click', () => setMode('work'));
-    chatModeBtn.addEventListener('click', () => setMode('chat'));
-    setMode('work'); // Initialize
     
     // Add event listener for the Submit button (GitHub integration)
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.addEventListener('click', async () => {
+    uiManager.elements.submitBtn.addEventListener('click', async () => {
         try {
-            const userMessage = document.createElement('div');
-            userMessage.classList.add('chat-message', 'user-message');
-            userMessage.textContent = 'Pushing changes to GitHub...';
-            chatContainer.appendChild(userMessage);
+            uiManager.addMessage('Pushing changes to GitHub...', 'user');
             
-            const response = await fetch('/api/github/push', {
+            const response = await errorHandler.wrapAsync(fetch('/api/github/push', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ message: 'Update from Rapid AI Assistant' })
-            });
+            }));
             
             const data = await response.json();
             
-            const aiMessage = document.createElement('div');
-            aiMessage.classList.add('chat-message', 'ai-message');
-            
             if (response.ok) {
-                aiMessage.textContent = `Successfully pushed to GitHub: ${data.message}`;
+                uiManager.addMessage(`Successfully pushed to GitHub: ${data.message}`, 'ai');
             } else {
-                aiMessage.textContent = `Error pushing to GitHub: ${data.error}`;
-                aiMessage.classList.add('error-message');
+                const error = errorHandler.handleError(new Error(data.error), errorHandler.errorTypes.API_ERROR);
+                uiManager.addMessage(error.message, 'error');
             }
-            
-            chatContainer.appendChild(aiMessage);
         } catch (error) {
-            console.error('Error pushing to GitHub:', error);
-            const errorMessage = document.createElement('div');
-            errorMessage.classList.add('chat-message', 'error-message');
-            errorMessage.textContent = `Error: ${error.message}`;
-            chatContainer.appendChild(errorMessage);
+            const handledError = errorHandler.handleError(error, errorHandler.errorTypes.API_ERROR);
+            uiManager.addMessage(handledError.message, 'error');
+        } finally {
+            // Reset processing state
+            processBtn.disabled = false;
+            processBtn.textContent = 'Process';
         }
     });
 
-    processBtn.addEventListener('click', async () => {
-        const prompt = promptTextarea.value;
-        if (!prompt.trim()) return;
+    // Reset functionality is now handled by uiManager
 
-        const numFiles = window.selectedFiles ? window.selectedFiles.length : 0;
-        if (numFiles > 0) {
-            if (!confirm(`You are about to generate responses for ${numFiles} files. Proceed?`)) {
-                return;
-            }
-        }
-
-        // Add user message to chat
-        const userMessage = document.createElement('div');
-        userMessage.classList.add('chat-message', 'user-message');
-        userMessage.textContent = prompt;
-        chatContainer.appendChild(userMessage);
-        promptTextarea.value = '';
-
+    uiManager.elements.processBtn.addEventListener('click', async () => {
         try {
-            let requestBody = { prompt };
-            if (currentMode === 'work') {
-                const selectedTemplateName = templateSelect.value;
-                const selectedTemplate = window.templateFiles.find(file => file.name === selectedTemplateName);
-                requestBody.templateFile = selectedTemplate ? { name: selectedTemplate.name, content: selectedTemplate.content, type: selectedTemplate.type } : null;
-                requestBody.files = window.selectedFiles || [];
+            const prompt = uiManager.elements.promptTextarea.value;
+            
+            // Validate input
+            errorHandler.validateInput({ prompt }, {
+                prompt: { required: true, minLength: 1 }
+            });
+
+            const numFiles = stateManager.state.selectedFiles.length;
+            if (numFiles > 0) {
+                if (!confirm(`You are about to generate responses for ${numFiles} files. Proceed?`)) {
+                    return;
+                }
             }
 
-            const response = await fetch('https://rapid-ai-assistant.onrender.com/api/ask-gemini', {
+            uiManager.setProcessingState(true);
+            uiManager.addMessage(prompt, 'user');
+            uiManager.elements.promptTextarea.value = '';
+
+            let requestBody = { prompt };
+            if (stateManager.state.mode === 'work') {
+                const selectedTemplate = stateManager.state.selectedTemplate;
+                requestBody.templateFile = selectedTemplate ? { name: selectedTemplate.name, content: selectedTemplate.content, type: selectedTemplate.type } : null;
+                requestBody.files = stateManager.state.selectedFiles;
+            }
+
+            const response = await errorHandler.wrapAsync(fetch('https://rapid-ai-assistant.onrender.com/api/ask-gemini', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(requestBody)
-            });
+            }));
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw errorHandler.handleError(
+                    new Error(`HTTP error! status: ${response.status}`),
+                    errorHandler.errorTypes.API_ERROR
+                );
             }
 
             const data = await response.json();
 
-            if (currentMode === 'work') {
+            if (stateManager.state.mode === 'work') {
                 // Display preview
-                previewContent.innerHTML = '';
+                let previewHtml = '';
                 if (data.responses && Array.isArray(data.responses)) {
                     data.responses.forEach(resp => {
-                        const section = document.createElement('div');
-                        const heading = document.createElement('h4');
-                        heading.textContent = resp.file ? `Response for ${resp.file}:` : 'Response:';
-                        section.appendChild(heading);
-                        const content = document.createElement('p');
-                        content.textContent = resp.response;
-                        section.appendChild(content);
-                        previewContent.appendChild(section);
+                        previewHtml += `
+                            <div>
+                                <h4>${resp.file ? `Response for ${resp.file}:` : 'Response:'}</h4>
+                                <p>${resp.response}</p>
+                            </div>
+                        `;
                     });
                 } else {
-                    previewContent.textContent = 'Unexpected response format.';
+                    previewHtml = 'Unexpected response format.';
                 }
-                previewContainer.style.display = 'block';
+                uiManager.setPreviewContent(previewHtml);
 
                 const combinedContent = data.responses.map(resp => (resp.file ? `Response for ${resp.file}:
 ` : '') + resp.response).join('\n\n');
                 setupExportButtons(combinedContent);
 
-                const aiMessage = document.createElement('div');
-                aiMessage.classList.add('chat-message', 'ai-message');
-                aiMessage.textContent = 'Processing complete. Check preview.';
-                chatContainer.appendChild(aiMessage);
+                uiManager.addMessage('Processing complete. Check preview.', 'ai');
             } else {
                 // Chat mode: display response in chat
-                const aiMessage = document.createElement('div');
-                aiMessage.classList.add('chat-message', 'ai-message');
-                aiMessage.textContent = data.responses[0].response;
-                chatContainer.appendChild(aiMessage);
+                uiManager.addMessage(data.responses[0].response, 'ai');
             }
         } catch (error) {
-            console.error('Error processing:', error);
-            const errorMessage = document.createElement('div');
-            errorMessage.classList.add('chat-message', 'error-message');
-            errorMessage.textContent = `Error: ${error.message}`;
-            chatContainer.appendChild(errorMessage);
+            const handledError = errorHandler.handleError(
+                error,
+                error.type || errorHandler.errorTypes.UNKNOWN_ERROR
+            );
+            uiManager.addMessage(handledError.message, 'error');
+        } finally {
+            uiManager.setProcessingState(false);
         }
     });
 

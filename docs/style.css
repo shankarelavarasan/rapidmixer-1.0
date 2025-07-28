@@ -106,7 +106,7 @@ body {
     resize: none;
 }
 
-#processBtn, #submitBtn {
+#processBtn, #submitBtn, #resetBtn {
     background-color: #007bff;
     color: white;
     border: none;
@@ -117,7 +117,7 @@ body {
     width: auto;
 }
 
-#processBtn:hover, #submitBtn:hover {
+#processBtn:hover, #submitBtn:hover, #resetBtn:hover {
     background-color: #0056b3;
 }
 
@@ -127,6 +127,19 @@ body {
 
 #submitBtn:hover {
     background-color: #218838;
+}
+
+#resetBtn {
+    background-color: #dc3545;
+}
+
+#resetBtn:hover {
+    background-color: #c82333;
+}
+
+#processBtn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
 }
 
 button {
