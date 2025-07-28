@@ -20,16 +20,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chatModeBtn = document.getElementById('chatModeBtn');
     let currentMode = 'work'; // Default to work mode
 
+    const promptContainer = document.querySelector('.prompt-container');
+
     function setMode(mode) {
         currentMode = mode;
         if (mode === 'work') {
             leftPanel.style.display = 'block';
             previewContainer.style.display = 'none';
+            promptContainer.style.display = 'flex';
+            promptContainer.style.visibility = 'visible';
             workModeBtn.classList.add('active');
             chatModeBtn.classList.remove('active');
         } else {
             leftPanel.style.display = 'none';
             previewContainer.style.display = 'none';
+            promptContainer.style.display = 'flex';
+            promptContainer.style.visibility = 'visible';
             workModeBtn.classList.remove('active');
             chatModeBtn.classList.add('active');
         }
