@@ -1,10 +1,7 @@
 import { initializeFileSelection } from './modules/fileManager.js';
 import { initializeTemplateSelection } from './modules/templateManager.js';
 import { initializeVoiceInput } from './modules/voiceManager.js';
-import {
-  initializeTaskProcessing,
-  processTask,
-} from './modules/taskProcessor.js';
+import { processor } from './modules/integratedProcessor.js';
 import { uiManager } from './modules/uiManager.js';
 import { errorHandler } from './modules/errorHandler.js';
 import { stateManager } from './modules/stateManager.js';
@@ -26,16 +23,18 @@ const isProduction = window.location.hostname === 'shankarelavarasan.github.io';
 const API_URLS = isProduction ? API_CONFIG.production : API_CONFIG.development;
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize all modules
   initializeFileSelection();
   await initializeTemplateSelection();
   initializeVoiceInput();
-  initializeTaskProcessing();
+  processor.initialize();
   uiManager.initialize();
 
   const templateSelect = document.getElementById('templateSelect');
 
   // Add event listener for the Submit button (GitHub integration)
-  uiManager.elements.submitBtn.addEventListener('click', async () => {
+  if (uiManager.elements.submitBtn) {
+    uiManager.elements.submitBtn.addEventListener('click', async () => {
     try {
       uiManager.addMessage('Pushing changes to GitHub...', 'user');
 
@@ -72,14 +71,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       uiManager.addMessage(handledError.message, 'error');
     } finally {
       // Reset processing state
-      processBtn.disabled = false;
-      processBtn.textContent = 'Process';
+      const processBtn = document.getElementById('processBtn');
+      if (processBtn) {
+        processBtn.disabled = false;
+        processBtn.textContent = 'Process';
+      }
     }
   });
+  }
 
   // Reset functionality is now handled by uiManager
 
-  uiManager.elements.processBtn.addEventListener('click', async () => {
+  const processBtn = document.getElementById('processBtn');
+  if (processBtn) {
+    processBtn.addEventListener('click', async () => {
     try {
       const prompt = uiManager.elements.promptTextarea.value;
 
@@ -182,6 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       uiManager.setProcessingState(false);
     }
   });
+  }
 
   function setupExportButtons(content) {
     document.getElementById('exportPdfBtn').onclick = () =>

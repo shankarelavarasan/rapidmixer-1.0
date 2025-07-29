@@ -1,36 +1,39 @@
 // docs/modules/fileManager.js
 import { stateManager } from './stateManager.js';
 
-export function initializeFileSelection() {
-  const selectFileBtn = document.getElementById('selectFileBtn');
-  const selectFolderBtn = document.getElementById('selectFolderBtn');
-  const selectedFilesDiv = document.getElementById('selectedFiles');
+// File validation constants
+const FILE_VALIDATION = {
+  maxFileSize: 50 * 1024 * 1024, // 50MB
+  allowedTypes: [
+    'application/pdf',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/csv',
+    'text/plain',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ],
+  allowedExtensions: ['.pdf', '.xlsx', '.xls', '.csv', '.txt', '.doc', '.docx'],
+};
 
-  if (selectFileBtn) {
-    selectFileBtn.addEventListener('click', () => {
-      console.log('Select File button clicked');
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.multiple = true;
-      input.addEventListener('change', () => {
-        displaySelectedFiles(input.files);
-      });
-      input.click();
+export function initializeFileSelection() {
+  const fileInput = document.getElementById('selectFileBtn');
+  const folderInput = document.getElementById('selectFolderBtn');
+  const selectedFilesDiv = document.getElementById('selectedFiles');
+  const folderStats = document.getElementById('folderStats');
+
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      console.log('File input changed');
+      displaySelectedFiles(e.target.files);
     });
   }
 
-  if (selectFolderBtn) {
-    selectFolderBtn.addEventListener('click', () => {
-      console.log('Select Folder button clicked');
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.webkitdirectory = true;
-      input.directory = true;
-      input.multiple = true;
-      input.addEventListener('change', () => {
-        displaySelectedFiles(input.files);
-      });
-      input.click();
+  if (folderInput) {
+    folderInput.addEventListener('change', (e) => {
+      console.log('Folder input changed');
+      displaySelectedFiles(e.target.files);
+      updateFolderStats(e.target.files);
     });
   }
 
@@ -61,7 +64,23 @@ export function initializeFileSelection() {
     return true;
   }
 
+  function updateFolderStats(files) {
+    if (!folderStats) return;
+    
+    const validFiles = Array.from(files).filter(validateFile);
+    const totalFiles = files.length;
+    const validCount = validFiles.length;
+    
+    folderStats.innerHTML = `
+      <p><strong>Total files:</strong> ${totalFiles}</p>
+      <p><strong>Valid files:</strong> ${validCount}</p>
+      <p><strong>File types:</strong> ${[...new Set(validFiles.map(f => f.type))].join(', ')}</p>
+    `;
+  }
+
   function displaySelectedFiles(files) {
+    if (!selectedFilesDiv) return;
+    
     selectedFilesDiv.innerHTML = ''; // Clear previous selections
     stateManager.setSelectedFiles([]);
 

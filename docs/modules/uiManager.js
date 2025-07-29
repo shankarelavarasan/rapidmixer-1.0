@@ -44,13 +44,19 @@ class UIManager {
   }
 
   initializeEventHandlers() {
-    this.elements.workModeBtn.addEventListener('click', () =>
-      this.setMode('work')
-    );
-    this.elements.chatModeBtn.addEventListener('click', () =>
-      this.setMode('chat')
-    );
-    this.elements.resetBtn.addEventListener('click', () => this.resetPrompt());
+    if (this.elements.workModeBtn) {
+      this.elements.workModeBtn.addEventListener('click', () =>
+        this.setMode('work')
+      );
+    }
+    if (this.elements.chatModeBtn) {
+      this.elements.chatModeBtn.addEventListener('click', () =>
+        this.setMode('chat')
+      );
+    }
+    if (this.elements.resetBtn) {
+      this.elements.resetBtn.addEventListener('click', () => this.resetPrompt());
+    }
   }
 
   setMode(mode) {
@@ -58,17 +64,27 @@ class UIManager {
     this.state.leftPanelVisible = mode === 'work';
     this.state.previewVisible = false;
 
-    // Update UI based on mode
-    this.elements.leftPanel.style.display = this.state.leftPanelVisible
-      ? 'block'
-      : 'none';
-    this.elements.previewContainer.style.display = 'none';
-    this.elements.promptContainer.style.display = 'flex';
-    this.elements.promptContainer.style.visibility = 'visible';
+    // Update UI based on mode with null checks
+    if (this.elements.leftPanel) {
+      this.elements.leftPanel.style.display = this.state.leftPanelVisible
+        ? 'block'
+        : 'none';
+    }
+    if (this.elements.previewContainer) {
+      this.elements.previewContainer.style.display = 'none';
+    }
+    if (this.elements.promptContainer) {
+      this.elements.promptContainer.style.display = 'flex';
+      this.elements.promptContainer.style.visibility = 'visible';
+    }
 
-    // Update mode buttons
-    this.elements.workModeBtn.classList.toggle('active', mode === 'work');
-    this.elements.chatModeBtn.classList.toggle('active', mode === 'chat');
+    // Update mode buttons with null checks
+    if (this.elements.workModeBtn) {
+      this.elements.workModeBtn.classList.toggle('active', mode === 'work');
+    }
+    if (this.elements.chatModeBtn) {
+      this.elements.chatModeBtn.classList.toggle('active', mode === 'chat');
+    }
   }
 
   setProcessingState(isProcessing) {
