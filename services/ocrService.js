@@ -15,17 +15,17 @@ import { FileProcessingError } from '../middleware/errorHandler.js';
  * @throws {FileProcessingError} If OCR processing fails
  */
 export const extractTextFromImage = withErrorHandling(
-  async (imageFile) => {
+  async imageFile => {
     // Create a worker for OCR processing
     const worker = await createWorker('eng');
-    
+
     try {
       // Convert base64 to buffer
       const imageBuffer = Buffer.from(imageFile.content, 'base64');
-      
+
       // Recognize text from image
       const { data } = await worker.recognize(imageBuffer);
-      
+
       // Return the extracted text
       return data.text;
     } finally {
@@ -33,7 +33,10 @@ export const extractTextFromImage = withErrorHandling(
       await worker.terminate();
     }
   },
-  { context: 'OCR processing', defaultMessage: 'Failed to extract text from image' }
+  {
+    context: 'OCR processing',
+    defaultMessage: 'Failed to extract text from image',
+  }
 );
 
 /**
@@ -41,8 +44,17 @@ export const extractTextFromImage = withErrorHandling(
  * @param {string} filename - File name
  * @returns {boolean} True if the file is an image, false otherwise
  */
-export const isImageFile = (filename) => {
-  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff', 'tif'];
+export const isImageFile = filename => {
+  const imageExtensions = [
+    'jpg',
+    'jpeg',
+    'png',
+    'gif',
+    'bmp',
+    'webp',
+    'tiff',
+    'tif',
+  ];
   const ext = filename.split('.').pop().toLowerCase();
   return imageExtensions.includes(ext);
 };

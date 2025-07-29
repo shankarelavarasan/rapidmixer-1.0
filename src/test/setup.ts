@@ -9,9 +9,9 @@ jest.mock('@google/generative-ai', () => ({
     getGenerativeModel: jest.fn().mockReturnValue({
       generateContent: jest.fn().mockResolvedValue({
         response: {
-          text: () => 'Mocked AI response'
-        }
-      })
-    })
-  }))
+          text: () => 'Mocked AI response',
+        },
+      }),
+    }),
+  })),
 }));

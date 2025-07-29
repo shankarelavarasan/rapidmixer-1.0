@@ -15,24 +15,24 @@ import path from 'path';
  * @throws {TemplateError} If template cannot be loaded
  */
 export const getTemplate = withErrorHandling(
-    async (templateName, templatesDir) => {
-        const cacheKey = `template:${templateName}`;
-        
-        // Check cache first
-        const cachedTemplate = templateCache.get(cacheKey);
-        if (cachedTemplate) {
-            return cachedTemplate;
-        }
-        
-        // Read template from file
-        const content = await readTemplate(templateName, templatesDir);
-        
-        // Cache the template
-        templateCache.set(cacheKey, content);
-        
-        return content;
-    },
-    { context: 'template processing', defaultMessage: 'Failed to load template' }
+  async (templateName, templatesDir) => {
+    const cacheKey = `template:${templateName}`;
+
+    // Check cache first
+    const cachedTemplate = templateCache.get(cacheKey);
+    if (cachedTemplate) {
+      return cachedTemplate;
+    }
+
+    // Read template from file
+    const content = await readTemplate(templateName, templatesDir);
+
+    // Cache the template
+    templateCache.set(cacheKey, content);
+
+    return content;
+  },
+  { context: 'template processing', defaultMessage: 'Failed to load template' }
 );
 
 /**
@@ -42,9 +42,9 @@ export const getTemplate = withErrorHandling(
  * @returns {string} Processed content with template applied
  */
 export const applyTemplate = (templateContent, userContent) => {
-    // Simple implementation - in a real app, this would be more sophisticated
-    // with actual template parsing and variable substitution
-    return `Template: ${templateContent}\n\nContent: ${userContent}`;
+  // Simple implementation - in a real app, this would be more sophisticated
+  // with actual template parsing and variable substitution
+  return `Template: ${templateContent}\n\nContent: ${userContent}`;
 };
 
 /**
@@ -54,10 +54,10 @@ export const applyTemplate = (templateContent, userContent) => {
  * @throws {TemplateError} If templates cannot be listed
  */
 export const listTemplates = withErrorHandling(
-    async (templatesDir) => {
-        const fs = await import('fs/promises');
-        const files = await fs.readdir(templatesDir);
-        return files;
-    },
-    { context: 'template listing', defaultMessage: 'Failed to list templates' }
+  async templatesDir => {
+    const fs = await import('fs/promises');
+    const files = await fs.readdir(templatesDir);
+    return files;
+  },
+  { context: 'template listing', defaultMessage: 'Failed to list templates' }
 );

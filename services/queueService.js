@@ -33,56 +33,71 @@ const folderQueue = new Queue('folder-processing', {
  * @param {Object} data.options - Processing options
  * @returns {Promise<Object>} Job object
  */
-export const queueFolderProcessing = async (data) => {
+export const queueFolderProcessing = async data => {
   const job = await folderQueue.add('process-folder', data);
   return job;
 };
 
 // Process folder queue
-folderQueue.process('process-folder', async (job) => {
+folderQueue.process('process-folder', async job => {
   const { folderStructure, prompt, templateText, options } = job.data;
-  const { outputFormat, processingMode, saveOutput, outputDestination } = options || {};
-  
+  const { outputFormat, processingMode, saveOutput, outputDestination } =
+    options || {};
+
   try {
     // Update job progress
     job.progress(10);
-    
+
     // Process the folder structure to extract text from all files
-    const processedFolderStructure = await processFolderStructure(folderStructure);
+    const processedFolderStructure =
+      await processFolderStructure(folderStructure);
     job.progress(40);
-    
+
     // Combine prompt with template if provided
     let combinedPrompt = prompt;
     if (templateText) {
       combinedPrompt = `Use this template: ${templateText}. ${combinedPrompt}`;
     }
-    
+
     // Initialize Gemini model
     const model = getGeminiModel(process.env.GEMINI_API_KEY);
     job.progress(50);
-    
+
     // Process the folder with Gemini
-    const result = await processWithGemini(model, combinedPrompt, processedFolderStructure, {
-      outputFormat,
-      processingMode
-    });
+    const result = await processWithGemini(
+      model,
+      combinedPrompt,
+      processedFolderStructure,
+      {
+        outputFormat,
+        processingMode,
+      }
+    );
     job.progress(80);
-    
+
     // Save output if requested
     if (saveOutput && outputDestination) {
       if (result.combined) {
         // Save combined result
-        await saveResponseOutput([{ response: result.response, outputFormat }], outputDestination, outputFormat);
+        await saveResponseOutput(
+          [{ response: result.response, outputFormat }],
+          outputDestination,
+          outputFormat
+        );
       } else {
         // Save individual results
         const flatResponses = [];
         for (const folderResponses of Object.values(result.responses)) {
           flatResponses.push(...folderResponses);
         }
-        await saveResponseOutput(flatResponses, outputDestination, outputFormat);
+        await saveResponseOutput(
+          flatResponses,
+          outputDestination,
+          outputFormat
+        );
       }
     }
-    
+
     job.progress(100);
     return result;
   } catch (error) {
@@ -109,23 +124,23 @@ folderQueue.on('progress', (job, progress) => {
  * @param {string} jobId - Job ID
  * @returns {Promise<Object>} Job status
  */
-export const getJobStatus = async (jobId) => {
+export const getJobStatus = async jobId => {
   const job = await folderQueue.getJob(jobId);
-  
+
   if (!job) {
     return { status: 'not-found' };
   }
-  
+
   const state = await job.getState();
   const progress = job._progress;
   const result = job.returnvalue;
   const error = job.failedReason;
-  
+
   return {
     id: job.id,
     status: state,
     progress,
     result,
-    error
+    error,
   };
 };

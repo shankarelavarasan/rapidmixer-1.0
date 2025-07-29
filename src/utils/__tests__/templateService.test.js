@@ -1,5 +1,12 @@
-const { getTemplate, applyTemplate, listTemplates } = require('../../../services/templateService');
-const { FileProcessingError, TemplateError } = require('../../../utils/errorUtils');
+const {
+  getTemplate,
+  applyTemplate,
+  listTemplates,
+} = require('../../../services/templateService');
+const {
+  FileProcessingError,
+  TemplateError,
+} = require('../../../utils/errorUtils');
 const fs = require('fs');
 const path = require('path');
 const templateCache = require('../../../utils/cacheManager');
@@ -44,8 +51,14 @@ describe('templateService', () => {
       // Assert
       expect(result).toBe(templateContent);
       expect(templateCache.get).toHaveBeenCalledWith(templateId);
-      expect(fs.promises.readFile).toHaveBeenCalledWith('/path/to/template.txt', 'utf8');
-      expect(templateCache.set).toHaveBeenCalledWith(templateId, templateContent);
+      expect(fs.promises.readFile).toHaveBeenCalledWith(
+        '/path/to/template.txt',
+        'utf8'
+      );
+      expect(templateCache.set).toHaveBeenCalledWith(
+        templateId,
+        templateContent
+      );
     });
 
     it('should throw TemplateError if template file cannot be read', async () => {
@@ -58,7 +71,10 @@ describe('templateService', () => {
       // Act & Assert
       await expect(getTemplate(templateId)).rejects.toThrow(TemplateError);
       expect(templateCache.get).toHaveBeenCalledWith(templateId);
-      expect(fs.promises.readFile).toHaveBeenCalledWith('/path/to/template.txt', 'utf8');
+      expect(fs.promises.readFile).toHaveBeenCalledWith(
+        '/path/to/template.txt',
+        'utf8'
+      );
       expect(templateCache.set).not.toHaveBeenCalled();
     });
   });
@@ -79,7 +95,10 @@ describe('templateService', () => {
       // Assert
       expect(result).toBe('Hello John, welcome to Acme Inc!');
       expect(templateCache.get).toHaveBeenCalledWith(templateId);
-      expect(fs.promises.readFile).toHaveBeenCalledWith('/path/to/template.txt', 'utf8');
+      expect(fs.promises.readFile).toHaveBeenCalledWith(
+        '/path/to/template.txt',
+        'utf8'
+      );
     });
 
     it('should handle missing values by leaving placeholders unchanged', async () => {
@@ -105,7 +124,9 @@ describe('templateService', () => {
       fs.promises.readFile.mockRejectedValue(new Error('File not found'));
 
       // Act & Assert
-      await expect(applyTemplate(templateId, values)).rejects.toThrow(TemplateError);
+      await expect(applyTemplate(templateId, values)).rejects.toThrow(
+        TemplateError
+      );
     });
   });
 

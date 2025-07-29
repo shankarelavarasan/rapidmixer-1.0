@@ -1,92 +1,92 @@
 // State Management Module
 
 class AppState {
-    constructor() {
-        this._state = {
-            mode: 'work',
-            isProcessing: false,
-            selectedFiles: [],
-            selectedTemplate: null,
-            prompt: '',
-            responses: [],
-            error: null
-        };
-        this._listeners = new Set();
-    }
+  constructor() {
+    this._state = {
+      mode: 'work',
+      isProcessing: false,
+      selectedFiles: [],
+      selectedTemplate: null,
+      prompt: '',
+      responses: [],
+      error: null,
+    };
+    this._listeners = new Set();
+  }
 
-    get state() {
-        return { ...this._state };
-    }
+  get state() {
+    return { ...this._state };
+  }
 
-    subscribe(listener) {
-        this._listeners.add(listener);
-        return () => this._listeners.delete(listener);
-    }
+  subscribe(listener) {
+    this._listeners.add(listener);
+    return () => this._listeners.delete(listener);
+  }
 
-    setState(newState) {
-        const oldState = { ...this._state };
-        this._state = { ...this._state, ...newState };
-        
-        // Notify listeners only if state actually changed
-        if (JSON.stringify(oldState) !== JSON.stringify(this._state)) {
-            this._listeners.forEach(listener => listener(this._state, oldState));
-        }
-    }
+  setState(newState) {
+    const oldState = { ...this._state };
+    this._state = { ...this._state, ...newState };
 
-    // Mode management
-    setMode(mode) {
-        this.setState({ mode });
+    // Notify listeners only if state actually changed
+    if (JSON.stringify(oldState) !== JSON.stringify(this._state)) {
+      this._listeners.forEach(listener => listener(this._state, oldState));
     }
+  }
 
-    // Processing state
-    setProcessing(isProcessing) {
-        this.setState({ isProcessing });
-    }
+  // Mode management
+  setMode(mode) {
+    this.setState({ mode });
+  }
 
-    // File management
-    setSelectedFiles(files) {
-        this.setState({ selectedFiles: files });
-    }
+  // Processing state
+  setProcessing(isProcessing) {
+    this.setState({ isProcessing });
+  }
 
-    // Template management
-    setSelectedTemplate(template) {
-        this.setState({ selectedTemplate: template });
-    }
+  // File management
+  setSelectedFiles(files) {
+    this.setState({ selectedFiles: files });
+  }
 
-    // Prompt management
-    setPrompt(prompt) {
-        this.setState({ prompt });
-    }
+  // Template management
+  setSelectedTemplate(template) {
+    this.setState({ selectedTemplate: template });
+  }
 
-    // Response management
-    setResponses(responses) {
-        this.setState({ responses });
-    }
+  // Prompt management
+  setPrompt(prompt) {
+    this.setState({ prompt });
+  }
 
-    addResponse(response) {
-        this.setState({
-            responses: [...this._state.responses, response]
-        });
-    }
+  // Response management
+  setResponses(responses) {
+    this.setState({ responses });
+  }
 
-    // Error management
-    setError(error) {
-        this.setState({ error });
-    }
+  addResponse(response) {
+    this.setState({
+      responses: [...this._state.responses, response],
+    });
+  }
 
-    clearError() {
-        this.setState({ error: null });
-    }
+  // Error management
+  setError(error) {
+    this.setState({ error });
+  }
 
-    // State reset
-    resetState() {
-        this.setState({
-            isProcessing: false,
-            prompt: '',
-            responses: [],
-            error: null
-        });
-    }
+  clearError() {
+    this.setState({ error: null });
+  }
+
+  // State reset
+  resetState() {
+    this.setState({
+      isProcessing: false,
+      prompt: '',
+      responses: [],
+      error: null,
+    });
+  }
 }
 
 export const stateManager = new AppState();

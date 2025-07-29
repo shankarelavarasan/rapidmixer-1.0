@@ -16,7 +16,7 @@ export const formatOutput = withErrorHandling(
     if (typeof content === 'string' && format === 'text') {
       return content;
     }
-    
+
     switch (format.toLowerCase()) {
       case 'json':
         return formatAsJson(content, options);
@@ -42,11 +42,11 @@ const formatAsText = (content, options = {}) => {
   if (typeof content === 'string') {
     return content;
   }
-  
+
   if (typeof content === 'object') {
     return JSON.stringify(content, null, 2);
   }
-  
+
   return String(content);
 };
 
@@ -60,13 +60,13 @@ const formatAsJson = (content, options = {}) => {
   if (typeof content === 'object') {
     return content;
   }
-  
+
   try {
     // Try to parse as JSON if it's a string
     if (typeof content === 'string') {
       return JSON.parse(content);
     }
-    
+
     // Fallback to creating a simple JSON object
     return { content: String(content) };
   } catch (error) {
@@ -83,9 +83,9 @@ const formatAsJson = (content, options = {}) => {
  */
 const formatAsHtml = (content, options = {}) => {
   const { title = 'AI Response', css = '' } = options;
-  
+
   let htmlContent = '';
-  
+
   if (typeof content === 'string') {
     // Convert plain text to HTML (respecting line breaks)
     htmlContent = content
@@ -106,7 +106,7 @@ const formatAsHtml = (content, options = {}) => {
   } else {
     htmlContent = String(content);
   }
-  
+
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -150,9 +150,9 @@ const formatAsHtml = (content, options = {}) => {
  */
 const formatAsMarkdown = (content, options = {}) => {
   const { title = 'AI Response' } = options;
-  
+
   let mdContent = '';
-  
+
   if (typeof content === 'string') {
     mdContent = content;
   } else if (typeof content === 'object') {
@@ -160,6 +160,6 @@ const formatAsMarkdown = (content, options = {}) => {
   } else {
     mdContent = String(content);
   }
-  
+
   return `# ${title}\n\n${mdContent}`;
 };

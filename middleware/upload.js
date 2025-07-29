@@ -21,8 +21,8 @@ const upload = multer({
   fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
-    files: 50 // Maximum 50 files per upload
-  }
+    files: 50, // Maximum 50 files per upload
+  },
 });
 
 /**
@@ -49,30 +49,34 @@ export const processFolderUpload = async (req, res, next) => {
 
     // Group files by their folder structure
     const folderStructure = {};
-    
+
     req.files.forEach(file => {
       // Extract folder path from the file path
       const relativePath = file.originalname;
       const folderPath = path.dirname(relativePath);
-      
+
       if (!folderStructure[folderPath]) {
         folderStructure[folderPath] = [];
       }
-      
+
       folderStructure[folderPath].push({
         name: path.basename(relativePath),
         content: file.buffer.toString('base64'),
         type: file.mimetype,
         size: file.size,
-        path: relativePath
+        path: relativePath,
       });
     });
-    
+
     // Attach folder structure to request object
     req.folderStructure = folderStructure;
     next();
   } catch (error) {
-    next(new FileProcessingError(`Error processing folder upload: ${error.message}`));
+    next(
+      new FileProcessingError(
+        `Error processing folder upload: ${error.message}`
+      )
+    );
   }
 };
 

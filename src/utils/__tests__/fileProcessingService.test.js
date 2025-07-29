@@ -10,14 +10,14 @@ jest.mock('pdf-parse', () => jest.fn());
 jest.mock('xlsx', () => ({
   read: jest.fn(),
   utils: {
-    sheet_to_csv: jest.fn()
-  }
+    sheet_to_csv: jest.fn(),
+  },
 }));
 jest.mock('mammoth', () => ({
-  extractRawText: jest.fn()
+  extractRawText: jest.fn(),
 }));
 jest.mock('../../../utils/fileUtils.js', () => ({
-  validateFile: jest.fn()
+  validateFile: jest.fn(),
 }));
 
 // Import mocked modules
@@ -37,10 +37,10 @@ describe('File Processing Service', () => {
       // Setup
       const mockPdfText = 'Extracted PDF text';
       pdf.mockResolvedValue({ text: mockPdfText });
-      
+
       const file = {
         name: 'test.pdf',
-        content: Buffer.from('test content').toString('base64')
+        content: Buffer.from('test content').toString('base64'),
       };
 
       // Execute
@@ -57,13 +57,13 @@ describe('File Processing Service', () => {
       const mockSheetData = 'Sheet1 data';
       XLSX.read.mockReturnValue({
         SheetNames: ['Sheet1'],
-        Sheets: { Sheet1: {} }
+        Sheets: { Sheet1: {} },
       });
       XLSX.utils.sheet_to_csv.mockReturnValue(mockSheetData);
-      
+
       const file = {
         name: 'test.xlsx',
-        content: Buffer.from('test content').toString('base64')
+        content: Buffer.from('test content').toString('base64'),
       };
 
       // Execute
@@ -80,10 +80,10 @@ describe('File Processing Service', () => {
       // Setup
       const mockWordText = 'Extracted Word text';
       mammoth.extractRawText.mockResolvedValue({ value: mockWordText });
-      
+
       const file = {
         name: 'test.docx',
-        content: Buffer.from('test content').toString('base64')
+        content: Buffer.from('test content').toString('base64'),
       };
 
       // Execute
@@ -100,7 +100,7 @@ describe('File Processing Service', () => {
       const textContent = 'Plain text content';
       const file = {
         name: 'test.txt',
-        content: Buffer.from(textContent).toString('base64')
+        content: Buffer.from(textContent).toString('base64'),
       };
 
       // Execute
@@ -115,7 +115,7 @@ describe('File Processing Service', () => {
       // Setup
       const file = {
         name: 'test.jpg',
-        content: Buffer.from('image data').toString('base64')
+        content: Buffer.from('image data').toString('base64'),
       };
 
       // Execute
@@ -130,7 +130,7 @@ describe('File Processing Service', () => {
       // Setup
       const file = {
         name: 'test.xyz',
-        content: Buffer.from('unknown content').toString('base64')
+        content: Buffer.from('unknown content').toString('base64'),
       };
 
       // Execute & Verify
@@ -141,10 +141,10 @@ describe('File Processing Service', () => {
     test('should handle PDF parsing errors correctly', async () => {
       // Setup
       pdf.mockRejectedValue(new Error('PDF parsing failed'));
-      
+
       const file = {
         name: 'test.pdf',
-        content: Buffer.from('test content').toString('base64')
+        content: Buffer.from('test content').toString('base64'),
       };
 
       // Execute & Verify

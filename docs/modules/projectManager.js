@@ -1,6 +1,12 @@
 export function createProject(name) {
   const id = `proj_${Date.now()}`;
-  const project = { id, name, files: [], tasks: [], created: new Date().toISOString() };
+  const project = {
+    id,
+    name,
+    files: [],
+    tasks: [],
+    created: new Date().toISOString(),
+  };
   let projects = JSON.parse(localStorage.getItem('projects')) || [];
   projects.push(project);
   localStorage.setItem('projects', JSON.stringify(projects));
@@ -17,10 +23,10 @@ export function getProject(id) {
 }
 
 export function updateProject(updatedProject) {
-    let projects = getProjects();
-    const index = projects.findIndex(p => p.id === updatedProject.id);
-    if (index !== -1) {
-        projects[index] = updatedProject;
-        localStorage.setItem('projects', JSON.stringify(projects));
-    }
+  let projects = getProjects();
+  const index = projects.findIndex(p => p.id === updatedProject.id);
+  if (index !== -1) {
+    projects[index] = updatedProject;
+    localStorage.setItem('projects', JSON.stringify(projects));
+  }
 }

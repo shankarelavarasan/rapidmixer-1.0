@@ -12,47 +12,54 @@ import { FileProcessingError } from '../middleware/errorHandler.js';
  * @param {string} outputFormat - Format of the output (text, json, html, markdown)
  * @returns {Promise<void>}
  */
-export async function saveResponseOutput(responses, outputDestination, outputFormat) {
-    try {
-        // Create the output directory if it doesn't exist
-        await fs.mkdir(outputDestination, { recursive: true });
-        
-        // Save each response
-        for (let i = 0; i < responses.length; i++) {
-            const response = responses[i];
-            const fileName = response.file || `response_${i + 1}`;
-            let fileExtension;
-            
-            // Determine file extension based on output format
-            switch (outputFormat.toLowerCase()) {
-                case 'json':
-                    fileExtension = '.json';
-                    break;
-                case 'html':
-                    fileExtension = '.html';
-                    break;
-                case 'markdown':
-                    fileExtension = '.md';
-                    break;
-                case 'text':
-                default:
-                    fileExtension = '.txt';
-                    break;
-            }
-            
-            const outputPath = path.join(outputDestination, `${fileName}${fileExtension}`);
-            
-            // Format and save the response
-            let content = response.response;
-            if (typeof content === 'object') {
-                content = JSON.stringify(content, null, 2);
-            }
-            
-            await fs.writeFile(outputPath, content, 'utf-8');
-        }
-    } catch (error) {
-        throw new FileProcessingError(`Failed to save output: ${error.message}`);
+export async function saveResponseOutput(
+  responses,
+  outputDestination,
+  outputFormat
+) {
+  try {
+    // Create the output directory if it doesn't exist
+    await fs.mkdir(outputDestination, { recursive: true });
+
+    // Save each response
+    for (let i = 0; i < responses.length; i++) {
+      const response = responses[i];
+      const fileName = response.file || `response_${i + 1}`;
+      let fileExtension;
+
+      // Determine file extension based on output format
+      switch (outputFormat.toLowerCase()) {
+        case 'json':
+          fileExtension = '.json';
+          break;
+        case 'html':
+          fileExtension = '.html';
+          break;
+        case 'markdown':
+          fileExtension = '.md';
+          break;
+        case 'text':
+        default:
+          fileExtension = '.txt';
+          break;
+      }
+
+      const outputPath = path.join(
+        outputDestination,
+        `${fileName}${fileExtension}`
+      );
+
+      // Format and save the response
+      let content = response.response;
+      if (typeof content === 'object') {
+        content = JSON.stringify(content, null, 2);
+      }
+
+      await fs.writeFile(outputPath, content, 'utf-8');
     }
+  } catch (error) {
+    throw new FileProcessingError(`Failed to save output: ${error.message}`);
+  }
 }
 
 /**
@@ -62,8 +69,8 @@ export async function saveResponseOutput(responses, outputDestination, outputFor
  * @returns {string} Unique filename
  */
 export function createUniqueFilename(baseName, extension) {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    return `${baseName}_${timestamp}${extension}`;
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  return `${baseName}_${timestamp}${extension}`;
 }
 
 /**
@@ -72,15 +79,15 @@ export function createUniqueFilename(baseName, extension) {
  * @returns {string} File extension with dot
  */
 export function getFileExtension(outputFormat) {
-    switch (outputFormat.toLowerCase()) {
-        case 'json':
-            return '.json';
-        case 'html':
-            return '.html';
-        case 'markdown':
-            return '.md';
-        case 'text':
-        default:
-            return '.txt';
-    }
+  switch (outputFormat.toLowerCase()) {
+    case 'json':
+      return '.json';
+    case 'html':
+      return '.html';
+    case 'markdown':
+      return '.md';
+    case 'text':
+    default:
+      return '.txt';
+  }
 }

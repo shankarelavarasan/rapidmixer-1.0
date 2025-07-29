@@ -1,7 +1,7 @@
 // This module will handle Voice to Task functionality
 
 export function render(container, project) {
-    container.innerHTML = `
+  container.innerHTML = `
         <h3>Voice to Task</h3>
         <p>Upload an audio file to transcribe and create tasks.</p>
         <input type="file" id="audioInput" accept="audio/*">
@@ -12,25 +12,27 @@ export function render(container, project) {
         <pre id="tasksOutput"></pre>
     `;
 
-    const processAudioBtn = document.getElementById('processAudioBtn');
-    const audioInput = document.getElementById('audioInput');
-    const transcriptionOutput = document.getElementById('transcriptionOutput');
-    const tasksOutput = document.getElementById('tasksOutput');
+  const processAudioBtn = document.getElementById('processAudioBtn');
+  const audioInput = document.getElementById('audioInput');
+  const transcriptionOutput = document.getElementById('transcriptionOutput');
+  const tasksOutput = document.getElementById('tasksOutput');
 
-    processAudioBtn.addEventListener('click', async () => {
-        const file = audioInput.files[0];
-        if (!file) {
-            transcriptionOutput.textContent = 'Please select an audio file first.';
-            return;
-        }
+  processAudioBtn.addEventListener('click', async () => {
+    const file = audioInput.files[0];
+    if (!file) {
+      transcriptionOutput.textContent = 'Please select an audio file first.';
+      return;
+    }
 
-        transcriptionOutput.textContent = 'Processing audio...';
-        tasksOutput.textContent = '';
+    transcriptionOutput.textContent = 'Processing audio...';
+    tasksOutput.textContent = '';
 
-        // Placeholder for voice-to-text and task creation logic
-        setTimeout(() => {
-            transcriptionOutput.textContent = 'This is a sample transcription of the audio file.';
-            tasksOutput.textContent = '- Task 1 created from transcription.\n- Task 2 created from transcription.';
-        }, 2000);
-    });
+    // Placeholder for voice-to-text and task creation logic
+    setTimeout(() => {
+      transcriptionOutput.textContent =
+        'This is a sample transcription of the audio file.';
+      tasksOutput.textContent =
+        '- Task 1 created from transcription.\n- Task 2 created from transcription.';
+    }, 2000);
+  });
 }

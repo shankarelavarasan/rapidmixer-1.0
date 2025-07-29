@@ -1,4 +1,8 @@
-const { getGeminiModel, generateContent, processBatch } = require('../../../services/geminiService');
+const {
+  getGeminiModel,
+  generateContent,
+  processBatch,
+} = require('../../../services/geminiService');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { FileProcessingError } = require('../../../utils/errorUtils');
 
@@ -11,16 +15,16 @@ describe('geminiService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Setup mock for GoogleGenerativeAI
     mockGenerateContent = jest.fn();
     mockModel = {
-      generateContent: mockGenerateContent
+      generateContent: mockGenerateContent,
     };
-    
+
     const mockGetGenerativeModel = jest.fn().mockReturnValue(mockModel);
     GoogleGenerativeAI.mockImplementation(() => ({
-      getGenerativeModel: mockGetGenerativeModel
+      getGenerativeModel: mockGetGenerativeModel,
     }));
   });
 
@@ -56,8 +60,8 @@ describe('geminiService', () => {
       const prompt = 'Test prompt';
       const mockResponse = {
         response: {
-          text: () => 'Generated content'
-        }
+          text: () => 'Generated content',
+        },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);
 
@@ -75,7 +79,9 @@ describe('geminiService', () => {
       mockGenerateContent.mockRejectedValue(new Error('API error'));
 
       // Act & Assert
-      await expect(generateContent(mockModel, prompt)).rejects.toThrow('Error generating content: API error');
+      await expect(generateContent(mockModel, prompt)).rejects.toThrow(
+        'Error generating content: API error'
+      );
     });
   });
 
@@ -86,21 +92,21 @@ describe('geminiService', () => {
       const prompt = 'Test prompt';
       const files = [
         { name: 'file1.txt', content: 'File 1 content' },
-        { name: 'file2.txt', content: 'File 2 content' }
+        { name: 'file2.txt', content: 'File 2 content' },
       ];
-      
+
       const mockResponse1 = {
         response: {
-          text: () => 'Response for file1'
-        }
+          text: () => 'Response for file1',
+        },
       };
-      
+
       const mockResponse2 = {
         response: {
-          text: () => 'Response for file2'
-        }
+          text: () => 'Response for file2',
+        },
       };
-      
+
       // Setup mock to return different responses for different calls
       mockGenerateContent
         .mockResolvedValueOnce(mockResponse1)
@@ -112,7 +118,7 @@ describe('geminiService', () => {
       // Assert
       expect(result).toEqual([
         { file: 'file1.txt', response: 'Response for file1' },
-        { file: 'file2.txt', response: 'Response for file2' }
+        { file: 'file2.txt', response: 'Response for file2' },
       ]);
       expect(mockGenerateContent).toHaveBeenCalledTimes(2);
     });
@@ -123,15 +129,15 @@ describe('geminiService', () => {
       const prompt = 'Test prompt';
       const files = [
         { name: 'file1.txt', content: 'File 1 content' },
-        { name: 'file2.txt', content: 'File 2 content' }
+        { name: 'file2.txt', content: 'File 2 content' },
       ];
-      
+
       const mockResponse = {
         response: {
-          text: () => 'Response for file1'
-        }
+          text: () => 'Response for file1',
+        },
       };
-      
+
       // First call succeeds, second call fails
       mockGenerateContent
         .mockResolvedValueOnce(mockResponse)
@@ -143,7 +149,10 @@ describe('geminiService', () => {
       // Assert
       expect(result).toEqual([
         { file: 'file1.txt', response: 'Response for file1' },
-        { file: 'file2.txt', response: 'Error processing file: API error for file2' }
+        {
+          file: 'file2.txt',
+          response: 'Error processing file: API error for file2',
+        },
       ]);
       expect(mockGenerateContent).toHaveBeenCalledTimes(2);
     });

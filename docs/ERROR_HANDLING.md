@@ -39,13 +39,13 @@ The `withErrorHandling` utility provides a consistent way to add error handling 
 
 ```javascript
 const processExcelFile = withErrorHandling(
-    async (buffer) => {
-        // Function implementation
-    },
-    { 
-        context: 'excel processing', 
-        defaultMessage: 'Could not parse Excel file' 
-    }
+  async buffer => {
+    // Function implementation
+  },
+  {
+    context: 'excel processing',
+    defaultMessage: 'Could not parse Excel file',
+  }
 );
 ```
 

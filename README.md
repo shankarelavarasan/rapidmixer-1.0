@@ -45,8 +45,8 @@ The server will be running on `http://localhost:10000`.
 
 ## API Endpoints
 
--   `POST /api/ask-gemini`: Sends a prompt to the Gemini API and returns the generated text. Supports file processing for PDF, Excel, Word, Text, and Image files.
--   `GET /api/templates`: Returns a list of available templates.
+- `POST /api/ask-gemini`: Sends a prompt to the Gemini API and returns the generated text. Supports file processing for PDF, Excel, Word, Text, and Image files.
+- `GET /api/templates`: Returns a list of available templates.
 
 ## Recent Improvements
 

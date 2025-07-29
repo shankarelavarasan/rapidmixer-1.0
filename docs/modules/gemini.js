@@ -6,23 +6,28 @@
  * @returns {Promise<string>} A promise that resolves with the AI's answer.
  */
 export async function ask(prompt, filesData = []) {
-    console.log(`Asking Gemini: ${prompt}`);
+  console.log(`Asking Gemini: ${prompt}`);
 
-    const response = await fetch('https://rapid-ai-assistant.onrender.com/ask-gemini', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt, filesData }),
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.response || 'An error occurred with the Gemini API.');
+  const response = await fetch(
+    'https://rapid-ai-assistant.onrender.com/ask-gemini',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt, filesData }),
     }
+  );
 
-    const data = await response.json();
-    return data.response;
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(
+      errorData.response || 'An error occurred with the Gemini API.'
+    );
+  }
+
+  const data = await response.json();
+  return data.response;
 }
 
 /**
@@ -32,7 +37,7 @@ export async function ask(prompt, filesData = []) {
  * @param {object} project The active project.
  */
 export function render(container, project) {
-    // The main chat interface is handled by script.js now.
-    // This space can be used for Gemini-specific settings for the project.
-    container.innerHTML = `<h3>Gemini Settings</h3><p>This area can be used for API key settings, model selection, etc. for the <strong>${project.name}</strong> project.</p>`;
+  // The main chat interface is handled by script.js now.
+  // This space can be used for Gemini-specific settings for the project.
+  container.innerHTML = `<h3>Gemini Settings</h3><p>This area can be used for API key settings, model selection, etc. for the <strong>${project.name}</strong> project.</p>`;
 }
