@@ -1,6 +1,7 @@
 import { initializeFileSelection } from './modules/fileManager.js';
 import { initializeTemplateSelection } from './modules/templateManager.js';
 import { initializeVoiceInput } from './modules/voiceManager.js';
+import { initializeFileSelection } from './modules/fileManager.js';
 import { processor } from './modules/integratedProcessor.js';
 import { uiManager } from './modules/uiManager.js';
 import { errorHandler } from './modules/errorHandler.js';
@@ -9,8 +10,8 @@ import { stateManager } from './modules/stateManager.js';
 // API Configuration
 const API_CONFIG = {
   development: {
-    baseUrl: 'http://localhost:10000',
-    wsUrl: 'ws://localhost:10000',
+    baseUrl: 'http://localhost:3000',
+    wsUrl: 'ws://localhost:3000',
   },
   production: {
     baseUrl: 'https://rapid-ai-assistant.onrender.com',

@@ -441,4 +441,71 @@ setInterval(() => {
     }
 }, 60 * 60 * 1000); // Run every hour
 
+// Analyze documents endpoint
+router.post('/analyze', upload.array('files'), async (req, res) => {
+    try {
+        const files = req.files;
+        const prompt = req.body.prompt;
+
+        if (!files || files.length === 0) {
+            return res.status(400).json({ error: 'No files provided' });
+        }
+
+        if (!prompt) {
+            return res.status(400).json({ error: 'No prompt provided' });
+        }
+
+        const results = [];
+        
+        for (const file of files) {
+            try {
+                const filePath = file.path;
+                const content = await processFile(filePath);
+                
+                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                const result = await model.generateContent([
+                    prompt,
+                    `File: ${file.originalname}\n\nContent:\n${content}`
+                ]);
+                
+                const response = await result.response;
+                const analysis = response.text();
+                
+                results.push({
+                    filename: file.originalname,
+                    analysis: analysis,
+                    success: true
+                });
+                
+            } catch (error) {
+                results.push({
+                    filename: file.originalname,
+                    error: error.message,
+                    success: false
+                });
+            }
+        }
+
+        // Clean up uploaded files
+        files.forEach(file => {
+            try {
+                fs.unlinkSync(file.path);
+            } catch (cleanupError) {
+                console.error('Error cleaning up file:', cleanupError);
+            }
+        });
+
+        res.json({
+            analysis: results.map(r => 
+                `## ${r.filename}\n\n${r.success ? r.analysis : `Error: ${r.error}`}\n\n---\n\n`
+            ).join(''),
+            results: results
+        });
+
+    } catch (error) {
+        console.error('Analyze error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 export default router;

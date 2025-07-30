@@ -17,25 +17,33 @@ const FILE_VALIDATION = {
 };
 
 export function initializeFileSelection() {
-  const fileInput = document.getElementById('selectFileBtn');
-  const folderInput = document.getElementById('selectFolderBtn');
+  const fileInput = document.getElementById('fileInput');
+  const folderInput = document.getElementById('folderInput');
   const selectedFilesDiv = document.getElementById('selectedFiles');
   const folderStats = document.getElementById('folderStats');
+  const selectFileBtn = document.getElementById('selectFileBtn');
+  const selectFolderBtn = document.getElementById('selectFolderBtn');
 
-  if (fileInput) {
-    fileInput.addEventListener('change', (e) => {
-      console.log('File input changed');
-      displaySelectedFiles(e.target.files);
-    });
+  if (!fileInput || !folderInput || !selectedFilesDiv || !selectFileBtn || !selectFolderBtn) {
+    console.error('Required file selection elements not found');
+    return;
   }
 
-  if (folderInput) {
-    folderInput.addEventListener('change', (e) => {
-      console.log('Folder input changed');
-      displaySelectedFiles(e.target.files);
-      updateFolderStats(e.target.files);
-    });
-  }
+  // Button click events to trigger file inputs
+  selectFileBtn.addEventListener('click', () => fileInput.click());
+  selectFolderBtn.addEventListener('click', () => folderInput.click());
+
+  // File selection events
+  fileInput.addEventListener('change', (e) => {
+    console.log('File input changed');
+    displaySelectedFiles(e.target.files);
+  });
+
+  folderInput.addEventListener('change', (e) => {
+    console.log('Folder input changed');
+    displaySelectedFiles(e.target.files);
+    updateFolderStats(e.target.files);
+  });
 
   function validateFile(file) {
     // Check file size

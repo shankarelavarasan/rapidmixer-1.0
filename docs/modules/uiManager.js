@@ -57,6 +57,12 @@ class UIManager {
     if (this.elements.resetBtn) {
       this.elements.resetBtn.addEventListener('click', () => this.resetPrompt());
     }
+    if (this.elements.processBtn) {
+      this.elements.processBtn.addEventListener('click', () => this.handleProcess());
+    }
+    if (this.elements.submitBtn) {
+      this.elements.submitBtn.addEventListener('click', () => this.handleSubmit());
+    }
   }
 
   setMode(mode) {
@@ -153,6 +159,42 @@ class UIManager {
   resetPrompt() {
     this.elements.promptTextarea.value = '';
     this.hidePreview();
+  }
+
+  async handleProcess() {
+    const prompt = this.elements.promptTextarea.value.trim();
+    if (!prompt) {
+      alert('Please enter a prompt first.');
+      return;
+    }
+
+    try {
+      this.setProcessingState(true);
+      await processor.processFiles(prompt);
+    } catch (error) {
+      console.error('Processing error:', error);
+      alert('Error processing files: ' + error.message);
+    } finally {
+      this.setProcessingState(false);
+    }
+  }
+
+  async handleSubmit() {
+    const prompt = this.elements.promptTextarea.value.trim();
+    if (!prompt) {
+      alert('Please enter a prompt first.');
+      return;
+    }
+
+    try {
+      this.setProcessingState(true);
+      await processor.submitForAnalysis(prompt);
+    } catch (error) {
+      console.error('Submit error:', error);
+      alert('Error submitting for analysis: ' + error.message);
+    } finally {
+      this.setProcessingState(false);
+    }
   }
 
   addMessage(message, type = 'user') {

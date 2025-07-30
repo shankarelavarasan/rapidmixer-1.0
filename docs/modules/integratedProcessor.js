@@ -312,6 +312,53 @@ export class IntegratedProcessor {
       window.URL.revokeObjectURL(url);
     }
   }
+
+  async submitForAnalysis(prompt) {
+    try {
+      uiManager.setProcessingState(true);
+      uiManager.addMessage('Submitting for AI analysis...', 'ai');
+
+      const formData = new FormData();
+      this.currentFiles.forEach(file => {
+        formData.append('files', file);
+      });
+      formData.append('prompt', prompt);
+
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      uiManager.setProcessingState(false);
+      uiManager.addMessage('Analysis complete!', 'ai');
+
+      if (result.analysis) {
+        this.showAnalysisResults(result.analysis);
+      }
+
+    } catch (error) {
+      uiManager.setProcessingState(false);
+      uiManager.addMessage(`Analysis error: ${error.message}`, 'error');
+    }
+  }
+
+  showAnalysisResults(analysis) {
+    const output = `
+      <div class="analysis-results">
+        <h3>Analysis Results</h3>
+        <div class="analysis-content">
+          ${analysis}
+        </div>
+      </div>
+    `;
+    uiManager.setPreviewContent(output);
+  }
 }
 
 // Initialize the processor
@@ -320,4 +367,8 @@ export const processor = new IntegratedProcessor();
 // Global process function for UI integration
 window.processFiles = async (prompt) => {
   await processor.processFiles(prompt);
+};
+
+window.submitForAnalysis = async (prompt) => {
+  await processor.submitForAnalysis(prompt);
 };

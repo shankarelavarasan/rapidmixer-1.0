@@ -16,9 +16,18 @@
         <div class="left-panel">
             <div class="panel-section">
                 <h3>File/Folder Selection</h3>
+                <input type="file" id="fileInput" multiple accept=".txt,.pdf,.docx,.doc,.rtf,.odt" style="display: none;">
+                <input type="file" id="folderInput" webkitdirectory directory multiple style="display: none;">
                 <button id="selectFileBtn" name="selectFileBtn">Select File</button>
                 <button id="selectFolderBtn" name="selectFolderBtn">Select Folder</button>
                 <div id="selectedFiles" name="selectedFilesContainer"></div>
+                <div id="folderStats" name="folderStats"></div>
+            </div>
+            <div id="progressContainer" style="display: none; margin: 10px 0;">
+                <div style="background: #f0f0f0; border-radius: 4px; height: 20px;">
+                    <div id="progressBar" style="background: #007bff; height: 100%; width: 0%; border-radius: 4px; transition: width 0.3s;"></div>
+                </div>
+                <div id="progressText" style="text-align: center; margin-top: 5px;"></div>
             </div>
 
             <div class="panel-section">

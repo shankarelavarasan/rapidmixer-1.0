@@ -30,7 +30,7 @@ const PORT = process.env.PORT || 3000;
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: ['http://localhost:10000', 'https://shankarelavarasan.github.io'],
+    origin: ['http://localhost:3000', 'http://localhost:10000', 'https://shankarelavarasan.github.io'],
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true,
   },
@@ -51,10 +51,10 @@ app.set('io', io);
 // CORS configuration
 app.use(
   cors({
-    origin: ['http://localhost:10000', 'https://shankarelavarasan.github.io'],
-    methods: ['GET', 'POST', 'OPTIONS'],
+    origin: ['http://localhost:3000', 'http://localhost:10000', 'https://shankarelavarasan.github.io'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   })
 );
 
