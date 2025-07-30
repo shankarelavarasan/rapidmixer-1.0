@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
+import XLSX from 'xlsx';
 
 /**
  * Format and structure output data for Excel generation
