@@ -1,5 +1,7 @@
 // This module will handle interactions with the Gemini API
 
+import { getApiConfig } from '../config/api.js';
+
 /**
  * Simulates a call to the Gemini API.
  * @param {string} question The user's question.
@@ -8,8 +10,9 @@
 export async function ask(prompt, filesData = []) {
   console.log(`Asking Gemini: ${prompt}`);
 
+  const { baseUrl } = getApiConfig();
   const response = await fetch(
-    'https://rapid-ai-assistant.onrender.com/api/ask-gemini',
+    `${baseUrl}/api/ask-gemini`,
     {
       method: 'POST',
       headers: {

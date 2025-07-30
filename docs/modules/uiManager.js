@@ -1,5 +1,7 @@
 // UI State Management and Operations
 
+import { processor } from './integratedProcessor.js';
+
 class UIState {
   constructor() {
     this.currentMode = 'work';

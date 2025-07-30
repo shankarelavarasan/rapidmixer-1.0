@@ -2,6 +2,7 @@
 import { stateManager } from './stateManager.js';
 import { uiManager } from './uiManager.js';
 import { errorHandler } from './errorHandler.js';
+import { getApiConfig } from '../config/api.js';
 
 // File processing workflow for user's requirements
 export class IntegratedProcessor {
@@ -187,7 +188,8 @@ export class IntegratedProcessor {
       formData.append('template', this.templateFile);
     }
 
-    const response = await fetch('/api/process-file', {
+    const apiConfig = getApiConfig();
+    const response = await fetch(`${apiConfig.baseUrl}/api/process-file`, {
       method: 'POST',
       body: formData
     });
@@ -296,7 +298,8 @@ export class IntegratedProcessor {
       }
     };
 
-    const response = await fetch('/api/export', {
+    const apiConfig = getApiConfig();
+    const response = await fetch(`${apiConfig.baseUrl}/api/export`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ format, data })
@@ -324,7 +327,8 @@ export class IntegratedProcessor {
       });
       formData.append('prompt', prompt);
 
-      const response = await fetch('/api/analyze', {
+      const apiConfig = getApiConfig();
+      const response = await fetch(`${apiConfig.baseUrl}/api/analyze`, {
         method: 'POST',
         body: formData
       });
