@@ -9,7 +9,7 @@ export async function ask(prompt, filesData = []) {
   console.log(`Asking Gemini: ${prompt}`);
 
   const response = await fetch(
-    'https://rapid-ai-assistant.vercel.app/api/ask-gemini',
+    'https://rapid-ai-assistant.onrender.com/ask-gemini',
     {
       method: 'POST',
       headers: {

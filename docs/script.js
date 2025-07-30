@@ -14,8 +14,8 @@ const API_CONFIG = {
     wsUrl: 'ws://localhost:3000',
   },
   production: {
-    baseUrl: 'https://rapid-ai-assistant.vercel.app',
-    wsUrl: 'wss://rapid-ai-assistant.vercel.app',
+    baseUrl: 'https://rapid-ai-assistant.onrender.com',
+    wsUrl: 'wss://rapid-ai-assistant.onrender.com',
   },
 };
 
