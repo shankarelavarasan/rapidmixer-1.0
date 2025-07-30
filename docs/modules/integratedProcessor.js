@@ -18,6 +18,36 @@ export class IntegratedProcessor {
     this.setupTemplateSelection();
   }
 
+  setupTemplateSelection() {
+    const templateInput = document.getElementById('templateSelect');
+    const templateBtn = document.getElementById('selectTemplateFileBtn');
+    
+    if (templateBtn) {
+      templateBtn.addEventListener('click', () => {
+        // Create a hidden file input for template selection
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'file';
+        hiddenInput.accept = '.xlsx,.xls,.csv';
+        hiddenInput.style.display = 'none';
+        hiddenInput.addEventListener('change', (e) => {
+          this.handleTemplateSelection(e.target.files);
+        });
+        document.body.appendChild(hiddenInput);
+        hiddenInput.click();
+        document.body.removeChild(hiddenInput);
+      });
+    }
+    
+    if (templateInput && templateInput.tagName === 'SELECT') {
+      templateInput.addEventListener('change', (e) => {
+        if (e.target.value) {
+          // Handle template selection from dropdown
+          this.loadTemplateFromSelection(e.target.value);
+        }
+      });
+    }
+  }
+
   setupEventListeners() {
     // File selection
     const fileInput = document.getElementById('fileInput');
@@ -55,12 +85,25 @@ export class IntegratedProcessor {
       const reader = new FileReader();
       reader.onload = (e) => {
         this.templateContent = e.target.result;
+        this.templateFile = file;
         uiManager.addMessage(`Template loaded: ${file.name}`, 'ai');
         resolve();
       };
       reader.onerror = reject;
       reader.readAsArrayBuffer(file);
     });
+  }
+
+  async loadTemplateFromSelection(templateValue) {
+    if (templateValue === 'custom') {
+      // Trigger file selection for custom template
+      const templateBtn = document.getElementById('selectTemplateFileBtn');
+      if (templateBtn) templateBtn.click();
+    } else {
+      // Handle predefined templates
+      uiManager.addMessage(`Template selected: ${templateValue}`, 'ai');
+      this.templateFile = templateValue;
+    }
   }
 
   validateAndDisplayFiles() {
