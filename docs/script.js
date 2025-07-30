@@ -1,7 +1,6 @@
-import { initializeFileSelection } from './modules/fileManager.js';
+import { initializeFileSelection } from './modules/fileSelectionFixed.js';
 import { initializeTemplateSelection } from './modules/templateManager.js';
 import { initializeVoiceInput } from './modules/voiceManager.js';
-import { initializeFileSelection } from './modules/fileManager.js';
 import { processor } from './modules/integratedProcessor.js';
 import { uiManager } from './modules/uiManager.js';
 import { errorHandler } from './modules/errorHandler.js';

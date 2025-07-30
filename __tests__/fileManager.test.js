@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { initializeFileSelection } from '../docs/modules/fileManager.js';
+import { initializeFileManager } from '../docs/modules/fileManager.js';
 
 // Mock DOM elements
 document.body.innerHTML = `
@@ -57,7 +57,7 @@ describe('File Manager', () => {
   });
 
   test('should initialize file selection buttons', () => {
-    initializeFileSelection();
+    initializeFileManager();
     const selectFileBtn = document.getElementById('selectFileBtn');
     const selectFolderBtn = document.getElementById('selectFolderBtn');
 
@@ -129,6 +129,6 @@ describe('File Manager', () => {
   test('should display error for invalid files', () => {
     // This test would require mocking the DOM and file selection
     // For now, we'll test the structure
-    expect(typeof initializeFileSelection).toBe('function');
+    expect(typeof initializeFileManager).toBe('function');
   });
 });

@@ -16,7 +16,7 @@ const FILE_VALIDATION = {
   allowedExtensions: ['.pdf', '.xlsx', '.xls', '.csv', '.txt', '.doc', '.docx'],
 };
 
-export function initializeFileSelection() {
+export function initializeFileManager() {
   const fileInput = document.getElementById('fileInput');
   const folderInput = document.getElementById('folderInput');
   const selectedFilesDiv = document.getElementById('selectedFiles');
