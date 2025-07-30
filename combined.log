@@ -1,2 +1,4 @@
 {"level":"info","message":"Server running on port 10000"}
 {"level":"info","message":"Socket.IO server running"}
+{"level":"info","message":"Server running on port 3000"}
+{"level":"info","message":"Socket.IO server running"}

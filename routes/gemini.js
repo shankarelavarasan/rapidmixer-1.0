@@ -357,4 +357,94 @@ router.post('/save-output', async (req, res) => {
   }
 });
 
+/**
+ * @route POST /api/ask-gemini/youtube
+ * @description Process YouTube video transcript with the Gemini API
+ * @access Public
+ */
+router.post('/ask-gemini/youtube', async (req, res) => {
+  try {
+    const {
+      url,
+      prompt,
+      lang = 'en',
+      outputFormat = 'text',
+      saveOutput = false,
+      outputDestination = '',
+    } = req.body;
+
+    // Validate required parameters
+    validateParams({ url, prompt }, ['url', 'prompt']);
+
+    // Extract transcript from YouTube video
+    const transcript = await getYouTubeTranscript(url, lang);
+    
+    if (!transcript) {
+      return res.status(404).json({ response: 'No transcript available for this video.' });
+    }
+
+    // Initialize Gemini model
+    const model = getGeminiModel(process.env.GEMINI_API_KEY);
+
+    // Combine prompt with transcript
+    const combinedContent = `${prompt}\n\nVideo Transcript:\n${transcript}`;
+
+    // Process with Gemini
+    const result = await generateContent(model, combinedContent);
+    const responseText = result.response.text();
+
+    // Format the output
+    const formattedOutput = await formatOutput(responseText, outputFormat, {
+      title: 'YouTube Video Analysis',
+      source: url,
+    });
+
+    const response = {
+      response: formattedOutput,
+      outputFormat,
+      transcript: transcript.substring(0, 1000) + (transcript.length > 1000 ? '...' : ''),
+    };
+
+    // Save output if requested
+    if (saveOutput && outputDestination) {
+      await saveResponseOutput([response], outputDestination, outputFormat);
+    }
+
+    res.json({ responses: [response] });
+  } catch (err) {
+    console.error('Error processing YouTube request:', err);
+    let status = 500;
+    let message = 'Something went wrong while processing the YouTube video.';
+
+    if (err.message.includes('No transcript')) {
+      status = 404;
+      message = 'No transcript available for this video. The video may not have captions enabled.';
+    } else if (err.message) {
+      message += ` Details: ${err.message}`;
+    }
+
+    res.status(status).json({ response: message });
+  }
+});
+
+// Helper function to get YouTube transcript
+async function getYouTubeTranscript(url, lang = 'en') {
+  try {
+    // Import the YouTube transcript MCP server
+    const { get_transcripts } = await import('mcp.config.usrlocalmcp.YouTube Transcript Server');
+    
+    // Extract transcript
+    const transcript = await get_transcripts({
+      url,
+      lang,
+      enableParagraphs: true
+    });
+
+    return transcript;
+  } catch (error) {
+    console.error('Error extracting YouTube transcript:', error);
+    throw new Error(`Failed to extract transcript: ${error.message}`);
+  }
+}
+
 export default router;

@@ -3,6 +3,9 @@
  */
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { withErrorHandling } from '../utils/errorUtils.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 /**
  * Creates and returns a Gemini model instance

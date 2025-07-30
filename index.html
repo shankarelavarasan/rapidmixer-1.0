@@ -1,889 +1,322 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rapid AI Assistant</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-    <script src="/socket.io/socket.io.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapid AI Assistant - Document Processor</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
-      .drop-zone {
-        border: 2px dashed #ccc;
-        border-radius: 8px;
-        padding: 20px;
-        text-align: center;
-        transition: all 0.3s ease;
-      }
-      .drop-zone:hover,
-      .drop-zone.dragover {
-        border-color: #4f46e5;
-        background-color: rgba(79, 70, 229, 0.1);
-      }
-      .progress-bar {
-        height: 8px;
-        background-color: #e5e7eb;
-        border-radius: 4px;
-        overflow: hidden;
-      }
-      .progress-bar-fill {
-        height: 100%;
-        background-color: #4f46e5;
-        transition: width 0.3s ease;
-      }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .step.active {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
+        }
+        .step.completed {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        .upload-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #4f46e5;
+            background-color: #f8fafc;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            background-color: #f9fafb;
+            border-radius: 0.25rem;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #4f46e5;
+            transition: width 0.3s ease;
+        }
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+            flex-direction: column;
+        }
+        .chat-header {
+            background: #4f46e5;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        .chat-input {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .message {
+            margin: 0.5rem 0;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            max-width: 80%;
+        }
+        .message.user {
+            background-color: #4f46e5;
+            color: white;
+            margin-left: auto;
+        }
+        .message.ai {
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .approval-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .approval-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
     </style>
-  </head>
-  <body class="bg-gray-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-      <header class="mb-8 text-center">
-        <h1 class="text-4xl font-bold text-indigo-700">Rapid AI Assistant</h1>
-        <p class="text-gray-600 mt-2">
-          Powerful AI processing for your files and folders
-        </p>
-      </header>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-indigo-700 mb-2">🚀 Rapid AI Assistant</h1>
+            <p class="text-gray-600 text-lg">AI-Powered Document Processing & Data Entry Automation</p>
+        </header>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Input Section -->
-        <div class="left-panel">
-          <div class="bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Input</h2>
-
-            <!-- Mode Selection -->
-            <div class="flex gap-2 mb-4">
-              <button
-                id="workModeBtn"
-                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-              >
-                Work Mode
-              </button>
-              <button
-                id="chatModeBtn"
-                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-              >
-                Chat Mode
-              </button>
-              <button
-                id="resetBtn"
-                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-              >
-                Reset
-              </button>
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step active" data-step="1">
+                <div class="text-lg font-semibold">📁</div>
+                <div>Upload Documents</div>
             </div>
-
-            <!-- Prompt Input -->
-            <div class="mb-4 prompt-container">
-              <label
-                for="prompt"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Prompt</label
-              >
-              <textarea
-                id="promptTextarea"
-                rows="4"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="Enter your prompt here..."
-              ></textarea>
+            <div class="step" data-step="2">
+                <div class="text-lg font-semibold">📄</div>
+                <div>Upload Template</div>
             </div>
-
-            <!-- Template Selection -->
-            <div class="mb-4">
-              <label
-                for="template"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Template (Optional)</label
-              >
-              <select
-                id="template"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="">No Template</option>
-                <!-- Templates will be loaded dynamically -->
-              </select>
+            <div class="step" data-step="3">
+                <div class="text-lg font-semibold">💬</div>
+                <div>Define Task</div>
             </div>
-
-            <!-- File Upload -->
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Upload Files</label
-              >
-              <div id="dropZone" class="drop-zone">
-                <p>Drag & drop files here or</p>
-                <input type="file" id="fileInput" multiple class="hidden" />
-                <button
-                  id="browseButton"
-                  class="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  Browse Files
-                </button>
-              </div>
-              <div id="fileList" class="mt-2 text-sm text-gray-600"></div>
+            <div class="step" data-step="4">
+                <div class="text-lg font-semibold">⚙️</div>
+                <div>Processing</div>
             </div>
-
-            <!-- Folder Upload -->
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1"
-                >Upload Folder</label
-              >
-              <div id="folderDropZone" class="drop-zone">
-                <p>Drag & drop a folder here or</p>
-                <input
-                  type="file"
-                  id="folderInput"
-                  webkitdirectory
-                  directory
-                  multiple
-                  class="hidden"
-                />
-                <button
-                  id="browseFolderButton"
-                  class="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  Browse Folders
-                </button>
-              </div>
-              <div id="folderStats" class="mt-2 text-sm text-gray-600"></div>
+            <div class="step" data-step="5">
+                <div class="text-lg font-semibold">✅</div>
+                <div>Review & Approve</div>
             </div>
-
-            <!-- Options -->
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label
-                  for="outputFormat"
-                  class="block text-sm font-medium text-gray-700 mb-1"
-                  >Output Format</label
-                >
-                <select
-                  id="outputFormat"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="text">Text</option>
-                  <option value="json">JSON</option>
-                  <option value="html">HTML</option>
-                  <option value="markdown">Markdown</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  for="processingMode"
-                  class="block text-sm font-medium text-gray-700 mb-1"
-                  >Processing Mode</label
-                >
-                <select
-                  id="processingMode"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="individual">Individual Files</option>
-                  <option value="combined">Combined</option>
-                </select>
-              </div>
+            <div class="step" data-step="6">
+                <div class="text-lg font-semibold">📤</div>
+                <div>Export Results</div>
             </div>
-
-            <div class="flex items-center mb-4">
-              <input
-                type="checkbox"
-                id="saveOutput"
-                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
-              <label for="saveOutput" class="ml-2 block text-sm text-gray-700"
-                >Save Output</label
-              >
-              <input
-                type="text"
-                id="outputDestination"
-                placeholder="Output directory"
-                class="ml-4 flex-1 px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                value="./output"
-              />
-            </div>
-
-            <div class="flex items-center mb-4">
-              <input
-                type="checkbox"
-                id="asyncProcessing"
-                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
-              <label
-                for="asyncProcessing"
-                class="ml-2 block text-sm text-gray-700"
-                >Asynchronous Processing (for large folders)</label
-              >
-            </div>
-
-            <!-- Submit Buttons -->
-            <div class="flex gap-4">
-              <button
-                id="processBtn"
-                class="flex-1 py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                Process with AI
-              </button>
-              <button
-                id="submitBtn"
-                class="py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                Push to GitHub
-              </button>
-            </div>
-          </div>
         </div>
 
-        <!-- Output Section -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
-          <h2 class="text-2xl font-semibold mb-4 text-gray-800">Output</h2>
-
-          <!-- Chat Container -->
-          <div
-            id="chatContainer"
-            class="mb-4 h-48 overflow-y-auto border border-gray-300 rounded-md p-2 bg-gray-50 hidden"
-          ></div>
-
-          <!-- Preview Container -->
-          <div
-            id="previewContainer"
-            class="mb-4 border border-gray-300 rounded-md p-4 hidden"
-          >
-            <h3 class="text-lg font-semibold mb-2">Preview</h3>
-            <div id="previewContent" class="text-gray-800"></div>
-          </div>
-
-          <!-- Progress Bar (hidden by default) -->
-          <div id="progressContainer" class="mb-4 hidden">
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Processing Progress</label
-            >
-            <div class="progress-bar">
-              <div
-                id="progressBar"
-                class="progress-bar-fill"
-                style="width: 0%"
-              ></div>
+        <!-- Main Content -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <!-- Step 1: Folder Upload -->
+            <div id="step1-content" class="step-content">
+                <h2 class="text-2xl font-bold mb-4">📁 Upload Documents</h2>
+                <div class="upload-zone" id="folderUploadZone">
+                    <div class="text-4xl mb-4">📂</div>
+                    <h3 class="text-xl font-semibold mb-2">Select Folder with Documents</h3>
+                    <p class="text-gray-600 mb-4">Drag & drop or click to select folder containing PDF, DOCX, XLSX, CSV files</p>
+                    <input type="file" id="folderInput" webkitdirectory directory multiple 
+                           accept=".pdf,.docx,.xlsx,.csv,.json,.txt" style="display: none;">
+                    <button onclick="document.getElementById('folderInput').click()" 
+                            class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
+                        Browse Folder
+                    </button>
+                </div>
+                <div id="folderPreview" class="mt-4" style="display: none;">
+                    <h3 class="font-semibold mb-2">Selected Files:</h3>
+                    <div id="fileList" class="max-h-64 overflow-y-auto border rounded-md p-2"></div>
+                    <p id="fileCount" class="text-sm text-gray-600 mt-2"></p>
+                </div>
+                <button onclick="nextStep(2)" id="nextStep1" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700" style="display: none;">
+                    Next Step
+                </button>
             </div>
-            <p id="progressText" class="text-sm text-gray-600 mt-1">0%</p>
-          </div>
 
-          <!-- Status Message -->
-          <div
-            id="statusMessage"
-            class="mb-4 p-3 bg-gray-100 rounded-md text-gray-700 hidden"
-          ></div>
+            <!-- Step 2: Template Upload -->
+            <div id="step2-content" class="step-content" style="display: none;">
+                <h2 class="text-2xl font-bold mb-4">📄 Upload Excel Template</h2>
+                <div class="upload-zone" id="templateUploadZone">
+                    <div class="text-4xl mb-4">📤</div>
+                    <h3 class="text-xl font-semibold mb-2">Select Your Excel Template</h3>
+                    <p class="text-gray-600 mb-4">Choose your custom Excel template (.xlsx) for the output format</p>
+                    <input type="file" id="templateInput" accept=".xlsx" style="display: none;">
+                    <button onclick="document.getElementById('templateInput').click()" 
+                            class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
+                        Browse Template
+                    </button>
+                </div>
+                <div id="templatePreview" class="mt-4" style="display: none;">
+                    <h3 class="font-semibold mb-2">Template Structure:</h3>
+                    <div id="templateStructure" class="border rounded-md p-2"></div>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="prevStep(1)" class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700">
+                        Previous
+                    </button>
+                    <button onclick="nextStep(3)" id="nextStep2" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700" style="display: none;">
+                        Next Step
+                    </button>
+                </div>
+            </div>
 
-          <!-- Response Output -->
-          <div
-            id="responseContainer"
-            class="border border-gray-300 rounded-md p-4 h-96 overflow-auto bg-gray-50"
-          >
-            <pre id="responseOutput" class="text-gray-800 whitespace-pre-wrap">
-Results will appear here...</pre
-            >
-          </div>
+            <!-- Step 3: Prompt Input -->
+            <div id="step3-content" class="step-content" style="display: none;">
+                <h2 class="text-2xl font-bold mb-4">💬 Define Your Task</h2>
+                <div class="prompt-section">
+                    <label for="promptInput" class="block text-sm font-medium text-gray-700 mb-2">
+                        Your Task / Prompt:
+                    </label>
+                    <textarea id="promptInput" rows="4" 
+                              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              placeholder="Example: Extract all invoice data and populate this Excel template with company names, amounts, and dates. If any information is missing, ask for approval before proceeding."></textarea>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Describe what data you want to extract and how to populate your template
+                    </p>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="prevStep(2)" class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700">
+                        Previous
+                    </button>
+                    <button onclick="nextStep(4)" id="nextStep3" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700">
+                        Next Step
+                    </button>
+                </div>
+            </div>
 
-          <!-- Action Buttons -->
-          <div class="flex justify-between mt-4">
-            <button
-              id="copyButton"
-              class="py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              Copy to Clipboard
-            </button>
-            <button
-              id="downloadButton"
-              class="py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              Download Result
-            </button>
-          </div>
+            <!-- Step 4: Processing -->
+            <div id="step4-content" class="step-content" style="display: none;">
+                <h2 class="text-2xl font-bold mb-4">⚙️ Processing Documents</h2>
+                <div class="processing-section">
+                    <div class="mb-4">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <p id="progressText" class="text-center mt-2">Ready to start processing...</p>
+                    </div>
+                    <div id="processingLog" class="border rounded-md p-4 max-h-64 overflow-y-auto bg-gray-50"></div>
+                    <button id="startProcessing" onclick="startProcessing()" 
+                            class="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
+                        Start Processing
+                    </button>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="prevStep(3)" class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700">
+                        Previous
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 5: Review & Approval -->
+            <div id="step5-content" class="step-content" style="display: none;">
+                <h2 class="text-2xl font-bold mb-4">✅ Review & Approve</h2>
+                <div id="approvalSection">
+                    <div id="approvalContent" class="space-y-4"></div>
+                    <div class="approval-buttons flex gap-2 mt-4">
+                        <button onclick="approveResults()" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700">
+                            ✔ Approve All
+                        </button>
+                        <button onclick="editResults()" class="bg-yellow-600 text-white px-6 py-2 rounded-md hover:bg-yellow-700">
+                            ✖ Edit Results
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Export -->
+            <div id="step6-content" class="step-content" style="display: none;">
+                <h2 class="text-2xl font-bold mb-4">📤 Export Results</h2>
+                <div class="export-section">
+                    <div id="exportPreview" class="border rounded-md p-4 mb-4">
+                        <h3 class="font-semibold mb-2">Processing Complete!</h3>
+                        <p>Your documents have been processed and the Excel template has been populated.</p>
+                        <div id="finalStats" class="mt-2 text-sm text-gray-600"></div>
+                    </div>
+                    <button onclick="downloadResults()" 
+                            class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
+                        ⬇ Download Excel File
+                    </button>
+                    <button onclick="resetProcess()" 
+                            class="ml-2 bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700">
+                        Start New Process
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        // Socket.io connection
-        const socket = io();
-
-        // Elements
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const browseButton = document.getElementById('browseButton');
-        const fileList = document.getElementById('fileList');
-
-        const folderDropZone = document.getElementById('folderDropZone');
-        const folderInput = document.getElementById('folderInput');
-        const browseFolderButton =
-          document.getElementById('browseFolderButton');
-        const folderStats = document.getElementById('folderStats');
-
-        const submitButton = document.getElementById('submitButton');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const statusMessage = document.getElementById('statusMessage');
-        const responseOutput = document.getElementById('responseOutput');
-        const copyButton = document.getElementById('copyButton');
-        const downloadButton = document.getElementById('downloadButton');
-
-        // Template dropdown
-        const templateSelect = document.getElementById('template');
-
-        // Load templates
-        fetch('/api/templates')
-          .then(response => response.json())
-          .then(data => {
-            if (data.templates && Array.isArray(data.templates)) {
-              data.templates.forEach(template => {
-                const option = document.createElement('option');
-                option.value = template;
-                option.textContent = template;
-                templateSelect.appendChild(option);
-              });
-            }
-          })
-          .catch(error => console.error('Error loading templates:', error));
-
-        // File upload handling
-        browseButton.addEventListener('click', () => fileInput.click());
-
-        fileInput.addEventListener('change', () => {
-          updateFileList(fileInput.files);
-        });
-
-        // Drag and drop for files
-        dropZone.addEventListener('dragover', e => {
-          e.preventDefault();
-          dropZone.classList.add('dragover');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-          dropZone.classList.remove('dragover');
-        });
-
-        dropZone.addEventListener('drop', e => {
-          e.preventDefault();
-          dropZone.classList.remove('dragover');
-          updateFileList(e.dataTransfer.files);
-        });
-
-        // Folder upload handling
-        browseFolderButton.addEventListener('click', () => folderInput.click());
-
-        folderInput.addEventListener('change', () => {
-          updateFolderStats(folderInput.files);
-        });
-
-        // Drag and drop for folders
-        folderDropZone.addEventListener('dragover', e => {
-          e.preventDefault();
-          folderDropZone.classList.add('dragover');
-        });
-
-        folderDropZone.addEventListener('dragleave', () => {
-          folderDropZone.classList.remove('dragover');
-        });
-
-        folderDropZone.addEventListener('drop', e => {
-          e.preventDefault();
-          folderDropZone.classList.remove('dragover');
-          // Note: Folder drag and drop is not fully supported in all browsers
-          // This is a simplified implementation
-          updateFolderStats(e.dataTransfer.files);
-        });
-
-        // Update file list display
-        function updateFileList(files) {
-          fileList.innerHTML = '';
-          if (files.length > 0) {
-            const ul = document.createElement('ul');
-            ul.className = 'list-disc pl-5';
-
-            for (let i = 0; i < files.length; i++) {
-              const li = document.createElement('li');
-              li.textContent = `${files[i].name} (${formatFileSize(files[i].size)})`;
-              ul.appendChild(li);
-            }
-
-            fileList.appendChild(ul);
-          }
-        }
-
-        // Update folder stats display
-        function updateFolderStats(files) {
-          folderStats.innerHTML = '';
-          if (files.length > 0) {
-            const fileTypes = {};
-            let totalSize = 0;
-
-            for (let i = 0; i < files.length; i++) {
-              totalSize += files[i].size;
-              const ext = files[i].name.split('.').pop().toLowerCase();
-              fileTypes[ext] = (fileTypes[ext] || 0) + 1;
-            }
-
-            folderStats.innerHTML = `<p>${files.length} files (${formatFileSize(totalSize)})</p>`;
-
-            const ul = document.createElement('ul');
-            ul.className = 'list-disc pl-5';
-
-            for (const [ext, count] of Object.entries(fileTypes)) {
-              const li = document.createElement('li');
-              li.textContent = `${ext}: ${count} files`;
-              ul.appendChild(li);
-            }
-
-            folderStats.appendChild(ul);
-          }
-        }
-
-        // Format file size
-        function formatFileSize(bytes) {
-          if (bytes === 0) return '0 Bytes';
-          const k = 1024;
-          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-          const i = Math.floor(Math.log(bytes) / Math.log(k));
-          return (
-            parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-          );
-        }
-
-        // Submit form
-        submitButton.addEventListener('click', async () => {
-          const prompt = document.getElementById('prompt').value.trim();
-          if (!prompt) {
-            showStatus('Please enter a prompt', 'error');
-            return;
-          }
-
-          const outputFormat = document.getElementById('outputFormat').value;
-          const processingMode =
-            document.getElementById('processingMode').value;
-          const saveOutput = document.getElementById('saveOutput').checked;
-          const outputDestination =
-            document.getElementById('outputDestination').value;
-          const asyncProcessing =
-            document.getElementById('asyncProcessing').checked;
-          const templateFile = templateSelect.value
-            ? { name: templateSelect.value }
-            : null;
-
-          // Show progress and status
-          progressContainer.classList.remove('hidden');
-          statusMessage.classList.remove('hidden');
-          showStatus('Processing request...', 'info');
-          updateProgress(5);
-
-          // Determine if we're processing files or a folder
-          if (folderInput.files.length > 0) {
-            // Process folder
-            await processFolder({
-              prompt,
-              templateFile,
-              outputFormat,
-              processingMode,
-              saveOutput,
-              outputDestination,
-              async: asyncProcessing,
-              files: folderInput.files,
-            });
-          } else if (fileInput.files.length > 0) {
-            // Process individual files
-            await processFiles({
-              prompt,
-              templateFile,
-              outputFormat,
-              processingMode,
-              saveOutput,
-              outputDestination,
-              files: fileInput.files,
-            });
-          } else {
-            // Process text-only prompt
-            await processPrompt({
-              prompt,
-              templateFile,
-              outputFormat,
-            });
-          }
-        });
-
-        // Process folder
-        async function processFolder(data) {
-          try {
-            // Create FormData
-            const formData = new FormData();
-            formData.append('prompt', data.prompt);
-
-            if (data.templateFile) {
-              formData.append('templateFile', data.templateFile);
-            }
-
-            formData.append('outputFormat', data.outputFormat);
-            formData.append('processingMode', data.processingMode);
-            formData.append('saveOutput', data.saveOutput);
-            formData.append('outputDestination', data.outputDestination);
-            formData.append('async', data.async);
-
-            // Add all files with their relative paths
-            for (let i = 0; i < data.files.length; i++) {
-              const file = data.files[i];
-              formData.append(
-                'files',
-                file,
-                file.webkitRelativePath || file.name
-              );
-            }
-
-            updateProgress(10);
-            showStatus('Uploading folder...', 'info');
-
-            // Send request
-            const response = await fetch('/api/ask-gemini/folder', {
-              method: 'POST',
-              body: formData,
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-              if (data.async && result.jobId) {
-                // Handle async job
-                showStatus(
-                  `Job queued with ID: ${result.jobId}. Waiting for results...`,
-                  'info'
-                );
-
-                // Set up socket listeners for this job
-                const jobId = result.jobId;
-
-                socket.on(`job-progress-${jobId}`, data => {
-                  updateProgress(data.progress);
-                  showStatus(
-                    `Processing job ${jobId}: ${data.progress}% complete`,
-                    'info'
-                  );
-                });
-
-                socket.on(`job-completed-${jobId}`, data => {
-                  updateProgress(100);
-                  showStatus(`Job ${jobId} completed successfully!`, 'success');
-                  displayResponse(data.result);
-                });
-
-                socket.on(`job-failed-${jobId}`, data => {
-                  showStatus(`Job ${jobId} failed: ${data.error}`, 'error');
-                });
-
-                // Poll for job status as a fallback
-                pollJobStatus(jobId);
-              } else {
-                // Handle synchronous result
-                updateProgress(100);
-                showStatus('Processing completed successfully!', 'success');
-                displayResponse(result);
-              }
-            } else {
-              showStatus(
-                `Error: ${result.response || 'Unknown error'}`,
-                'error'
-              );
-            }
-          } catch (error) {
-            console.error('Error processing folder:', error);
-            showStatus(`Error: ${error.message}`, 'error');
-          }
-        }
-
-        // Poll job status
-        async function pollJobStatus(jobId) {
-          try {
-            const response = await fetch(`/api/job/${jobId}`);
-            const status = await response.json();
-
-            if (status.status === 'completed') {
-              updateProgress(100);
-              showStatus(`Job ${jobId} completed successfully!`, 'success');
-              displayResponse(status.result);
-              return;
-            } else if (status.status === 'failed') {
-              showStatus(`Job ${jobId} failed: ${status.error}`, 'error');
-              return;
-            }
-
-            // Update progress
-            if (status.progress) {
-              updateProgress(status.progress);
-              showStatus(
-                `Processing job ${jobId}: ${status.progress}% complete`,
-                'info'
-              );
-            }
-
-            // Poll again after 2 seconds
-            setTimeout(() => pollJobStatus(jobId), 2000);
-          } catch (error) {
-            console.error('Error polling job status:', error);
-            // Try again after 5 seconds
-            setTimeout(() => pollJobStatus(jobId), 5000);
-          }
-        }
-
-        // Process individual files
-        async function processFiles(data) {
-          try {
-            // Create FormData
-            const formData = new FormData();
-            formData.append('prompt', data.prompt);
-
-            if (data.templateFile) {
-              formData.append('templateFile', data.templateFile);
-            }
-
-            formData.append('outputFormat', data.outputFormat);
-            formData.append('processingMode', data.processingMode);
-            formData.append('saveOutput', data.saveOutput);
-            formData.append('outputDestination', data.outputDestination);
-
-            // Add all files
-            for (let i = 0; i < data.files.length; i++) {
-              formData.append('files', data.files[i]);
-            }
-
-            updateProgress(20);
-            showStatus('Uploading files...', 'info');
-
-            // Send request
-            const response = await fetch('/api/ask-gemini', {
-              method: 'POST',
-              body: formData,
-            });
-
-            updateProgress(80);
-            showStatus('Processing files...', 'info');
-
-            const result = await response.json();
-
-            if (response.ok) {
-              updateProgress(100);
-              showStatus('Processing completed successfully!', 'success');
-              displayResponse(result);
-            } else {
-              showStatus(
-                `Error: ${result.response || 'Unknown error'}`,
-                'error'
-              );
-            }
-          } catch (error) {
-            console.error('Error processing files:', error);
-            showStatus(`Error: ${error.message}`, 'error');
-          }
-        }
-
-        // Process text-only prompt
-        async function processPrompt(data) {
-          try {
-            updateProgress(20);
-            showStatus('Sending prompt...', 'info');
-
-            // Create request body
-            const requestBody = {
-              prompt: data.prompt,
-              outputFormat: data.outputFormat,
-            };
-
-            if (data.templateFile) {
-              requestBody.templateFile = data.templateFile;
-            }
-
-            // Send request
-            const response = await fetch('/api/ask-gemini', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(requestBody),
-            });
-
-            updateProgress(80);
-            showStatus('Processing prompt...', 'info');
-
-            const result = await response.json();
-
-            if (response.ok) {
-              updateProgress(100);
-              showStatus('Processing completed successfully!', 'success');
-              displayResponse(result);
-            } else {
-              showStatus(
-                `Error: ${result.response || 'Unknown error'}`,
-                'error'
-              );
-            }
-          } catch (error) {
-            console.error('Error processing prompt:', error);
-            showStatus(`Error: ${error.message}`, 'error');
-          }
-        }
-
-        // Update progress bar
-        function updateProgress(percent) {
-          progressBar.style.width = `${percent}%`;
-          progressText.textContent = `${percent}%`;
-        }
-
-        // Show status message
-        function showStatus(message, type) {
-          statusMessage.textContent = message;
-          statusMessage.className = 'mb-4 p-3 rounded-md';
-
-          switch (type) {
-            case 'error':
-              statusMessage.classList.add('bg-red-100', 'text-red-700');
-              break;
-            case 'success':
-              statusMessage.classList.add('bg-green-100', 'text-green-700');
-              break;
-            case 'info':
-            default:
-              statusMessage.classList.add('bg-blue-100', 'text-blue-700');
-              break;
-          }
-        }
-
-        // Display response
-        function displayResponse(result) {
-          if (result.responses && Array.isArray(result.responses)) {
-            // Multiple responses
-            let output = '';
-
-            result.responses.forEach((response, index) => {
-              if (index > 0) output += '\n\n---\n\n';
-
-              if (response.file) {
-                output += `File: ${response.file}\n\n`;
-              }
-
-              output += response.response;
-            });
-
-            responseOutput.textContent = output;
-          } else if (result.combined && result.response) {
-            // Combined response
-            responseOutput.textContent = result.response;
-          } else if (result.responses) {
-            // Folder structure responses
-            let output = '';
-
-            for (const [folderPath, responses] of Object.entries(
-              result.responses
-            )) {
-              output += `Folder: ${folderPath}\n\n`;
-
-              responses.forEach((response, index) => {
-                if (index > 0) output += '\n---\n';
-
-                if (response.file) {
-                  output += `File: ${response.file}\n\n`;
-                }
-
-                output += response.response + '\n';
-              });
-
-              output += '\n\n';
-            }
-
-            responseOutput.textContent = output;
-          } else {
-            // Single response
-            responseOutput.textContent = JSON.stringify(result, null, 2);
-          }
-        }
-
-        // Copy to clipboard
-        copyButton.addEventListener('click', () => {
-          navigator.clipboard
-            .writeText(responseOutput.textContent)
-            .then(() => {
-              const originalText = copyButton.textContent;
-              copyButton.textContent = 'Copied!';
-              setTimeout(() => {
-                copyButton.textContent = originalText;
-              }, 2000);
-            })
-            .catch(err => {
-              console.error('Failed to copy text:', err);
-            });
-        });
-
-        // Download result
-        downloadButton.addEventListener('click', () => {
-          const outputFormat = document.getElementById('outputFormat').value;
-          let extension, mimeType;
-
-          switch (outputFormat) {
-            case 'json':
-              extension = 'json';
-              mimeType = 'application/json';
-              break;
-            case 'html':
-              extension = 'html';
-              mimeType = 'text/html';
-              break;
-            case 'markdown':
-              extension = 'md';
-              mimeType = 'text/markdown';
-              break;
-            case 'text':
-            default:
-              extension = 'txt';
-              mimeType = 'text/plain';
-              break;
-          }
-
-          const blob = new Blob([responseOutput.textContent], {
-            type: mimeType,
-          });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `rapid-ai-response.${extension}`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        });
-
-        // Push to GitHub
-        const pushButton = document.getElementById('pushButton');
-        pushButton.addEventListener('click', async () => {
-          try {
-            showStatus('Pushing changes to GitHub...', 'info');
-
-            const response = await fetch('/api/github/push', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                message: 'Update from Rapid AI Assistant',
-              }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-              showStatus(
-                `Successfully pushed to GitHub: ${result.message}`,
-                'success'
-              );
-            } else {
-              showStatus(`Error pushing to GitHub: ${result.error}`, 'error');
-            }
-          } catch (error) {
-            console.error('Error pushing to GitHub:', error);
-            showStatus(`Error: ${error.message}`, 'error');
-          }
-        });
-      });
-    </script>
-  </body>
+    <!-- Chat Interface -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <h3>🤖 AI Assistant</h3>
+            <button onclick="toggleChat()" class="text-white text-xl">×</button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Ask questions or provide feedback..." 
+                   class="flex-1 border rounded-l-md px-3 py-2">
+            <button onclick="sendMessage()" class="bg-indigo-600 text-white px-4 py-2 rounded-r-md hover:bg-indigo-700">
+                Send
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating Chat Toggle -->
+    <button id="chatToggle" onclick="toggleChat()" 
+            class="fixed bottom-4 right-4 bg-indigo-600 text-white p-3 rounded-full shadow-lg hover:bg-indigo-700">
+        💬
+    </button>
+
+    <script src="app.js"></script>
+</body>
 </html>

@@ -4,8 +4,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import geminiRoutes from './routes/gemini.js';
 import githubRoutes from './routes/github.js';
-import processFileRoutes from './server/api/process-file.js';
-import exportRoutes from './server/api/export.js';
+import fileRoutes from './routes/file.js';
+import exportRoutes from './routes/export.js';
+import processRoutes from './routes/process.js';
 import cors from 'cors';
 import fs from 'fs';
 import { createServer } from 'http';
@@ -93,7 +94,8 @@ if (!fs.existsSync(outputDir)) {
 // API routes
 app.use('/api', geminiRoutes);
 app.use('/api/github', githubRoutes);
-app.use('/api', processFileRoutes);
+app.use('/api', fileRoutes);
+app.use('/api', processRoutes);
 app.use('/api', exportRoutes);
 
 // Error handling middleware should be the last middleware
