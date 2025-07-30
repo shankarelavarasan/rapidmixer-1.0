@@ -1,7 +1,4 @@
-// Fixed version of initializeFileSelection function
-// This fixes the issues in the provided broken code
-
-import { getApiConfig } from '../config/api.js';
+import { stateManager } from './stateManager.js';
 
 // File validation constants
 const FILE_VALIDATION = {
@@ -19,7 +16,6 @@ const FILE_VALIDATION = {
 };
 
 export function initializeFileSelection() {
-  // Get DOM elements (fixed duplicate variable declarations)
   const fileInput = document.getElementById('fileInput');
   const folderInput = document.getElementById('folderInput');
   const selectedFilesDiv = document.getElementById('selectedFiles');
@@ -27,7 +23,6 @@ export function initializeFileSelection() {
   const selectFileBtn = document.getElementById('selectFileBtn');
   const selectFolderBtn = document.getElementById('selectFolderBtn');
 
-  // Validate all required elements exist
   if (!fileInput || !folderInput || !selectedFilesDiv || !selectFileBtn || !selectFolderBtn) {
     console.error('Required file selection elements not found');
     return;
@@ -37,7 +32,7 @@ export function initializeFileSelection() {
   selectFileBtn.addEventListener('click', () => fileInput.click());
   selectFolderBtn.addEventListener('click', () => folderInput.click());
 
-  // File selection events (removed duplicate listeners)
+  // File selection events - only bind once
   fileInput.addEventListener('change', (e) => {
     console.log('File input changed');
     displaySelectedFiles(e.target.files);
@@ -48,61 +43,100 @@ export function initializeFileSelection() {
     displaySelectedFiles(e.target.files);
     updateFolderStats(e.target.files);
   });
-}
 
-// Fixed validateFile function (was incomplete in provided code)
-export function validateFile(file) {
-  // Check file size
-  if (file.size > FILE_VALIDATION.maxFileSize) {
-    console.warn(
-      `File ${file.name} exceeds size limit (${file.size} > ${FILE_VALIDATION.maxFileSize})`
-    );
-    return false;
+  function validateFile(file) {
+    // Check file size
+    if (file.size > FILE_VALIDATION.maxFileSize) {
+      return {
+        valid: false,
+        error: `File ${file.name} exceeds 50MB limit`
+      };
+    }
+
+    // Check file type
+    if (!FILE_VALIDATION.allowedTypes.includes(file.type)) {
+      // Check by extension if MIME type is not reliable
+      const extension = '.' + file.name.split('.').pop().toLowerCase();
+      if (!FILE_VALIDATION.allowedExtensions.includes(extension)) {
+        return {
+          valid: false,
+          error: `File ${file.name} has unsupported format`
+        };
+      }
+    }
+
+    return { valid: true };
   }
 
-  // Check file type
-  if (!FILE_VALIDATION.allowedTypes.includes(file.type)) {
-    console.warn(`File ${file.name} has unsupported type: ${file.type}`);
-    return false;
+  function displaySelectedFiles(files) {
+    if (!files || files.length === 0) return;
+
+    selectedFilesDiv.innerHTML = '';
+    const filesArray = Array.from(files);
+    
+    filesArray.forEach(file => {
+      const validation = validateFile(file);
+      
+      const fileElement = document.createElement('div');
+      fileElement.className = `file-item ${validation.valid ? 'valid' : 'invalid'}`;
+      fileElement.innerHTML = `
+        <div class="file-info">
+          <span class="file-name">${file.name}</span>
+          <span class="file-size">${formatFileSize(file.size)}</span>
+          ${!validation.valid ? `<span class="error">${validation.error}</span>` : ''}
+        </div>
+        <button class="remove-file" data-name="${file.name}">×</button>
+      `;
+      
+      selectedFilesDiv.appendChild(fileElement);
+    });
+
+    // Update state
+    stateManager.setState('selectedFiles', filesArray);
   }
 
-  // Check file extension
-  const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-  if (!FILE_VALIDATION.allowedExtensions.includes(fileExtension)) {
-    console.warn(
-      `File ${file.name} has unsupported extension: ${fileExtension}`
-    );
-    return false;
+  function updateFolderStats(files) {
+    if (!files || files.length === 0) return;
+
+    const filesArray = Array.from(files);
+    const totalSize = filesArray.reduce((sum, file) => sum + file.size, 0);
+    const validFiles = filesArray.filter(file => validateFile(file).valid);
+
+    folderStats.innerHTML = `
+      <div class="stats-grid">
+        <div class="stat">
+          <span class="label">Total Files:</span>
+          <span class="value">${filesArray.length}</span>
+        </div>
+        <div class="stat">
+          <span class="label">Valid Files:</span>
+          <span class="value">${validFiles.length}</span>
+        </div>
+        <div class="stat">
+          <span class="label">Total Size:</span>
+          <span class="value">${formatFileSize(totalSize)}</span>
+        </div>
+      </div>
+    `;
+
+    stateManager.setState('folderStats', {
+      totalFiles: filesArray.length,
+      validFiles: validFiles.length,
+      totalSize: totalSize
+    });
   }
 
-  return true;
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Initialize
+  console.log('File selection initialized successfully');
 }
 
-// Helper functions for displaying files and stats
-function displaySelectedFiles(files) {
-  if (!files || files.length === 0) return;
-  
-  const validFiles = Array.from(files).filter(validateFile);
-  console.log(`Selected ${files.length} files, ${validFiles.length} valid`);
-  
-  // Implementation would go here to display files in UI
-  // This is a placeholder for the actual display logic
-}
-
-function updateFolderStats(files) {
-  if (!files || files.length === 0) return;
-  
-  const validFiles = Array.from(files).filter(validateFile);
-  const totalFiles = files.length;
-  const validCount = validFiles.length;
-  
-  console.log(`Folder stats: ${totalFiles} total, ${validCount} valid`);
-  
-  // Implementation would go here to update folder statistics
-  // This is a placeholder for the actual stats update logic
-}
-
-// Get current API configuration
-export function getCurrentApiConfig() {
-  return getApiConfig();
-}
+// Export for backward compatibility
+export default initializeFileSelection;
