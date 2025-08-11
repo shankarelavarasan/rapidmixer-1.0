@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: rapid-mixer-backend
+    env: node
+    plan: starter
+    buildCommand: |
+      npm install
+      pip install -r requirements.txt
+      python -c "import spleeter; print('Spleeter installed successfully')"
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+    healthCheckPath: /health
+    autoDeploy: false
+    disk:
+      name: rapid-mixer-storage
+      mountPath: /opt/render/project/src/uploads
+      sizeGB: 5

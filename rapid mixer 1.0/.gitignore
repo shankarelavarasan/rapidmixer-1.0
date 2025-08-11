@@ -1,0 +1,73 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Node.js Backend
+backend/backend/node_modules/
+backend/backend/.env
+backend/backend/database.db
+backend/backend/npm-debug.log*
+backend/backend/yarn-debug.log*
+backend/backend/yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Temporary files
+*.tmp
+*.temp
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Audio files (if large)
+*.wav
+*.mp3
+*.flac
+*.aac
+
+# Exclude specific files
+DIFF FILE.zip
+backend.zip
+rapid_mixer- full code ui.zip
+rapid mixer- full source code flutter.zip
