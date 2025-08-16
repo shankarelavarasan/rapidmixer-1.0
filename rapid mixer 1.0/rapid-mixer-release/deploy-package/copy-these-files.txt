@@ -1,0 +1,42 @@
+BACKEND FILES TO COPY TO YOUR REPOSITORY:
+=============================================
+
+REPLACE EXISTING FILES:
+- backend/package.json
+- backend/server.js
+
+ADD NEW FILES:
+- backend/config/config.js
+- backend/models/User.js
+- backend/middleware/auth.js
+- backend/routes/api/auth.js
+- backend/routes/api/subscription.js
+- backend/services/analyticsService.js
+- backend/services/cloudStorage.js
+- backend/services/collaborationService.js
+- backend/services/paymentService.js
+
+FRONTEND FILES TO COPY TO YOUR REPOSITORY:
+==========================================
+
+ADD NEW FILES:
+- frontend/lib/core/app_config.dart
+- frontend/lib/core/api_service.dart
+- frontend/lib/services/subscription_service.dart
+- frontend/lib/theme/app_colors.dart
+- frontend/lib/widgets/premium_badge_widget.dart
+- frontend/lib/widgets/advanced_mixer_console.dart
+
+UPDATE EXISTING FILE:
+- frontend/pubspec.yaml (add new dependencies)
+
+ENVIRONMENT VARIABLES FOR RENDER:
+=================================
+
+JWT_SECRET=rapid-mixer-super-secure-jwt-secret-2024
+ALLOWED_ORIGINS=https://shankarelavarasan.github.io,https://rapid-mixer-2-0-1.onrender.com
+NODE_ENV=production
+PORT=10000
+ENABLE_PREMIUM=true
+ENABLE_COLLABORATION=true
+ENABLE_ANALYTICS=true
