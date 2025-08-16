@@ -1,0 +1,28 @@
+{
+  "name": "rapid-mixer-frontend-backend",
+  "version": "1.0.0",
+  "description": "Rapid Mixer Frontend with Backend Support",
+  "main": "minimal-server.js",
+  "scripts": {
+    "start": "python3 backend_server.py",
+    "build": "npm install",
+    "dev": "node minimal-server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "keywords": [
+    "audio",
+    "music",
+    "production",
+    "flutter",
+    "frontend"
+  ],
+  "author": "Rapid Audio Labs",
+  "license": "MIT"
+}
