@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: rapid-mixer-frontend-backend
+    env: python
+    buildCommand: npm install
+    startCommand: python3 backend_server.py
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        value: rapid-mixer-super-secure-jwt-secret-2024
+      - key: ALLOWED_ORIGINS
+        value: https://shankarelavarasan.github.io
+    healthCheckPath: /health
