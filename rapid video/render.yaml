@@ -1,0 +1,280 @@
+# Render Blueprint for Rapid Video Backend
+# This file defines the infrastructure for deploying on Render
+
+services:
+  # =============================================================================
+  # Backend API Service
+  # =============================================================================
+  - type: web
+    name: rapid-video-backend
+    runtime: docker
+    plan: starter  # Change to 'standard' or 'pro' for production
+    region: oregon  # Choose your preferred region
+    branch: main    # Deploy from main branch
+    rootDir: ./backend
+    
+    # Docker configuration
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    
+    # Service configuration
+    healthCheckPath: /health
+    
+    # Environment variables
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      
+      - key: HOST
+        value: 0.0.0.0
+      
+      - key: PORT
+        value: 8000
+      
+      - key: DEBUG
+        value: false
+      
+      # Database (automatically provided by Render)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rapid-video-db
+          property: connectionString
+      
+      # Redis (automatically provided by Render)
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: rapid-video-redis
+          property: connectionString
+      
+      # AI API Keys (set these in Render dashboard)
+      - key: GEMINI_API_KEY
+        sync: false  # Set manually in dashboard
+      
+      - key: VEO_API_KEY
+        sync: false  # Set manually in dashboard
+      
+      - key: BANANA_API_KEY
+        sync: false  # Set manually in dashboard
+      
+      - key: BANANA_MODEL_KEY
+        sync: false  # Set manually in dashboard
+      
+      # Google Cloud Configuration
+      - key: GOOGLE_CLOUD_PROJECT
+        sync: false  # Set manually in dashboard
+      
+      - key: VERTEX_AI_PROJECT
+        sync: false  # Set manually in dashboard
+      
+      - key: USE_CLOUD_STORAGE
+        value: true
+      
+      - key: GCS_BUCKET_NAME
+        sync: false  # Set manually in dashboard
+      
+      # Security
+      - key: SECRET_KEY
+        generateValue: true  # Auto-generate secure key
+      
+      # CORS Configuration
+      - key: ALLOWED_ORIGINS
+        value: https://your-username.github.io,http://localhost:3000
+      
+      # Processing Configuration
+      - key: MAX_CONCURRENT_JOBS
+        value: 3  # Adjust based on your plan
+      
+      - key: SCENE_DURATION
+        value: 8
+      
+      - key: MAX_VIDEO_DURATION
+        value: 180
+      
+      - key: MAX_FILE_SIZE
+        value: 104857600
+      
+      # Logging
+      - key: LOG_LEVEL
+        value: INFO
+      
+      # Video Processing
+      - key: OUTPUT_VIDEO_CODEC
+        value: libx264
+      
+      - key: OUTPUT_VIDEO_BITRATE
+        value: 2M
+      
+      - key: OUTPUT_AUDIO_CODEC
+        value: aac
+      
+      - key: OUTPUT_AUDIO_BITRATE
+        value: 128k
+    
+    # Auto-deploy configuration
+    autoDeploy: true
+    
+    # Build configuration
+    buildFilter:
+      paths:
+        - backend/**
+      ignoredPaths:
+        - frontend/**
+        - README.md
+        - .gitignore
+
+  # =============================================================================
+  # Redis Cache Service
+  # =============================================================================
+  - type: redis
+    name: rapid-video-redis
+    plan: starter  # 25MB cache, upgrade as needed
+    region: oregon
+    
+    # Redis configuration
+    ipAllowList: []  # Empty = allow all IPs
+    
+    # Auto-deploy
+    autoDeploy: false  # Redis doesn't need redeployment
+
+databases:
+  # =============================================================================
+  # PostgreSQL Database
+  # =============================================================================
+  - name: rapid-video-db
+    plan: starter  # 1GB storage, upgrade as needed
+    region: oregon
+    
+    # Database configuration
+    databaseName: rapidvideo
+    user: rapidvideo
+    
+    # Auto-backup (available on paid plans)
+    # postgresMajorVersion: 15
+
+# =============================================================================
+# Deployment Instructions
+# =============================================================================
+#
+# 1. SETUP RENDER ACCOUNT:
+#    - Sign up at https://render.com
+#    - Connect your GitHub account
+#    - Fork/clone this repository
+#
+# 2. DEPLOY WITH BLUEPRINT:
+#    - Go to Render Dashboard
+#    - Click "New" > "Blueprint"
+#    - Connect your repository
+#    - Select this render.yaml file
+#    - Click "Apply"
+#
+# 3. CONFIGURE ENVIRONMENT VARIABLES:
+#    After deployment, go to your service settings and add:
+#    
+#    Required API Keys:
+#    - GEMINI_API_KEY: Get from Google AI Studio
+#    - VEO_API_KEY: Get from Veo 3 provider  
+#    - BANANA_API_KEY: Get from Banana.dev
+#    - BANANA_MODEL_KEY: Get from Banana.dev
+#    
+#    Google Cloud Setup:
+#    - GOOGLE_CLOUD_PROJECT: Your GCP project ID
+#    - VERTEX_AI_PROJECT: Same as above
+#    - GCS_BUCKET_NAME: Your storage bucket name
+#    - GOOGLE_APPLICATION_CREDENTIALS: Upload service account JSON
+#    
+#    Frontend URL:
+#    - ALLOWED_ORIGINS: Update with your GitHub Pages URL
+#
+# 4. GOOGLE CLOUD STORAGE SETUP:
+#    - Create a GCS bucket for file storage
+#    - Create a service account with Storage Admin role
+#    - Download the JSON key file
+#    - Upload it as an environment file in Render
+#    - Set GOOGLE_APPLICATION_CREDENTIALS to the file path
+#
+# 5. FRONTEND CONFIGURATION:
+#    - Update your frontend API_BASE_URL to point to:
+#      https://rapid-video-backend.onrender.com
+#    - Deploy your frontend to GitHub Pages
+#    - Update ALLOWED_ORIGINS with your GitHub Pages URL
+#
+# 6. MONITORING:
+#    - Check service logs in Render dashboard
+#    - Monitor database and Redis usage
+#    - Set up alerts for service health
+#
+# =============================================================================
+
+# =============================================================================
+# Scaling and Performance
+# =============================================================================
+#
+# STARTER PLAN LIMITS:
+# - Web Service: 512MB RAM, 0.1 CPU
+# - Database: 1GB storage, 97 connection limit
+# - Redis: 25MB cache
+# - Bandwidth: 100GB/month
+#
+# UPGRADE RECOMMENDATIONS:
+# - For production: Use 'standard' or 'pro' plans
+# - Database: Upgrade to 'standard' for better performance
+# - Redis: Upgrade for larger cache if needed
+# - Consider multiple regions for global users
+#
+# PERFORMANCE OPTIMIZATION:
+# - Enable Redis caching for API responses
+# - Use CDN for static file serving
+# - Implement request rate limiting
+# - Monitor and optimize database queries
+# - Use background jobs for heavy processing
+#
+# =============================================================================
+
+# =============================================================================
+# Security Considerations
+# =============================================================================
+#
+# 1. API KEYS:
+#    - Never commit API keys to version control
+#    - Rotate keys regularly
+#    - Use environment variables only
+#    - Monitor API usage and set limits
+#
+# 2. DATABASE:
+#    - Use strong passwords
+#    - Enable SSL connections
+#    - Regular backups (automatic on paid plans)
+#    - Monitor for suspicious activity
+#
+# 3. CORS:
+#    - Restrict ALLOWED_ORIGINS to your domains only
+#    - Don't use wildcards (*) in production
+#    - Regularly review and update origins
+#
+# 4. FILE UPLOADS:
+#    - Validate file types and sizes
+#    - Scan uploads for malware
+#    - Use signed URLs for downloads
+#    - Implement rate limiting
+#
+# =============================================================================
+
+# =============================================================================
+# Cost Optimization
+# =============================================================================
+#
+# STARTER PLAN COSTS (as of 2024):
+# - Web Service: $7/month
+# - PostgreSQL: $7/month  
+# - Redis: $7/month
+# - Total: ~$21/month
+#
+# COST SAVING TIPS:
+# - Start with starter plans and upgrade as needed
+# - Monitor usage and optimize resource consumption
+# - Use efficient algorithms and caching
+# - Clean up old files and database records
+# - Consider usage-based pricing for AI APIs
+#
+# =============================================================================

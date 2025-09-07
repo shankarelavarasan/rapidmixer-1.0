@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Rapid Video - Transform your videos into stunning 3D animations with AI">
+    <meta name="keywords" content="video, 3D animation, AI, video processing, animation converter">
+    <meta name="author" content="Rapid Video">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-username.github.io/rapid-video/">
+    <meta property="og:title" content="Rapid Video - AI-Powered 3D Animation">
+    <meta property="og:description" content="Transform your videos into stunning 3D animations with AI">
+    <meta property="og:image" content="https://your-username.github.io/rapid-video/assets/images/og-image.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://your-username.github.io/rapid-video/">
+    <meta property="twitter:title" content="Rapid Video - AI-Powered 3D Animation">
+    <meta property="twitter:description" content="Transform your videos into stunning 3D animations with AI">
+    <meta property="twitter:image" content="https://your-username.github.io/rapid-video/assets/images/og-image.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <style>
+        /* Loading screen styles */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        .loading-text {
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .loading-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-top: 20px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Hide Flutter app initially */
+        #flutter-app {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+        
+        #flutter-app.loaded {
+            opacity: 1;
+        }
+        
+        /* Error fallback styles */
+        .error-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1f2937;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .error-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ef4444;
+        }
+        
+        .error-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .error-message {
+            font-size: 16px;
+            color: #9ca3af;
+            margin-bottom: 20px;
+            max-width: 500px;
+        }
+        
+        .error-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .error-button:hover {
+            background: #2563eb;
+        }
+    </style>
+    
+    <title>Rapid Video - AI-Powered 3D Animation</title>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <svg class="loading-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="45" stroke="white" stroke-width="3" fill="none" opacity="0.3"/>
+            <path d="M30 35L70 50L30 65V35Z" fill="white"/>
+            <circle cx="75" cy="25" r="8" fill="#00ff88"/>
+        </svg>
+        <div class="loading-text">Rapid Video</div>
+        <div class="loading-subtitle">Loading AI-powered video processing...</div>
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- Error Screen -->
+    <div id="error-screen" class="error-screen">
+        <div class="error-icon">⚠️</div>
+        <div class="error-title">Failed to Load Application</div>
+        <div class="error-message">
+            We're having trouble loading Rapid Video. This might be due to a network issue or browser compatibility.
+        </div>
+        <button class="error-button" onclick="location.reload()">Retry</button>
+    </div>
+    
+    <!-- Flutter App Container -->
+    <div id="flutter-app"></div>
+    
+    <!-- Flutter Web Bootstrap -->
+    <script>
+        // Configuration
+        const config = {
+            apiBaseUrl: 'https://rapid-video-backend.onrender.com', // Update with your backend URL
+            environment: 'production',
+            version: '1.0.0',
+            features: {
+                analytics: true,
+                errorReporting: true,
+                betaFeatures: false
+            }
+        };
+        
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            showErrorScreen('An unexpected error occurred');
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled promise rejection:', e.reason);
+            showErrorScreen('Failed to load application resources');
+        });
+        
+        // Utility functions
+        function showErrorScreen(message) {
+            const loadingScreen = document.getElementById('loading-screen');
+            const errorScreen = document.getElementById('error-screen');
+            const errorMessage = errorScreen.querySelector('.error-message');
+            
+            if (message) {
+                errorMessage.textContent = message;
+            }
+            
+            loadingScreen.style.display = 'none';
+            errorScreen.style.display = 'flex';
+        }
+        
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const flutterApp = document.getElementById('flutter-app');
+            
+            loadingScreen.classList.add('hidden');
+            flutterApp.classList.add('loaded');
+            
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 500);
+        }
+        
+        // Flutter initialization
+        window.addEventListener('load', function() {
+            // Check for Flutter support
+            if (!window.flutterConfiguration) {
+                console.warn('Flutter configuration not found, using fallback');
+            }
+            
+            // Set up Flutter configuration
+            window.flutterConfiguration = {
+                assetBase: './assets/',
+                canvasKitBaseUrl: 'https://cdn.jsdelivr.net/npm/canvaskit-wasm@0.38.0/bin/',
+                renderer: 'html',
+                ...config
+            };
+            
+            // Load Flutter
+            const script = document.createElement('script');
+            script.src = 'flutter.js';
+            script.onload = function() {
+                _flutter.loader.loadEntrypoint({
+                    serviceWorker: {
+                        serviceWorkerVersion: null,
+                    },
+                    onEntrypointLoaded: function(engineInitializer) {
+                        engineInitializer.initializeEngine().then(function(appRunner) {
+                            appRunner.runApp().then(function() {
+                                // App loaded successfully
+                                setTimeout(hideLoadingScreen, 1000);
+                            }).catch(function(error) {
+                                console.error('Failed to run Flutter app:', error);
+                                showErrorScreen('Failed to start the application');
+                            });
+                        }).catch(function(error) {
+                            console.error('Failed to initialize Flutter engine:', error);
+                            showErrorScreen('Failed to initialize the application');
+                        });
+                    }
+                });
+            };
+            script.onerror = function() {
+                console.error('Failed to load Flutter script');
+                showErrorScreen('Failed to load application resources');
+            };
+            document.head.appendChild(script);
+        });
+        
+        // Analytics (optional)
+        if (config.features.analytics) {
+            // Add your analytics code here
+            // Example: Google Analytics, Mixpanel, etc.
+        }
+        
+        // Service Worker registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('flutter_service_worker.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(function(error) {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+        
+        // PWA install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Show install button or banner
+        });
+        
+        // Expose config to Flutter
+        window.rapidVideoConfig = config;
+    </script>
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Rapid Video",
+        "description": "Transform your videos into stunning 3D animations with AI",
+        "url": "https://your-username.github.io/rapid-video/",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "creator": {
+            "@type": "Organization",
+            "name": "Rapid Video"
+        }
+    }
+    </script>
+</body>
+</html>
