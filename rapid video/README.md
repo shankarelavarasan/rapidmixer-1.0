@@ -1,7 +1,7 @@
 # 🎥 Rapid Video - AI-Powered 3D Animation Platform
 
-[![Deploy Status](https://img.shields.io/badge/deploy-success-brightgreen)](https://shankarelavarasan.github.io/rapidmixer-1.0/)
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-blue)](https://shankarelavarasan.github.io/rapidmixer-1.0/)
+[![Deploy Status](https://img.shields.io/badge/deploy-success-brightgreen)](https://shankarelavarasan.github.io/Rapid-video-maker/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-blue)](https://shankarelavarasan.github.io/Rapid-video-maker/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Flutter](https://img.shields.io/badge/Flutter-Web-blue)](https://flutter.dev/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Python-red)](https://fastapi.tiangolo.com/)
@@ -10,7 +10,7 @@
 
 ## 🌟 Live Demo
 
-**🚀 [Visit Live Site](https://shankarelavarasan.github.io/rapidmixer-1.0/)**
+**🚀 [Visit Live Site](https://shankarelavarasan.github.io/Rapid-video-maker/)**
 
 ## 📋 Table of Contents
 
@@ -168,8 +168,8 @@ rapid-video/
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/shankarelavarasan/Rapid-video-maker.git
-cd Rapid-video-maker
+git clone https://github.com/shankarelavarasan/rapidmixer-1.0.git
+cd rapidmixer-1.0
 ```
 
 ### 2. Frontend Setup
@@ -355,7 +355,7 @@ alembic upgrade head
 
 The documentation site is automatically deployed to GitHub Pages:
 
-- **URL**: https://shankarelavarasan.github.io/rapidmixer-1.0/
+- **URL**: https://shankarelavarasan.github.io/Rapid-video-maker/
 - **Source**: `docs/index.html`
 - **Trigger**: Push to main branch
 
@@ -458,16 +458,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Documentation**: [GitHub Pages](https://shankarelavarasan.github.io/rapidmixer-1.0/)
-- **Issues**: [GitHub Issues](https://github.com/shankarelavarasan/Rapid-video-maker/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/shankarelavarasan/Rapid-video-maker/discussions)
+- **Documentation**: [GitHub Pages](https://shankarelavarasan.github.io/Rapid-video-maker/)
+- **Issues**: [GitHub Issues](https://github.com/shankarelavarasan/rapidmixer-1.0/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/shankarelavarasan/rapidmixer-1.0/discussions)
 
 ---
 
 <div align="center">
   <p><strong>Built with ❤️ and AI</strong></p>
   <p>
-    <a href="https://shankarelavarasan.github.io/rapidmixer-1.0/">🌐 Live Demo</a> |
+    <a href="https://shankarelavarasan.github.io/Rapid-video-maker/">🌐 Live Demo</a> |
     <a href="./PITCH_DECK.md">📊 Pitch Deck</a> |
     <a href="./PROJECT_STATUS_REPORT.md">📋 Status Report</a>
   </p>
@@ -551,8 +551,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/your-username/rapid-video.git
-cd rapid-video
+git clone https://github.com/shankarelavarasan/rapidmixer-1.0.git
+cd rapidmixer-1.0
 ```
 
 ### 2. Frontend Setup
