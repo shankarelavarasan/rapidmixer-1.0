@@ -168,8 +168,8 @@ rapid-video/
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/shankarelavarasan/rapidmixer-1.0.git
-cd rapidmixer-1.0
+git clone https://github.com/shankarelavarasan/Rapid-video-maker.git
+cd Rapid-video-maker
 ```
 
 ### 2. Frontend Setup
@@ -459,8 +459,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **Documentation**: [GitHub Pages](https://shankarelavarasan.github.io/Rapid-video-maker/)
-- **Issues**: [GitHub Issues](https://github.com/shankarelavarasan/rapidmixer-1.0/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/shankarelavarasan/rapidmixer-1.0/discussions)
+- **Issues**: [GitHub Issues](https://github.com/shankarelavarasan/Rapid-video-maker/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/shankarelavarasan/Rapid-video-maker/discussions)
 
 ---
 
@@ -551,8 +551,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/shankarelavarasan/rapidmixer-1.0.git
-cd rapidmixer-1.0
+git clone https://github.com/shankarelavarasan/Rapid-video-maker.git
+cd Rapid-video-maker
 ```
 
 ### 2. Frontend Setup
