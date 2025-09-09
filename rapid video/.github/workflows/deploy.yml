@@ -59,7 +59,7 @@ jobs:
     - name: Build Flutter Web
       working-directory: ./frontend
       run: |
-        flutter build web --release --web-renderer canvaskit --base-href "/rapid-video/"
+        flutter build web --release --web-renderer canvaskit --base-href "/Rapid-video-maker/"
         
     - name: Setup Pages
       uses: actions/configure-pages@v4
@@ -94,7 +94,7 @@ jobs:
       run: |
         if [ "${{ needs.deploy.result }}" == "success" ]; then
           echo "✅ Deployment successful!"
-          echo "🌐 Site URL: https://${{ github.repository_owner }}.github.io/rapid-video/"
+          echo "🌐 Site URL: https://${{ github.repository_owner }}.github.io/Rapid-video-maker/"
         else
           echo "❌ Deployment failed!"
           exit 1
